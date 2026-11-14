@@ -231,6 +231,33 @@ html[data-theme="dark"] .leaflet-tile-pane{filter:grayscale(.25) invert(.92) hue
 }
 @media(prefers-reduced-motion:reduce){.screen.active{animation:none}}
 
+
+/* Glücksrad in der Host-Lobby */
+.wheel-host-control{margin-top:15px;padding:15px;border:1px solid var(--line);border-radius:16px;background:var(--soft)}
+.wheel-host-control .micro{margin:8px 2px 0}
+.wheel-back{position:fixed;z-index:1100;inset:0;display:none;align-items:center;justify-content:center;background:rgba(8,13,22,.65);padding:14px;backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px)}
+.wheel-back.open{display:flex}
+.wheel-sheet{width:min(100%,475px);max-height:calc(100dvh - 28px);overflow-y:auto;overscroll-behavior:contain;padding:clamp(15px,4vw,24px);background:var(--surface);border:1px solid var(--line);border-radius:27px;box-shadow:0 25px 80px #0005;color:var(--fg)}
+.wheel-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.wheel-top h3{font-size:24px;letter-spacing:-.045em;line-height:1.2;margin:4px 0 4px;font-weight:750}
+.wheel-top .sub{max-width:330px}
+.wheel-close{flex:0 0 39px;width:39px;height:39px;padding:0;border-radius:50%;font-size:24px;font-weight:400}
+.wheel-stage{position:relative;width:min(100%,355px);margin:16px auto 0;aspect-ratio:1;touch-action:none;user-select:none;-webkit-user-select:none}
+#wheelCanvas{display:block;width:100%;height:100%;touch-action:none;cursor:grab;outline-offset:0}
+#wheelCanvas:active{cursor:grabbing}
+#wheelCanvas:focus-visible{outline:3px solid var(--blue);border-radius:50%}
+.wheel-pointer{position:absolute;z-index:2;pointer-events:none;left:50%;top:0;transform:translateX(-50%);width:32px;height:38px;background:#fcfbf8;filter:drop-shadow(0 2px 4px rgba(0,0,0,.28));clip-path:polygon(8% 0,92% 0,50% 100%)}
+.wheel-pointer:before{content:'';position:absolute;inset:5px 7px 8px;background:#e55f5e;clip-path:polygon(0 0,100% 0,50% 100%)}
+.wheel-status{font-size:13px;text-align:center;min-height:40px;line-height:1.5;color:var(--muted);margin:6px 0 0}
+.wheel-status strong{font-size:19px;color:var(--fg);font-weight:750}
+.wheel-actions{margin-top:10px}
+.wheel-actions .sub{margin-bottom:9px;text-align:center}
+.wheel-role-buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.wheel-role-buttons .btn:last-child{grid-column:1/-1}
+.wheel-roster{margin-top:12px;padding-top:11px;border-top:1px solid var(--line);color:var(--muted);font-size:11px;line-height:1.6;overflow-wrap:anywhere;text-align:center}
+.wheel-speed-note{font-size:11px;color:var(--muted);text-align:center;margin:8px 0 0}
+@media(max-height:680px){.wheel-sheet{padding:13px 20px}.wheel-stage{width:min(100%,275px);margin-top:5px}.wheel-top h3{font-size:21px}.wheel-roster{margin-top:7px}}
+
   </style>
 </head>
 <body>
@@ -288,6 +315,7 @@ html[data-theme="dark"] .leaflet-tile-pane{filter:grayscale(.25) invert(.92) hue
       <div class="row-between"><div><div class="panel-title">Teamboard</div><div class="sub" id="teamHint">Spieler verschieben oder antippen.</div></div><span class="pill" id="hostBadge">HOST</span></div>
       <div class="teamboard"><div class="teamzone hunter" data-team="hunter"><div class="zone-title text-blue">● HUNTER <small> · Blau</small></div><div id="hunterCards"></div></div><div class="teamzone runner" data-team="runner"><div class="zone-title text-orange">● RUNNER <small> · Orange</small></div><div id="runnerCards"></div></div></div>
       <div class="bench" data-team="none"><h4>NOCH NICHT ZUGEWIESEN</h4><div id="benchCards"></div></div>
+      <div id="wheelHostControl" class="wheel-host-control hidden"><button type="button" id="openWheel" class="btn primary block">◉ Glücksrad öffnen</button><p class="micro">Alle Spieler auf einem Rad. Mit dem Finger andrehen und danach den gezogenen Spieler einem Team zuweisen.</p></div>
       <div id="pendingSection" class="hidden"><label class="label">Neue Beitrittsanfragen</label><div id="pendingList"></div></div>
     </div>
     <div class="panel mt"><div class="panel-title">Karte & Startpunkt</div><div class="sub">Der Kreis markiert das Spielgebiet. Der Bonuspunkt muss an einem sicheren, öffentlichen Ort liegen.</div><div id="mapDock"></div>
@@ -306,6 +334,16 @@ html[data-theme="dark"] .leaflet-tile-pane{filter:grayscale(.25) invert(.92) hue
     <div class="panel mt"><div class="row-between"><div><div class="panel-title">Taktik-Hub</div><div class="sub" id="roleHelp">Dein Standort bleibt kontrollierbar.</div></div><button id="soundBtn" class="btn tiny">Ton: An</button></div><div class="controls mt"><button id="gpsBtnGame" class="btn">◎ GPS aktivieren</button><button id="centerOnMe" class="btn">⌖ Zentrieren</button></div><div id="gameInfo" class="micro mt">Hunter sehen ausschließlich zeitversetzte und anonyme Runner-Punkte. Standortfreigabe ist jederzeit stoppbar.</div><button id="endGame" class="btn block danger mt hidden">Spiel für alle beenden</button><button id="exitGame" class="btn block mt">Spiel verlassen</button></div>
     <div class="footerline">BLEIB AUF ÖFFENTLICHEN WEGEN · KEIN BETRETEN PRIVATER FLÄCHEN</div>
   </section>
+</div>
+<div class="wheel-back" id="wheelModal" aria-hidden="true">
+  <div class="wheel-sheet" role="dialog" aria-modal="true" aria-labelledby="wheelTitle" aria-describedby="wheelHelp">
+    <div class="wheel-top"><div><div class="eyebrow">TEAMVERLOSUNG</div><h3 id="wheelTitle">Glücksrad</h3><div id="wheelHelp" class="sub">Rad mit dem Finger oder der Maus ziehen und schnell loslassen.</div></div><button id="wheelClose" class="btn wheel-close" type="button" aria-label="Glücksrad schließen">×</button></div>
+    <div class="wheel-stage"><canvas id="wheelCanvas" width="700" height="700" tabindex="0" aria-label="Glücksrad mit den Namen der Teilnehmer. Mit dem Finger ziehen und schwungvoll loslassen."></canvas><div class="wheel-pointer" aria-hidden="true"></div></div>
+    <div class="wheel-status" id="wheelStatus" aria-live="polite">Wische schwungvoll über das Rad, damit es sich dreht.</div>
+    <div class="wheel-speed-note">Mindestgeschwindigkeit erforderlich · schneller wischen = schneller drehen · Gewinner bleibt zufällig</div>
+    <div class="wheel-actions hidden" id="wheelActions"><div class="sub">Ausgelosten Spieler einem Team zuweisen:</div><div class="wheel-role-buttons"><button type="button" id="wheelSetHunter" class="btn blue">● Hunter</button><button type="button" id="wheelSetRunner" class="btn orange">● Runner</button><button type="button" id="wheelSetNone" class="btn">Noch nicht zuweisen</button></div><button type="button" id="wheelAgain" class="btn block mt">Erneut drehen</button></div>
+    <div class="wheel-roster" id="wheelRoster"></div>
+  </div>
 </div>
 <div class="notifications" id="notifications" role="status" aria-live="polite"></div>
 <div class="modal-back" id="modal"><div class="modal-sheet" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="eyebrow">NIGHTSHIFT CONTROL</div><h3 id="modalTitle">Profil</h3><p id="modalDescription"></p><div id="modalCustom"></div><div class="flex-gap" id="modalButtons"></div></div></div>
@@ -476,7 +514,7 @@ html[data-theme="dark"] .leaflet-tile-pane{filter:grayscale(.25) invert(.92) hue
   function renderAll(){if(!S.approved)return;$('roomSubtitle').textContent=S.roomName;$('countPlayers').textContent=S.players.length;$('countHunters').textContent=S.players.filter(p=>p.role==='hunter').length;$('countRunners').textContent=S.players.filter(p=>p.role==='runner').length;
     $('radiusRange').value=S.settings.radiusKm;$('radiusValue').textContent=S.settings.radiusKm+' km';$('durationRange').value=S.settings.durationMin;$('durationValue').textContent=S.settings.durationMin+' min';$('leadRange').value=S.settings.headstartMin;$('leadValue').textContent=S.settings.headstartMin+' min';
     const role=myRole();$('myTeamPill').textContent=role==='hunter'?'● HUNTER':role==='runner'?'● RUNNER':'TEAM OFFEN';renderTeams();renderPending();checkStart();updateMapDecor();renderGame()}
-  function renderTeams(){const targets={hunter:$('hunterCards'),runner:$('runnerCards'),none:$('benchCards')};Object.values(targets).forEach(e=>e.replaceChildren());for(const p of S.players){const div=document.createElement('div');div.className='player-card';div.dataset.pid=p.id;
+  function renderTeams(){refreshWheelHostControl();const targets={hunter:$('hunterCards'),runner:$('runnerCards'),none:$('benchCards')};Object.values(targets).forEach(e=>e.replaceChildren());for(const p of S.players){const div=document.createElement('div');div.className='player-card';div.dataset.pid=p.id;
       const avatar=document.createElement('span');avatar.className='avatar';avatar.textContent=p.name.slice(0,1).toUpperCase();const detail=document.createElement('span');detail.style.minWidth='0';const bold=document.createElement('strong');bold.textContent=p.name+(p.host?' ★':'');const small=document.createElement('small');small.textContent=p.id===S.myId?'Du':p.role==='none'?`Wunsch: ${p.preference==='runner'?'Runner':'Hunter'}`:'Spieler';detail.append(bold,small);div.append(avatar,detail);targets[p.role]?.append(div);
       if(S.host&&S.phase==='lobby')div.addEventListener('pointerdown',ev=>beginDrag(ev,div,p.id));}
   }
@@ -487,6 +525,178 @@ html[data-theme="dark"] .leaflet-tile-pane{filter:grayscale(.25) invert(.92) hue
   function openRoleMenu(id){const p=S.players.find(p=>p.id===id);if(!p)return;ask(p.name,'Wähle das Team. Alternativ kannst du das Profil auf der Tafel verschieben.',[
     {label:'Hunter · Blau',kind:'blue',fn:()=>assignRole(id,'hunter')},{label:'Runner · Orange',kind:'orange',fn:()=>assignRole(id,'runner')},{label:'Bank',fn:()=>assignRole(id,'none')}]);}
   function assignRole(id,role){if(!S.host||S.phase!=='lobby'||!allowedRoles.includes(role))return;const p=S.players.find(p=>p.id===id);if(!p)return;p.role=role;sync();renderTeams();checkStart();notify('Team aktualisiert',`${p.name} → ${role==='hunter'?'Hunter':role==='runner'?'Runner':'Bank'}`)}
+  // Glücksrad: Geschwindigkeitsgeste bestimmt die Bewegung, nicht die Gewinnchance.
+  // Jede Person bekommt pro Drehung genau einen gleich großen Sektor.
+  const TAU=Math.PI*2;
+  const wheel={open:false,players:[],rotation:0,dragging:false,spinning:false,pointerId:null,
+    lastAngle:0,originRotation:0,samples:[],winnerId:null,frame:0};
+  const wheelCanvas=$('wheelCanvas'),wheelContext=wheelCanvas.getContext('2d');
+  const wheelModulo=n=>((n%TAU)+TAU)%TAU;
+  const wheelAngle=e=>{const r=wheelCanvas.getBoundingClientRect();return Math.atan2(e.clientY-r.top-r.height/2,e.clientX-r.left-r.width/2)};
+  function randomWheelIndex(n){
+    if(window.crypto?.getRandomValues){const number=new Uint32Array(1),limit=Math.floor(4294967296/n)*n;
+      do{window.crypto.getRandomValues(number)}while(number[0]>=limit);
+      return number[0]%n;
+    }
+    return Math.floor(Math.random()*n);
+  }
+  function refreshWheelHostControl(){
+    const allowed=S.host&&S.phase==='lobby'&&S.approved;
+    $('wheelHostControl').classList.toggle('hidden',!allowed);
+    $('openWheel').disabled=!allowed||S.players.length<2;
+    $('openWheel').textContent='◉ Glücksrad öffnen'+(allowed?' · '+S.players.length+' Spieler':'');
+    if(wheel.open&&!wheel.spinning&&!wheel.dragging&&!wheel.winnerId){
+      const before=wheel.players.map(p=>p.id).join('\u001f'),after=S.players.map(p=>p.id).join('\u001f');
+      if(before!==after){wheel.players=S.players.map(p=>({id:p.id,name:p.name}));
+        $('wheelRoster').textContent='Auf dem Rad ('+wheel.players.length+'): '+wheel.players.map(p=>p.name).join(' · ');
+        wheelDraw();}
+    }
+    if(wheel.open&&!allowed)closeWheel();
+  }
+  function wheelDraw(){
+    if(!wheelContext||!wheel.open)return;
+    const rect=wheelCanvas.getBoundingClientRect(),size=Math.max(200,rect.width||320);
+    const dpr=Math.min(window.devicePixelRatio||1,3),pixels=Math.round(size*dpr);
+    if(wheelCanvas.width!==pixels||wheelCanvas.height!==pixels){wheelCanvas.width=pixels;wheelCanvas.height=pixels;}
+    const c=wheelContext;c.setTransform(dpr,0,0,dpr,0,0);c.clearRect(0,0,size,size);
+    const radius=size*.445,x=size/2,y=size/2,n=wheel.players.length;
+    if(!n)return;
+    const step=TAU/n;
+    const palette=['#2188f6','#fa9152','#9369e5','#19aaa5','#ea6082','#4476c4','#c27d2c','#38a466'];
+    c.save();c.translate(x,y);c.rotate(wheel.rotation);
+    for(let i=0;i<n;i++){
+      const start=-Math.PI/2+i*step,mid=start+step/2;
+      c.beginPath();c.moveTo(0,0);c.arc(0,0,radius,start,start+step);c.closePath();
+      c.fillStyle=palette[i%palette.length];c.fill();c.lineWidth=2;c.strokeStyle='rgba(255,255,255,.82)';c.stroke();
+      // Namen mittig in ihrem Sektor. Auf der linken Seite werden sie aufrecht gedreht.
+      const backwards=Math.cos(mid)<0;
+      c.save();c.rotate(mid+(backwards?Math.PI:0));
+      c.translate(backwards?-radius*.62:radius*.62,0);
+      const font=Math.max(9,Math.min(15,200/n, radius*.115));
+      c.font=`700 ${font}px -apple-system, BlinkMacSystemFont, Arial, sans-serif`;
+      c.textAlign='center';c.textBaseline='middle';c.fillStyle='#fff';
+      c.shadowColor='rgba(0,0,0,.35)';c.shadowBlur=2;
+      c.fillText(wheel.players[i].name,0,0,radius*.72);
+      c.restore();
+    }
+    c.restore();
+    c.beginPath();c.arc(x,y,radius,0,TAU);c.lineWidth=Math.max(5,size*.015);c.strokeStyle='rgba(255,255,255,.88)';c.stroke();
+    c.beginPath();c.arc(x,y,radius*.14,0,TAU);c.fillStyle='#fff';c.fill();
+    c.beginPath();c.arc(x,y,radius*.073,0,TAU);c.fillStyle='#23344b';c.fill();
+    c.beginPath();c.arc(x,y,radius*.027,0,TAU);c.fillStyle='#fff';c.fill();
+  }
+  function wheelClearWinner(){
+    wheel.winnerId=null;$('wheelActions').classList.add('hidden');
+    $('wheelStatus').textContent='Wische schwungvoll über das Rad, damit es sich dreht.';
+  }
+  function openWheel(){
+    if(!S.host||S.phase!=='lobby'||S.players.length<2){notify('Mindestens zwei Spieler','Warte, bis ein weiterer Teilnehmer beigetreten ist.');return;}
+    wheel.players=S.players.map(p=>({id:p.id,name:p.name}));wheel.open=true;wheel.dragging=false;wheel.spinning=false;
+    wheelClearWinner();$('wheelModal').classList.add('open');$('wheelModal').setAttribute('aria-hidden','false');
+    $('wheelRoster').textContent='Auf dem Rad ('+wheel.players.length+'): '+wheel.players.map(p=>p.name).join(' · ');
+    document.body.style.overflow='hidden';requestAnimationFrame(wheelDraw);
+    $('wheelClose').focus();
+  }
+  function closeWheel(){
+    if(!wheel.open)return;
+    wheel.open=false;wheel.dragging=false;wheel.spinning=false;wheel.pointerId=null;
+    if(wheel.frame)cancelAnimationFrame(wheel.frame);
+    $('wheelModal').classList.remove('open');$('wheelModal').setAttribute('aria-hidden','true');
+    document.body.style.overflow='';
+    if(!$('openWheel').classList.contains('hidden')&&S.phase==='lobby')$('openWheel').focus();
+  }
+  function wheelStartSpin(velocity){
+    if(wheel.spinning||wheel.players.length<2)return;
+    wheel.spinning=true;wheel.winnerId=null;$('wheelActions').classList.add('hidden');
+    $('wheelStatus').textContent='Das Rad dreht sich …';
+    const speed=Math.min(18,Math.abs(velocity)),direction=Math.sign(velocity)||1;
+    const winnerIndex=randomWheelIndex(wheel.players.length);
+    const step=TAU/wheel.players.length;
+    // Zufälliger Punkt innerhalb des Gewinnsektors; die Auswahl erfolgte bereits unabhängig vom Wischen.
+    const jitter=(Math.random()-.5)*step*.44;
+    const alignedRotation=-(winnerIndex+.5)*step+jitter;
+    const turns=Math.min(16,Math.max(4,Math.round(3.5+speed*.78)));
+    const residual=direction>0?wheelModulo(alignedRotation-wheel.rotation):wheelModulo(wheel.rotation-alignedRotation);
+    const distance=direction*(turns*TAU+residual);
+    const origin=wheel.rotation;
+    const duration=window.matchMedia('(prefers-reduced-motion: reduce)').matches?0:Math.min(6600,2900+speed*210);
+    const started=performance.now();
+    const finish=()=>{
+      wheel.rotation=wheelModulo(origin+distance);wheel.spinning=false;
+      const selected=wheel.players[winnerIndex];
+      if(!S.host||S.phase!=='lobby'||!S.players.some(p=>p.id===selected.id)){
+        wheelClearWinner();$('wheelStatus').textContent='Die Teilnehmerliste hat sich geändert. Bitte erneut drehen.';
+        wheel.players=S.players.map(p=>({id:p.id,name:p.name}));
+      }else{
+        wheel.winnerId=selected.id;
+        $('wheelStatus').replaceChildren();const strong=document.createElement('strong');strong.textContent='Gewonnen: '+selected.name;
+        $('wheelStatus').append(strong);$('wheelActions').classList.remove('hidden');beep();
+        if(navigator.vibrate)navigator.vibrate([70,50,90]);
+      }
+      $('wheelRoster').textContent='Auf dem Rad ('+wheel.players.length+'): '+wheel.players.map(p=>p.name).join(' · ');
+      wheelDraw();
+    };
+    const stepFrame=time=>{
+      if(!wheel.open)return;
+      const t=duration===0?1:Math.min(1,(time-started)/duration);
+      const eased=1-Math.pow(1-t,4);
+      wheel.rotation=origin+distance*eased;wheelDraw();
+      if(t<1)wheel.frame=requestAnimationFrame(stepFrame);else{wheel.frame=0;finish();}
+    };
+    wheel.frame=requestAnimationFrame(stepFrame);
+  }
+  wheelCanvas.addEventListener('pointerdown',e=>{
+    if((e.button!==undefined&&e.button!==0)||!wheel.open||wheel.spinning||wheel.players.length<2)return;
+    e.preventDefault();wheelClearWinner();wheel.dragging=true;wheel.pointerId=e.pointerId;
+    wheel.lastAngle=wheelAngle(e);wheel.originRotation=wheel.rotation;
+    wheel.samples=[{t:performance.now(),r:wheel.rotation}];
+    try{wheelCanvas.setPointerCapture(e.pointerId)}catch{}
+  });
+  wheelCanvas.addEventListener('pointermove',e=>{
+    if(!wheel.dragging||e.pointerId!==wheel.pointerId)return;
+    e.preventDefault();const angle=wheelAngle(e);
+    const diff=Math.atan2(Math.sin(angle-wheel.lastAngle),Math.cos(angle-wheel.lastAngle));
+    wheel.rotation+=diff;wheel.lastAngle=angle;
+    const t=performance.now();wheel.samples.push({t,r:wheel.rotation});
+    while(wheel.samples.length>2&&wheel.samples[1].t<t-160)wheel.samples.shift();
+    wheelDraw();
+  });
+  function releaseWheel(e,canceled=false){
+    if(!wheel.dragging||e.pointerId!==wheel.pointerId)return;
+    e.preventDefault();wheel.dragging=false;wheel.pointerId=null;
+    try{wheelCanvas.releasePointerCapture(e.pointerId)}catch{}
+    if(canceled)return;
+    const t=performance.now();wheel.samples.push({t,r:wheel.rotation});
+    const recent=wheel.samples.filter(s=>s.t>=t-145);
+    const first=recent.length>=2?recent[0]:wheel.samples[0];
+    const last=wheel.samples[wheel.samples.length-1];
+    const elapsed=Math.max(.001,(last.t-first.t)/1000),velocity=(last.r-first.r)/elapsed;
+    const travel=Math.abs(wheel.rotation-wheel.originRotation);
+    if(travel<.30||Math.abs(velocity)<1.25){
+      $('wheelStatus').textContent='Zu langsam! Ziehe das Rad schneller und lasse mit Schwung los.';
+      return;
+    }
+    wheelStartSpin(velocity);
+  }
+  wheelCanvas.addEventListener('pointerup',e=>releaseWheel(e));
+  wheelCanvas.addEventListener('pointercancel',e=>releaseWheel(e,true));
+  $('openWheel').onclick=openWheel;
+  $('wheelClose').onclick=closeWheel;
+  $('wheelModal').addEventListener('click',e=>{if(e.target===$('wheelModal'))closeWheel()});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&wheel.open){e.preventDefault();closeWheel()}});
+  $('wheelAgain').onclick=()=>{wheelClearWinner();wheel.players=S.players.map(p=>({id:p.id,name:p.name}));
+    $('wheelRoster').textContent='Auf dem Rad ('+wheel.players.length+'): '+wheel.players.map(p=>p.name).join(' · ');
+    wheelDraw();wheelCanvas.focus()};
+  function assignWinnerRole(role){
+    if(!wheel.winnerId||!S.players.some(p=>p.id===wheel.winnerId))return;
+    const chosen=S.players.find(p=>p.id===wheel.winnerId);
+    assignRole(wheel.winnerId,role);
+    $('wheelStatus').textContent=chosen.name+' wurde '+(role==='hunter'?'Hunter':role==='runner'?'Runner':'noch keinem Team')+' zugewiesen.';
+  }
+  $('wheelSetHunter').onclick=()=>assignWinnerRole('hunter');
+  $('wheelSetRunner').onclick=()=>assignWinnerRole('runner');
+  $('wheelSetNone').onclick=()=>assignWinnerRole('none');
+  window.addEventListener('resize',()=>{if(wheel.open)wheelDraw()});
   function renderPending(){const sec=$('pendingSection'),list=$('pendingList');list.replaceChildren();sec.classList.toggle('hidden',!S.host||!S.pending.size);if(!S.host)return;for(const p of S.pending.values()){
     const row=document.createElement('div');row.className='pending-entry';const name=document.createElement('div');const b=document.createElement('b');b.textContent=p.name;const small=document.createElement('small');small.textContent='Wunsch: '+(p.preference==='runner'?'Runner':'Hunter');name.append(b,small);const btns=document.createElement('div');btns.className='controls';const accept=document.createElement('button');accept.className='btn tiny blue';accept.textContent='✓';accept.onclick=()=>approve(p.id,true);const deny=document.createElement('button');deny.className='btn tiny danger';deny.textContent='✕';deny.onclick=()=>approve(p.id,false);btns.append(accept,deny);row.append(name,btns);list.append(row)
   }}
@@ -529,7 +739,7 @@ html[data-theme="dark"] .leaflet-tile-pane{filter:grayscale(.25) invert(.92) hue
     if(S.scanVisibleUntil&&t>=S.scanVisibleUntil)clearHunterScan();refreshMarkerLabels();renderGPS();
   }
   function tick(){if(S.host)hostTick();if(['headstart','playing','ended'].includes(S.phase))renderGame()}
-  function reset(){stopGPS();clearRemoteMarkers();try{S.conn?.close()}catch{}for(const c of S.clients.values())try{c.close()}catch{}for(const x of S.pending.values())try{x.conn.close()}catch{}try{S.peer?.destroy()}catch{}
+  function reset(){closeWheel();stopGPS();clearRemoteMarkers();try{S.conn?.close()}catch{}for(const c of S.clients.values())try{c.close()}catch{}for(const x of S.pending.values())try{x.conn.close()}catch{}try{S.peer?.destroy()}catch{}
     S.peer=null;S.conn=null;S.clients.clear();S.pending.clear();S.host=false;S.approved=false;S.myId='';S.players=[];S.phase='lobby';S.clockOffset=0;S.roomName='';S.roomCode='';S.challengePoint=null;S.challengeOpen=false;S.challengeWinner=null;S.challengeTriggered=false;S.scanVisibleUntil=0;S.pickMode='';S.settings={radiusKm:10,durationMin:60,headstartMin:5,center:null};S.startAt=0;S.chaseAt=0;S.endAt=0;S.anonTokens.clear();S.hunterTokens.clear();S.lastRunnerById.clear();S.lastHunterById.clear();S.camo.clear();S.runnerMarkers.clear();S.aliases={};connection('OFFLINE');updateMapDecor();setScreen('homeScreen')}
   function confirmExit(){ask('Spiel verlassen?','Deine Verbindung wird geschlossen und die GPS-Freigabe gestoppt.',[{label:'Verlassen',kind:'danger',fn:reset},{label:'Bleiben',kind:'primary'}])}
   // Main layout: one Leaflet map is moved between lobby and game to preserve layers.
