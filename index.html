@@ -258,6 +258,31 @@ html[data-theme="dark"] .leaflet-tile-pane{filter:grayscale(.25) invert(.92) hue
 .wheel-speed-note{font-size:11px;color:var(--muted);text-align:center;margin:8px 0 0}
 @media(max-height:680px){.wheel-sheet{padding:13px 20px}.wheel-stage{width:min(100%,275px);margin-top:5px}.wheel-top h3{font-size:21px}.wheel-roster{margin-top:7px}}
 
+
+/* Kartenstil, Gebietsgrenzen und eigenes Richtungssignal */
+.area-selector{margin:15px 0;padding:15px;border:1px solid var(--line);border-radius:16px;background:var(--soft)}
+.area-tabs{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:9px}
+.area-tabs .btn{min-height:43px;padding:8px}
+.area-search-row{display:flex;gap:8px;align-items:stretch;margin-top:10px}
+.area-search-row .field{min-width:0;flex:1}
+.area-search-row .btn{flex:0 0 auto}
+.area-result-list{margin-top:9px;display:grid;gap:7px}
+.area-result{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--surface);border:1px solid var(--line);padding:9px;border-radius:12px}
+.area-result span{font-size:12px;line-height:1.4;overflow-wrap:anywhere;min-width:0}
+.area-result .btn{flex:0 0 auto}
+.area-active{margin:10px 1px 0;color:var(--blue);font-size:12px;font-weight:650;line-height:1.5}
+.area-readonly{margin:9px 1px 0;font-size:12px;color:var(--muted)}
+.mapwrap{height:min(58dvh,525px);min-height:330px}
+.leaflet-tile-pane{filter:none!important}
+html[data-theme="dark"] .leaflet-tile-pane{filter:brightness(.7) saturate(.8)!important}
+.map-badge{max-width:calc(100% - 105px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.position-beacon{position:relative;width:32px;height:32px;display:grid;place-items:center}
+.position-beacon .position-center{width:15px;height:15px;border:3px solid #fff;border-radius:50%;background:#087bff;box-shadow:0 1px 12px #002f7599;position:relative;z-index:2}
+.position-beacon .direction-arrow{position:absolute;left:5px;top:-22px;width:22px;height:31px;display:none;transform-origin:50% 38px;filter:drop-shadow(0 2px 2px #003f7f77)}
+.position-beacon .direction-arrow:before{content:"";display:block;width:100%;height:100%;background:#087bff;clip-path:polygon(50% 0,100% 100%,50% 77%,0 100%);border-radius:4px}
+.position-beacon.has-heading .direction-arrow{display:block}
+.map-legend{font-size:11px;color:var(--muted);margin-top:9px;line-height:1.5}
+@media(max-width:400px){.area-search-row{flex-wrap:wrap}.area-search-row .btn{width:100%}}
   </style>
 </head>
 <body>
@@ -306,7 +331,18 @@ html[data-theme="dark"] .leaflet-tile-pane{filter:grayscale(.25) invert(.92) hue
     </div>
     <div class="panel mt" id="hostSetup">
       <div class="panel-title">Spielregeln</div><div class="sub">Nur der Host kann diese Einstellungen vor dem Start ändern.</div>
-      <label class="label" for="radiusRange">Spielgebiet</label><div class="number-row"><span class="sub">Radius ab Startpunkt</span><span class="number" id="radiusValue">10 km</span></div><input id="radiusRange" class="range" type="range" min="1" max="20" step="1" value="10">
+      <div class="area-selector" id="areaSelector">
+        <label class="label" style="margin-top:0">Spielgebiet auswählen</label>
+        <div class="area-tabs"><button type="button" class="btn selected" id="areaModeRadius">Umkreis</button><button type="button" class="btn" id="areaModeAdmin">Stadt / Stadtteil</button></div>
+        <div id="areaRadiusControls"><label class="label" for="radiusRange">Spielradius</label><div class="number-row"><span class="sub">Radius ab Startpunkt</span><span class="number" id="radiusValue">10 km</span></div><input id="radiusRange" class="range" type="range" min="1" max="20" step="1" value="10"></div>
+        <div id="areaAdminControls" class="hidden">
+          <label class="label" for="areaSearch">Stadt oder Stadtteil suchen</label>
+          <div class="area-search-row"><input class="field" id="areaSearch" placeholder="z. B. Köln oder Porz, Köln" maxlength="85" autocomplete="off"><button type="button" class="btn blue" id="areaSearchBtn">Suchen</button></div>
+          <div class="area-result-list" id="areaResults" aria-live="polite"></div>
+          <p class="micro">Die tatsächlichen Verwaltungsgrenzen werden aus OpenStreetMap geladen. Falls keine Grenze hinterlegt ist, wähle einen anderen Treffer.</p>
+        </div>
+        <div id="areaSelected" class="area-active">Aktuell: Umkreis 10 km</div>
+      </div>
       <label class="label" for="durationRange">Spieldauer</label><div class="number-row"><span class="sub">Ab Beginn der Jagd</span><span class="number" id="durationValue">60 min</span></div><input id="durationRange" class="range" type="range" min="20" max="180" step="10" value="60">
       <label class="label" for="leadRange">Runner-Vorsprung</label><div class="number-row"><span class="sub">Vor dem ersten Hunter-Start</span><span class="number" id="leadValue">5 min</span></div><input id="leadRange" class="range" type="range" min="0" max="15" step="1" value="5">
       <p class="micro">Runner → Hunter: GPS alle 5 Minuten. Hunter → Runner: 12-Minuten-Snapshot für 60 Sekunden. Zur Halbzeit: Bonusziel für 2 unterdrückte Runner-Pings.</p>
@@ -318,7 +354,7 @@ html[data-theme="dark"] .leaflet-tile-pane{filter:grayscale(.25) invert(.92) hue
       <div id="wheelHostControl" class="wheel-host-control hidden"><button type="button" id="openWheel" class="btn primary block">◉ Glücksrad öffnen</button><p class="micro">Alle Spieler auf einem Rad. Mit dem Finger andrehen und danach den gezogenen Spieler einem Team zuweisen.</p></div>
       <div id="pendingSection" class="hidden"><label class="label">Neue Beitrittsanfragen</label><div id="pendingList"></div></div>
     </div>
-    <div class="panel mt"><div class="panel-title">Karte & Startpunkt</div><div class="sub">Der Kreis markiert das Spielgebiet. Der Bonuspunkt muss an einem sicheren, öffentlichen Ort liegen.</div><div id="mapDock"></div>
+    <div class="panel mt"><div class="panel-title">Karte & Startpunkt</div><div class="sub">Die Karte zeigt die gewählte Stadtgrenze, Stadtteilgrenze oder den Spielradius. Der Bonuspunkt muss an einem sicheren, öffentlichen Ort liegen.</div><div id="mapDock"></div>
       <div class="map-actions" id="hostMapActions"><button id="setCenterGPS" class="btn tiny">Start = mein GPS</button><button id="pickCenter" class="btn tiny">Start auf Karte</button><button id="pickChallenge" class="btn tiny">Bonusziel setzen</button></div>
       <div id="mapInstructions" class="micro mt">Standort aktivieren, um deinen Punkt zu sehen.</div>
       <button id="gpsBtnLobby" class="btn block mt">◎ Eigenen Standort aktivieren</button>
@@ -331,7 +367,7 @@ html[data-theme="dark"] .leaflet-tile-pane{filter:grayscale(.25) invert(.92) hue
     <div class="stats"><div class="stat"><b id="nextPing">05:00</b><small>NÄCHSTER RUNNER-PING</small></div><div class="stat"><b id="nextScan">12:00</b><small>NÄCHSTER HUNTER-SCAN</small></div><div class="stat"><b id="geoState">AUS</b><small>MEIN GPS</small></div></div>
     <div id="gameMapDock"></div>
     <div id="challengeBanner" class="event-box hidden"><span class="event-spark">✦ MITTERNACHTS-SIGNAL</span><h3 id="challengeHeadline">BONUSZIEL AKTIV</h3><p id="challengeInfo">Der erste Runner im Zielkreis erhält zwei geheime Ping-Runden.</p><div class="scan-list" id="challengeMeta"></div></div>
-    <div class="panel mt"><div class="row-between"><div><div class="panel-title">Taktik-Hub</div><div class="sub" id="roleHelp">Dein Standort bleibt kontrollierbar.</div></div><button id="soundBtn" class="btn tiny">Ton: An</button></div><div class="controls mt"><button id="gpsBtnGame" class="btn">◎ GPS aktivieren</button><button id="centerOnMe" class="btn">⌖ Zentrieren</button></div><div id="gameInfo" class="micro mt">Hunter sehen ausschließlich zeitversetzte und anonyme Runner-Punkte. Standortfreigabe ist jederzeit stoppbar.</div><button id="endGame" class="btn block danger mt hidden">Spiel für alle beenden</button><button id="exitGame" class="btn block mt">Spiel verlassen</button></div>
+    <div class="panel mt"><div class="row-between"><div><div class="panel-title">Taktik-Hub</div><div class="sub" id="roleHelp">Dein Standort bleibt kontrollierbar.</div></div><button id="soundBtn" class="btn tiny">Ton: An</button></div><div class="controls mt"><button id="gpsBtnGame" class="btn">◎ GPS aktivieren</button><button id="centerOnMe" class="btn">⌖ Zentrieren</button><button id="enableCompass" class="btn">➤ Richtung</button></div><div class="map-legend">➤ Blauer Pfeil: deine eigene Bewegungs- oder Blickrichtung. Antippen eines freigegebenen Spieler-Pings zoomt auf dessen letzte Momentaufnahme, nicht auf einen Live-Standort.</div><div id="gameInfo" class="micro mt">Hunter sehen ausschließlich zeitversetzte und anonyme Runner-Punkte. Standortfreigabe ist jederzeit stoppbar.</div><button id="endGame" class="btn block danger mt hidden">Spiel für alle beenden</button><button id="exitGame" class="btn block mt">Spiel verlassen</button></div>
     <div class="footerline">BLEIB AUF ÖFFENTLICHEN WEGEN · KEIN BETRETEN PRIVATER FLÄCHEN</div>
   </section>
 </div>
@@ -355,10 +391,12 @@ html[data-theme="dark"] .leaflet-tile-pane{filter:grayscale(.25) invert(.92) hue
   const allowedRoles=['hunter','runner','none'];
   const S={peer:null,conn:null,clients:new Map(),pending:new Map(),host:false,approved:false,
     roomCode:'',roomName:'',myName:'',preferredRole:'hunter',myId:'',players:[],
-    phase:'lobby',settings:{radiusKm:10,durationMin:60,headstartMin:5,center:null},
+    phase:'lobby',settings:{radiusKm:10,durationMin:60,headstartMin:5,center:null,mode:'radius',area:null},
     challengePoint:null,challengeOpen:false,challengeWinner:null,challengeUntil:0,challengeTriggered:false,
     startAt:0,chaseAt:0,endAt:0,clockOffset:0,phaseVersion:0,
     radiusCircle:null,centerMarker:null,challengeMarker:null,ownMarker:null,map:null,pickMode:'',
+    areaGeometry:null,areaKey:'',areaLayer:null,areaLayerKey:'',areaPromise:null,areaSearchBusy:false,
+    gpsHeading:null,compassHeading:null,compassEnabled:false,
     gpsWatch:null,myLocation:null,gpsWanted:false,geoErrorShown:false,runnerMarkers:new Map(),
     hunterMarkers:new Map(),anonTokens:new Map(),hunterTokens:new Map(),lastRunnerById:new Map(),lastHunterById:new Map(),aliases:{},lastPingSlot:0,lastScanSlot:0,
     camo:new Map(),scanSamples:new Map(),scanVisibleUntil:0,
@@ -384,7 +422,7 @@ html[data-theme="dark"] .leaflet-tile-pane{filter:grayscale(.25) invert(.92) hue
   const hostSend=(obj)=>{if(S.host){onHostData({peer:S.myId},obj);return true}return safeSend(S.conn,obj)};
   const sendTo=(id,obj)=>id===S.myId?receiveHostMessage(obj):safeSend(S.clients.get(id),obj);
   const sendAll=(obj,role=null)=>{for(const p of S.players){if(role&&p.role!==role)continue;sendTo(p.id,obj)}};
-  const getSettingsPublic=()=>({...S.settings,center:S.settings.center?{...S.settings.center}:null});
+  const getSettingsPublic=()=>({...S.settings,center:S.settings.center?{...S.settings.center}:null,area:S.settings.area?{...S.settings.area}:null});
   const snapshotFor=id=>({t:'snapshot',clock:Date.now(),code:S.roomCode,roomName:S.roomName,players:S.players.map(p=>({...p})),phase:S.phase,
     settings:getSettingsPublic(),startAt:S.startAt,chaseAt:S.chaseAt,endAt:S.endAt,
     challengeOpen:S.challengeOpen,challengeUntil:S.challengeUntil,challengeWinner:S.challengeWinner,
@@ -397,9 +435,9 @@ html[data-theme="dark"] .leaflet-tile-pane{filter:grayscale(.25) invert(.92) hue
     peer.on('open',()=>connection('VERBUNDEN',true));
   };
   const initPeer=(id=null)=>new Promise((resolve,reject)=>{try{if(!window.Peer)throw Error('PeerJS konnte nicht geladen werden. Internetverbindung prüfen.');const p=new Peer(id,{debug:0,config:{iceServers:[{urls:'stun:stun.l.google.com:19302'}]}});let settled=false;const timeout=setTimeout(()=>{if(!settled){settled=true;p.destroy();reject(Error('PeerJS-Server antwortet nicht.'))}},15000);p.once('open',pid=>{if(settled)return;settled=true;clearTimeout(timeout);S.peer=p;attachPeerErrors(p);resolve(pid)});p.once('error',e=>{if(!settled){settled=true;clearTimeout(timeout);p.destroy();reject(e)}})}catch(e){reject(e)}});
-  const checkStart=()=>{const h=S.players.filter(p=>p.role==='hunter').length,r=S.players.filter(p=>p.role==='runner').length;const ok=S.host&&S.phase==='lobby'&&h>=1&&r>=1&&!!S.settings.center&&!!S.challengePoint;
-    $('readyText').textContent=!S.host?'Warte darauf, dass der Host das Spiel startet.':!S.settings.center?'Bitte einen Startpunkt auf der Karte bestimmen.':!S.challengePoint?'Bitte vor dem Start einen sicheren Bonuspunkt setzen.':!h||!r?'Es braucht mindestens einen Hunter und einen Runner.':'Alle Voraussetzungen erfüllt — das Spiel kann beginnen.';$('startGame').disabled=!ok};
-  const buildRoom=()=>{S.approved=true;S.players=[{id:S.myId,name:S.myName,role:S.preferredRole,preference:S.preferredRole,host:true}];S.roomName=clean($('createRoomName').value,30)||'Nachtjagd';S.settings={radiusKm:10,durationMin:60,headstartMin:5,center:null};S.phase='lobby';S.challengePoint=null;
+  const checkStart=()=>{const h=S.players.filter(p=>p.role==='hunter').length,r=S.players.filter(p=>p.role==='runner').length;const ok=S.host&&S.phase==='lobby'&&h>=1&&r>=1&&!!S.settings.center&&!!S.challengePoint&&(S.settings.mode!=='area'||!!S.areaGeometry);
+    $('readyText').textContent=!S.host?'Warte darauf, dass der Host das Spiel startet.':!S.settings.center?'Bitte einen Startpunkt auf der Karte bestimmen.':S.settings.mode==='area'&&!S.areaGeometry?'Stadt-/Stadtteilgrenze wird geladen.':!S.challengePoint?'Bitte vor dem Start einen sicheren Bonuspunkt setzen.':!h||!r?'Es braucht mindestens einen Hunter und einen Runner.':'Alle Voraussetzungen erfüllt — das Spiel kann beginnen.';$('startGame').disabled=!ok};
+  const buildRoom=()=>{S.approved=true;S.players=[{id:S.myId,name:S.myName,role:S.preferredRole,preference:S.preferredRole,host:true}];S.roomName=clean($('createRoomName').value,30)||'Nachtjagd';S.settings={radiusKm:10,durationMin:60,headstartMin:5,center:null,mode:'radius',area:null};clearAreaBoundary();S.phase='lobby';S.challengePoint=null;
     S.anonTokens.clear();S.hunterTokens.clear();S.lastRunnerById.clear();S.lastHunterById.clear();S.camo.clear();S.runnerMarkers.clear();S.hunterMarkers.clear();S.startAt=0;S.chaseAt=0;S.endAt=0;S.challengeOpen=false;S.challengeWinner=null;S.pending.clear();S.clients.clear();S.clockOffset=0;
     showRoom();sync();notify('Raum erstellt',`Code ${S.roomCode} · Gib ihn deinen Freunden weiter.`,true)};
   const gatherProfile=()=>{const name=clean($('myName').value,20);if(!name){notify('Name fehlt','Bitte zuerst einen Spielernamen eingeben.');return false}if(!$('privacyConsent').checked){notify('Zustimmung erforderlich','Bestätige die freiwillige GPS-Freigabe, bevor du beitrittst.');return false}S.myName=name;return true};
@@ -425,7 +463,7 @@ html[data-theme="dark"] .leaflet-tile-pane{filter:grayscale(.25) invert(.92) hue
     if(data.t==='approved'){S.approved=true;$('waitApproval').classList.add('hidden');notify('Zugang freigegeben','Du bist jetzt im Raum.',true);return}
     if(data.t==='snapshot'){
       S.approved=true;S.clockOffset=Number(data.clock)-Date.now();S.roomCode=data.code;S.roomName=data.roomName;S.players=Array.isArray(data.players)?data.players:[];
-      const oldPhase=S.phase;S.phase=data.phase;S.settings=data.settings;S.startAt=data.startAt;S.chaseAt=data.chaseAt;S.endAt=data.endAt;
+      const oldPhase=S.phase;S.phase=data.phase;S.settings={...data.settings,mode:data.settings?.mode==='area'?'area':'radius',area:data.settings?.area||null};ensureAreaBoundary();S.startAt=data.startAt;S.chaseAt=data.chaseAt;S.endAt=data.endAt;
       S.challengeOpen=!!data.challengeOpen;S.challengeUntil=data.challengeUntil||0;S.challengeWinner=data.challengeWinner||null;S.challengePoint=toLatLng(data.challengePoint);
       $('waitApproval').classList.add('hidden');if(oldPhase!==S.phase&&S.phase==='headstart')notify('Vorsprung läuft','Hunter warten, Runner bewegen sich zum Start.',true);
       if(oldPhase!==S.phase&&S.phase==='playing')notify('Jagd gestartet','Achte auf die GPS-Pings.',true);
@@ -450,12 +488,12 @@ html[data-theme="dark"] .leaflet-tile-pane{filter:grayscale(.25) invert(.92) hue
     if(data.t==='gps-off'&&role==='runner'){const tag=S.anonTokens.get(id);if(tag)sendAll({t:'runner-hide',tag},'hunter');return;}
     if(data.t==='runner-location'&&role==='runner'&&S.phase==='playing'){
       const slot=Number(data.slot),current=Math.floor((now()-S.chaseAt)/PING_MS);if(slot!==current||slot!==S.lastPingSlot||S.camo.get(id)>0||S.lastRunnerById.get(id)===slot)return;
-      const pos=validPoint(data.pos);if(!pos)return;if(S.settings.center&&dist(S.settings.center,pos)>S.settings.radiusKm*1000+Math.min(150,pos.accuracy))return;
+      const pos=validPoint(data.pos);if(!pos)return;if(!insidePlayArea(pos))return;
       S.lastRunnerById.set(id,slot);const tag=S.anonTokens.get(id);if(!tag)return;sendAll({t:'ping',tag,lat:pos.lat,lng:pos.lng,at:Date.now(),slot},'hunter');return;
     }
     if(data.t==='hunter-location'&&role==='hunter'&&S.phase==='playing'){
       const slot=Number(data.slot),current=Math.floor((now()-S.chaseAt)/SCAN_MS);if(slot!==current||slot!==S.lastScanSlot||slot<1||S.lastHunterById.get(id)===slot)return;
-      const pos=validPoint(data.pos);if(!pos)return;if(S.settings.center&&dist(S.settings.center,pos)>S.settings.radiusKm*1000+Math.min(150,pos.accuracy))return;
+      const pos=validPoint(data.pos);if(!pos)return;if(!insidePlayArea(pos))return;
       S.lastHunterById.set(id,slot);S.scanSamples.set(id,{tag:S.hunterTokens.get(id)||'H-???',lat:pos.lat,lng:pos.lng,at:Date.now()});broadcastScan();return;
     }
     if(data.t==='claim'&&role==='runner'&&S.phase==='playing'&&S.challengeOpen&&!S.challengeWinner&&now()<S.challengeUntil){
@@ -489,30 +527,122 @@ html[data-theme="dark"] .leaflet-tile-pane{filter:grayscale(.25) invert(.92) hue
   function clearRemoteMarkers(){S.runnerMarkers.forEach(v=>S.map?.removeLayer(v.marker));S.runnerMarkers.clear();clearHunterScan()}
   function clearHunterScan(){S.hunterMarkers.forEach(v=>S.map?.removeLayer(v.marker));S.hunterMarkers.clear();S.scanVisibleUntil=0}
   const markerIcon=cls=>L.divIcon({html:`<div class="dotmarker ${cls} pulse-circle"></div>`,className:'',iconSize:[22,22],iconAnchor:[11,11]});
+  // Die administrative Gebietsgrenze wird lokal geladen, nicht als großes GeoJSON über PeerJS verschickt.
+  const areaId=a=>a&&/^[RWN]$/.test(a.osmType)&&/^\d{1,15}$/.test(String(a.osmId))?a.osmType+a.osmId:'';
+  const isAreaMode=()=>S.settings.mode==='area';
+  function clearAreaBoundary(){if(S.areaLayer&&S.map)S.map.removeLayer(S.areaLayer);S.areaLayer=null;S.areaLayerKey='';S.areaGeometry=null;S.areaKey='';S.areaPromise=null}
+  const ringContains=(ring,pos)=>{let hit=false;for(let i=0,j=ring.length-1;i<ring.length;j=i++){
+    const ax=ring[i][0],ay=ring[i][1],bx=ring[j][0],by=ring[j][1];
+    if((ay>pos.lat)!==(by>pos.lat)&&pos.lng<(bx-ax)*(pos.lat-ay)/(by-ay)+ax)hit=!hit;
+  }return hit};
+  function insideGeometry(geom,pos){if(!geom||!pos)return false;const polys=geom.type==='Polygon'?[geom.coordinates]:geom.type==='MultiPolygon'?geom.coordinates:[];
+    return polys.some(rings=>rings.length&&ringContains(rings[0],pos)&&!rings.slice(1).some(hole=>ringContains(hole,pos)));
+  }
+  function insidePlayArea(pos){return isAreaMode()?!!S.areaGeometry&&insideGeometry(S.areaGeometry,pos):!!S.settings.center&&dist(S.settings.center,pos)<=S.settings.radiusKm*1000+Math.min(150,Number(pos.accuracy)||0)}
+  function ensureAreaBoundary(){const a=S.settings.area,key=areaId(a);if(!isAreaMode()||!key){clearAreaBoundary();updateMapDecor();return Promise.resolve(false)}
+    if(S.areaKey===key&&S.areaGeometry)return Promise.resolve(true);
+    if(S.areaKey===key&&S.areaPromise)return S.areaPromise;
+    clearAreaBoundary();S.areaKey=key;
+    S.areaPromise=fetch(`https://nominatim.openstreetmap.org/lookup?format=jsonv2&osm_ids=${encodeURIComponent(key)}&polygon_geojson=1&accept-language=de`,{headers:{Accept:'application/json'}})
+      .then(r=>{if(!r.ok)throw Error('Grenzdaten nicht erreichbar');return r.json()})
+      .then(rows=>{const geom=rows?.[0]?.geojson;if(!geom||!['Polygon','MultiPolygon'].includes(geom.type))throw Error('Keine Verwaltungsgrenze in OpenStreetMap gefunden');
+        if(S.areaKey!==key||areaId(S.settings.area)!==key)return false;
+        S.areaGeometry=geom;updateMapDecor();checkStart();return true})
+      .catch(e=>{if(S.areaKey===key){S.areaGeometry=null;updateMapDecor();checkStart();notify('Stadtgrenze nicht verfügbar',e.message||'Wähle einen anderen Bereich.')}return false})
+      .finally(()=>{if(S.areaKey===key)S.areaPromise=null});return S.areaPromise;
+  }
+  function renderAreaControls(){if(!S.approved)return;const selected=isAreaMode();const adminTab=S.areaTab==='area'||selected;
+    $('areaModeRadius').classList.toggle('selected',!adminTab);$('areaModeAdmin').classList.toggle('selected',adminTab);
+    $('areaRadiusControls').classList.toggle('hidden',adminTab);$('areaAdminControls').classList.toggle('hidden',!adminTab);
+    $('areaSelected').textContent=selected?(S.settings.area?'Aktuelles Spielfeld: '+S.settings.area.name:'Bitte Stadt oder Stadtteil suchen und auswählen.'):'Aktuell: Umkreis '+S.settings.radiusKm+' km';
+    $('areaSelected').classList.toggle('area-readonly',!S.host);
+  }
+  async function searchAreas(){if(!S.host||S.phase!=='lobby'||S.areaSearchBusy)return;
+    const q=$('areaSearch').value.trim();if(q.length<2){notify('Suchbegriff fehlt','Bitte Stadt oder Stadtteil eingeben.');return}
+    S.areaSearchBusy=true;$('areaSearchBtn').disabled=true;$('areaResults').textContent='Suche Gebiete …';
+    try{const url='https://nominatim.openstreetmap.org/search?format=jsonv2&limit=8&addressdetails=1&accept-language=de&q='+encodeURIComponent(q);
+      const response=await fetch(url,{headers:{Accept:'application/json'}});if(!response.ok)throw Error('Kartensuche momentan nicht erreichbar');
+      const results=(await response.json()).filter(v=>areaId({osmType:String(v.osm_type||'').slice(0,1).toUpperCase(),osmId:v.osm_id}));
+      $('areaResults').replaceChildren();const dedup=new Set();let count=0;
+      for(const item of results){const type=String(item.type||'');if(!['administrative','city','town','village','suburb','borough','quarter','neighbourhood','municipality','district','residential'].includes(type))continue;
+        const id=String(item.osm_type||'').slice(0,1).toUpperCase()+item.osm_id;if(dedup.has(id))continue;dedup.add(id);count++;
+        const entry=document.createElement('div');entry.className='area-result';const name=document.createElement('span');name.textContent=item.display_name;
+        const button=document.createElement('button');button.type='button';button.className='btn tiny blue';button.textContent='Auswählen';button.onclick=()=>selectArea(item);entry.append(name,button);$('areaResults').append(entry);
+      }
+      if(!count)$('areaResults').textContent='Kein Stadt- oder Stadtteilgebiet gefunden. Versuche z. B. „Porz, Köln“.';
+    }catch(e){$('areaResults').textContent='Suche fehlgeschlagen: '+(e.message||String(e))}
+    finally{S.areaSearchBusy=false;$('areaSearchBtn').disabled=false}
+  }
+  async function selectArea(item){if(!S.host||S.phase!=='lobby'||S.areaSearchBusy)return;
+    const osmType=String(item.osm_type||'').slice(0,1).toUpperCase(),osmId=String(item.osm_id||'');const key=areaId({osmType,osmId});if(!key)return;
+    S.areaSearchBusy=true;$('areaSearchBtn').disabled=true;
+    try{const response=await fetch(`https://nominatim.openstreetmap.org/lookup?format=jsonv2&osm_ids=${encodeURIComponent(key)}&polygon_geojson=1&accept-language=de`,{headers:{Accept:'application/json'}});
+      if(!response.ok)throw Error('Grenzdaten konnten nicht geladen werden');const row=(await response.json())?.[0],geometry=row?.geojson;
+      if(!geometry||!['Polygon','MultiPolygon'].includes(geometry.type))throw Error('Für diesen Treffer gibt es keine echte Gebietsgrenze. Bitte anderen Treffer wählen.');
+      const bbox=Array.isArray(row.boundingbox)?row.boundingbox.map(Number):[];
+      if(bbox.length!==4||bbox.some(n=>!Number.isFinite(n)))throw Error('Ungültige Gebietskoordinaten');
+      const center=toLatLng({lat:row.lat,lng:row.lon});if(!center)throw Error('Kein Gebietsmittelpunkt gefunden');
+      S.settings.mode='area';S.settings.area={osmType,osmId,name:clean(row.display_name||item.display_name,120),bbox,center};S.settings.center=center;
+      clearAreaBoundary();S.areaKey=key;S.areaGeometry=geometry;S.areaTab='area';S.pickMode='';
+      if(S.challengePoint&&!insidePlayArea(S.challengePoint)){S.challengePoint=null;notify('Bonusziel zurückgesetzt','Bitte innerhalb der neuen Stadtgrenze setzen.')}
+      renderAll();updateMapDecor();zoomToArea();sync();notify('Gebiet ausgewählt',S.settings.area.name);
+    }catch(e){notify('Gebiet nicht auswählbar',e.message||String(e))}
+    finally{S.areaSearchBusy=false;$('areaSearchBtn').disabled=false}
+  }
+  function setAreaMode(mode){if(!S.host||S.phase!=='lobby')return;S.areaTab=mode;
+    if(mode==='radius'&&isAreaMode()){
+      S.settings.mode='radius';S.settings.area=null;clearAreaBoundary();
+      if(S.challengePoint&&!insidePlayArea(S.challengePoint))S.challengePoint=null;
+      if(!S.settings.center&&S.myLocation)S.settings.center=toLatLng(S.myLocation);
+      sync();renderAll();zoomToArea();
+    }else if(mode==='area'&&!isAreaMode()){
+      S.settings.mode='area';S.settings.area=null;S.settings.center=null;S.challengePoint=null;clearAreaBoundary();S.pickMode='';sync();renderAll();
+    }else renderAreaControls();
+  }
+  function zoomToPing(loc,marker){if(!S.map)return;S.map.flyTo([loc.lat,loc.lng],Math.max(16,S.map.getZoom()),{duration:.6});setTimeout(()=>marker?.openPopup(),650)}
+  function updateHeading(){if(!S.ownMarker)return;const el=S.ownMarker.getElement()?.querySelector('.position-beacon');if(!el)return;
+    const heading=Number.isFinite(S.compassHeading)?S.compassHeading:S.gpsHeading;
+    el.classList.toggle('has-heading',Number.isFinite(heading));const arrow=el.querySelector('.direction-arrow');if(arrow&&Number.isFinite(heading))arrow.style.transform=`rotate(${heading}deg)`;
+  }
+  function onOrientation(e){let head=Number(e.webkitCompassHeading);if(!Number.isFinite(head)||e.webkitCompassHeading==null){head=e.absolute&&Number.isFinite(e.alpha)?360-e.alpha:null}
+    if(Number.isFinite(head)){S.compassHeading=(head+360)%360;updateHeading()}
+  }
+  async function enableCompass(){if(!S.gpsWanted){notify('Zuerst GPS aktivieren','Die Richtung wird nur auf deinem eigenen Gerät angezeigt.');return}
+    if(S.compassEnabled){S.compassEnabled=false;S.compassHeading=null;window.removeEventListener('deviceorientation',onOrientation);window.removeEventListener('deviceorientationabsolute',onOrientation);$('enableCompass').textContent='➤ Richtung';updateHeading();return}
+    try{if(typeof DeviceOrientationEvent==='undefined')throw Error('Kein Kompasssensor. Bei Bewegung zeigt GPS deine Richtung.');
+      if(typeof DeviceOrientationEvent.requestPermission==='function'){
+        const status=await DeviceOrientationEvent.requestPermission();if(status!=='granted')throw Error('Kompassberechtigung nicht erteilt');
+      }
+      window.addEventListener('deviceorientation',onOrientation);window.addEventListener('deviceorientationabsolute',onOrientation);
+      S.compassEnabled=true;$('enableCompass').textContent='➤ Kompass an';notify('Kompass eingeschaltet','Der Pfeil zeigt die Ausrichtung deines Geräts.');
+    }catch(e){notify('Kompass nicht verfügbar',e.message||String(e))}
+  }
   function initMap(){if(S.map)return;if(!window.L){notify('Karte nicht geladen','Bitte Internetverbindung prüfen und neu laden.');return}
     S.map=L.map('map',{zoomControl:false,preferCanvas:true}).setView([50.75,9.1],6);
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,minZoom:3,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap-Mitwirkende</a>',updateWhenIdle:true,keepBuffer:2}).addTo(S.map);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{subdomains:'abcd',maxZoom:20,maxNativeZoom:19,minZoom:3,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap-Mitwirkende</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',updateWhenIdle:true,keepBuffer:2}).addTo(S.map);
     L.control.zoom({position:'bottomright'}).addTo(S.map);
-    S.map.on('click',e=>{if(!S.host||S.phase!=='lobby'||!S.pickMode)return;const pos={lat:e.latlng.lat,lng:e.latlng.lng};if(S.pickMode==='center'){S.settings.center=pos;if(S.challengePoint&&dist(pos,S.challengePoint)>S.settings.radiusKm*1000){S.challengePoint=null;notify('Bonuspunkt zurückgesetzt','Bitte Bonuspunkt innerhalb des neuen Spielgebiets neu setzen.')}}
-      if(S.pickMode==='challenge'){if(!S.settings.center){notify('Erst den Startpunkt festlegen');return}if(dist(S.settings.center,pos)>S.settings.radiusKm*1000){notify('Außerhalb des Spielgebiets','Setze den Bonuspunkt innerhalb des Radius.');return}S.challengePoint=pos;notify('Bonuspunkt gesetzt','Nur öffentliche und gefahrlos erreichbare Orte verwenden.')}
+    S.map.on('click',e=>{if(!S.host||S.phase!=='lobby'||!S.pickMode)return;const pos={lat:e.latlng.lat,lng:e.latlng.lng};if(S.pickMode==='center'){if(isAreaMode())return;S.settings.center=pos;if(S.challengePoint&&!insidePlayArea(S.challengePoint)){S.challengePoint=null;notify('Bonuspunkt zurückgesetzt','Bitte Bonuspunkt innerhalb des neuen Spielgebiets neu setzen.')}}
+      if(S.pickMode==='challenge'){if(!S.settings.center){notify('Erst den Startpunkt festlegen');return}if(!insidePlayArea(pos)){notify('Außerhalb des Spielgebiets','Setze den Bonuspunkt innerhalb der gewählten Grenze.');return}S.challengePoint=pos;notify('Bonuspunkt gesetzt','Nur öffentliche und gefahrlos erreichbare Orte verwenden.')}
       S.pickMode='';updateMapDecor();sync();checkStart()})
   }
   function dockMap(where){initMap();const wrap=$('mapWrap');if(wrap&&wrap.parentElement!==$(where))$(where).append(wrap);setTimeout(()=>S.map?.invalidateSize(),120)}
-  function updateMapDecor(){if(!S.map)return;const center=S.settings.center;if(S.radiusCircle){S.map.removeLayer(S.radiusCircle);S.radiusCircle=null}if(S.centerMarker){S.map.removeLayer(S.centerMarker);S.centerMarker=null}if(S.challengeMarker){S.map.removeLayer(S.challengeMarker);S.challengeMarker=null}
-    if(center){S.radiusCircle=L.circle([center.lat,center.lng],{radius:S.settings.radiusKm*1000,color:'#a5b3cb',fillColor:'#8791aa',fillOpacity:.055,weight:1.5,dashArray:'6 8'}).addTo(S.map);
-      S.centerMarker=L.circleMarker([center.lat,center.lng],{radius:7,color:'#fff',fillColor:'#ece7fd',fillOpacity:1,weight:2}).addTo(S.map).bindTooltip('Startpunkt',{direction:'top'});
+  function updateMapDecor(){if(!S.map)return;const center=S.settings.center;if(S.areaLayer&&(!isAreaMode()||S.areaLayerKey!==S.areaKey||!S.areaGeometry)){S.map.removeLayer(S.areaLayer);S.areaLayer=null;S.areaLayerKey=''}
+    if(isAreaMode()&&S.areaGeometry&&!S.areaLayer){S.areaLayer=L.geoJSON({type:'Feature',geometry:S.areaGeometry,properties:{}},{style:{color:'#007aff',weight:3,opacity:.95,fillColor:'#3a9dff',fillOpacity:.09,interactive:false}}).addTo(S.map);S.areaLayerKey=S.areaKey}
+    if(S.radiusCircle){S.map.removeLayer(S.radiusCircle);S.radiusCircle=null}if(S.centerMarker){S.map.removeLayer(S.centerMarker);S.centerMarker=null}if(S.challengeMarker){S.map.removeLayer(S.challengeMarker);S.challengeMarker=null}
+    if(center&&!isAreaMode()){S.radiusCircle=L.circle([center.lat,center.lng],{radius:S.settings.radiusKm*1000,color:'#007aff',fillColor:'#70aaff',fillOpacity:.06,weight:2,dashArray:'6 8'}).addTo(S.map);
+      S.centerMarker=L.circleMarker([center.lat,center.lng],{radius:7,color:'#fff',fillColor:'#007aff',fillOpacity:1,weight:2}).addTo(S.map).bindTooltip('Startpunkt',{direction:'top'});
     }
     const showTarget=S.challengePoint&&(S.host&&S.phase==='lobby'||S.phase==='playing'&&S.challengeOpen&&myRole()==='runner');if(showTarget){S.challengeMarker=L.marker([S.challengePoint.lat,S.challengePoint.lng],{icon:markerIcon('target')}).addTo(S.map).bindTooltip('Bonusziel · Radius 55 m')}
-    $('mapStatus').textContent=S.pickMode?`KARTENMODUS: ${S.pickMode==='center'?'STARTPUNKT':'BONUSZIEL'}`:S.phase==='lobby'?'SPIELGEBIET':'LIVE · GPS-KARTE';
-    if(S.phase==='lobby')$('mapInstructions').textContent=S.pickMode?'Tippe auf die Karte, um diesen Punkt festzulegen.':center?`Startpunkt gesetzt · Radius ${S.settings.radiusKm} km · Bonuspunkt ${S.challengePoint?'gesetzt':'fehlt'}`:'Startpunkt fehlt: GPS nutzen oder auf der Karte auswählen.';
+    $('mapStatus').textContent=S.pickMode?`KARTENMODUS: ${S.pickMode==='center'?'STARTPUNKT':'BONUSZIEL'}`:isAreaMode()?(S.settings.area?.name?.split(',')[0]||'STADT / STADTTEIL'):(S.phase==='lobby'?'SPIELRADIUS':'GPS · SPIELKARTE');
+    if(S.phase==='lobby')$('mapInstructions').textContent=S.pickMode?'Tippe auf die Karte, um diesen Punkt festzulegen.':isAreaMode()?(S.settings.area?`Stadtgrenze: ${S.settings.area.name} · Bonuspunkt ${S.challengePoint?'gesetzt':'fehlt'}`:'Bitte zuerst Stadt oder Stadtteil auswählen.'):center?`Startpunkt gesetzt · Radius ${S.settings.radiusKm} km · Bonuspunkt ${S.challengePoint?'gesetzt':'fehlt'}`:'Startpunkt fehlt: GPS nutzen oder auf der Karte auswählen.';
   }
-  function zoomToArea(){if(S.map&&S.radiusCircle){S.map.fitBounds(S.radiusCircle.getBounds(),{padding:[15,15],maxZoom:13})}else if(S.myLocation)S.map?.setView([S.myLocation.lat,S.myLocation.lng],14)}
+  function zoomToArea(){if(!S.map)return;if(isAreaMode()&&S.areaLayer){S.map.fitBounds(S.areaLayer.getBounds(),{padding:[22,22],maxZoom:15})}else if(isAreaMode()&&S.settings.area?.bbox){const b=S.settings.area.bbox;S.map.fitBounds([[b[0],b[2]],[b[1],b[3]]],{padding:[22,22],maxZoom:15})}else if(S.radiusCircle){S.map.fitBounds(S.radiusCircle.getBounds(),{padding:[15,15],maxZoom:13})}else if(S.myLocation)S.map.setView([S.myLocation.lat,S.myLocation.lng],14)}
   function showRoom(){setScreen('roomScreen');$('roomTitle').textContent=S.approved?'Lobby':'Beitritt';$('roomSubtitle').textContent=S.roomName||'Verbinde mit Host …';$('roomCodeText').textContent=S.roomCode||'••••';$('waitApproval').classList.toggle('hidden',S.approved);
-    $('hostSetup').classList.toggle('hidden',!S.host);$('hostMapActions').classList.toggle('hidden',!S.host);$('hostBadge').textContent=S.host?'HOST':'TEAMS';$('hostBadge').classList.toggle('hidden',!S.host);$('startGame').classList.toggle('hidden',!S.host);$('teamHint').textContent=S.host?'Ziehen und ablegen oder Spieler antippen.':'Der Host teilt die Teams ein.';
-    dockMap('mapDock');renderAll();updateMapDecor()}
+    $('hostSetup').classList.toggle('hidden',!S.host);$('hostMapActions').classList.toggle('hidden',!S.host);$('setCenterGPS').classList.toggle('hidden',isAreaMode());$('pickCenter').classList.toggle('hidden',isAreaMode());$('hostBadge').textContent=S.host?'HOST':'TEAMS';$('hostBadge').classList.toggle('hidden',!S.host);$('startGame').classList.toggle('hidden',!S.host);$('teamHint').textContent=S.host?'Ziehen und ablegen oder Spieler antippen.':'Der Host teilt die Teams ein.';
+    dockMap('mapDock');renderAll();updateMapDecor();setTimeout(zoomToArea,200)}
   function showGame(){setScreen('gameScreen');dockMap('gameMapDock');$('gameName').textContent=`${S.roomName} · ${S.roomCode}`;$('endGame').classList.toggle('hidden',!S.host||S.phase==='ended');updateMapDecor();renderGame();setTimeout(zoomToArea,260)}
   function renderAll(){if(!S.approved)return;$('roomSubtitle').textContent=S.roomName;$('countPlayers').textContent=S.players.length;$('countHunters').textContent=S.players.filter(p=>p.role==='hunter').length;$('countRunners').textContent=S.players.filter(p=>p.role==='runner').length;
-    $('radiusRange').value=S.settings.radiusKm;$('radiusValue').textContent=S.settings.radiusKm+' km';$('durationRange').value=S.settings.durationMin;$('durationValue').textContent=S.settings.durationMin+' min';$('leadRange').value=S.settings.headstartMin;$('leadValue').textContent=S.settings.headstartMin+' min';
+    renderAreaControls();$('radiusRange').value=S.settings.radiusKm;$('radiusValue').textContent=S.settings.radiusKm+' km';$('durationRange').value=S.settings.durationMin;$('durationValue').textContent=S.settings.durationMin+' min';$('leadRange').value=S.settings.headstartMin;$('leadValue').textContent=S.settings.headstartMin+' min';
     const role=myRole();$('myTeamPill').textContent=role==='hunter'?'● HUNTER':role==='runner'?'● RUNNER':'TEAM OFFEN';renderTeams();renderPending();checkStart();updateMapDecor();renderGame()}
   function renderTeams(){refreshWheelHostControl();const targets={hunter:$('hunterCards'),runner:$('runnerCards'),none:$('benchCards')};Object.values(targets).forEach(e=>e.replaceChildren());for(const p of S.players){const div=document.createElement('div');div.className='player-card';div.dataset.pid=p.id;
       const avatar=document.createElement('span');avatar.className='avatar';avatar.textContent=p.name.slice(0,1).toUpperCase();const detail=document.createElement('span');detail.style.minWidth='0';const bold=document.createElement('strong');bold.textContent=p.name+(p.host?' ★':'');const small=document.createElement('small');small.textContent=p.id===S.myId?'Du':p.role==='none'?`Wunsch: ${p.preference==='runner'?'Runner':'Hunter'}`:'Spieler';detail.append(bold,small);div.append(avatar,detail);targets[p.role]?.append(div);
@@ -700,18 +830,18 @@ html[data-theme="dark"] .leaflet-tile-pane{filter:grayscale(.25) invert(.92) hue
   function renderPending(){const sec=$('pendingSection'),list=$('pendingList');list.replaceChildren();sec.classList.toggle('hidden',!S.host||!S.pending.size);if(!S.host)return;for(const p of S.pending.values()){
     const row=document.createElement('div');row.className='pending-entry';const name=document.createElement('div');const b=document.createElement('b');b.textContent=p.name;const small=document.createElement('small');small.textContent='Wunsch: '+(p.preference==='runner'?'Runner':'Hunter');name.append(b,small);const btns=document.createElement('div');btns.className='controls';const accept=document.createElement('button');accept.className='btn tiny blue';accept.textContent='✓';accept.onclick=()=>approve(p.id,true);const deny=document.createElement('button');deny.className='btn tiny danger';deny.textContent='✕';deny.onclick=()=>approve(p.id,false);btns.append(accept,deny);row.append(name,btns);list.append(row)
   }}
-  function showRunnerPing(data){if(!S.map||S.phase!=='playing')return;const tag=clean(data.tag,10);const loc=toLatLng(data);if(!tag||!loc)return;let v=S.runnerMarkers.get(tag);if(v)S.map.removeLayer(v.marker);const marker=L.marker([loc.lat,loc.lng],{icon:markerIcon('runner')}).addTo(S.map);marker.on('click',()=>openAlias(tag));S.runnerMarkers.set(tag,{marker,at:Number(data.at)||Date.now()});refreshMarkerLabels()}
+  function showRunnerPing(data){if(!S.map||S.phase!=='playing')return;const tag=clean(data.tag,10);const loc=toLatLng(data);if(!tag||!loc)return;let v=S.runnerMarkers.get(tag);if(v)S.map.removeLayer(v.marker);const marker=L.marker([loc.lat,loc.lng],{icon:markerIcon('runner')}).addTo(S.map);marker.on('click',()=>{zoomToPing(loc,marker)});S.runnerMarkers.set(tag,{marker,at:Number(data.at)||Date.now()});refreshMarkerLabels()}
   function removeRunnerPing(tag){const v=S.runnerMarkers.get(tag);if(v){S.map?.removeLayer(v.marker);S.runnerMarkers.delete(tag)}}
   function openAlias(tag){if(myRole()!=='hunter')return;const input=document.createElement('input');input.className='field';input.maxLength=24;input.value=S.aliases[tag]||'';input.placeholder='Optionaler Name für diesen Punkt';ask('Punkt '+tag,'Diese Zuordnung wird nur auf deinem Gerät gespeichert und nicht mit anderen Spielern geteilt.',[
     {label:'Speichern',kind:'primary',fn:()=>{S.aliases[tag]=clean(input.value,24);refreshMarkerLabels();try{localStorage.setItem('nightshift-aliases-'+S.roomCode,JSON.stringify(S.aliases))}catch{}}},{label:'Abbrechen'}],input)}
-  function refreshMarkerLabels(){for(const [tag,v] of S.runnerMarkers){const a=S.aliases[tag];const content=`<div style="color:#161b24"><b>${esc(a||'Unbekannter Runner')} · ${esc(tag)}</b><div>Ping ${esc(relative(v.at))}</div><small>Antippen: Namen zuordnen</small></div>`;v.marker.bindPopup(content,{closeButton:false})}}
-  function showHunterScan(data){clearHunterScan();const until=Number(data.until)||0;if(now()>=until)return;S.scanVisibleUntil=until;for(const raw of data.samples||[]){const loc=toLatLng(raw);if(!loc)continue;const tag=clean(raw.tag,8);const m=L.marker([loc.lat,loc.lng],{icon:markerIcon('hunter')}).addTo(S.map);m.bindPopup(`<div style="color:#161b24"><b>Hunter-Signal ${esc(tag)}</b><div>Snapshot ${esc(relative(raw.at))}</div></div>`);S.hunterMarkers.set(tag,{marker:m,at:raw.at})}notify('Radar-Snapshot',`${S.hunterMarkers.size} Hunter-Punkte für max. 60 Sekunden sichtbar.`,true)}
+  function refreshMarkerLabels(){for(const [tag,v] of S.runnerMarkers){const a=S.aliases[tag];const content=`<div style="color:#161b24"><b>${esc(a||'Unbekannter Runner')} · ${esc(tag)}</b><div>Ping ${esc(relative(v.at))}</div><small>Letzte freigegebene Position, nicht live</small><br><button type="button" data-alias="${esc(tag)}" style="margin-top:5px;cursor:pointer">Namen zuordnen</button></div>`;v.marker.bindPopup(content,{closeButton:false})}}
+  function showHunterScan(data){clearHunterScan();const until=Number(data.until)||0;if(now()>=until)return;S.scanVisibleUntil=until;for(const raw of data.samples||[]){const loc=toLatLng(raw);if(!loc)continue;const tag=clean(raw.tag,8);const m=L.marker([loc.lat,loc.lng],{icon:markerIcon('hunter')}).addTo(S.map);m.bindPopup(`<div style="color:#161b24"><b>Hunter-Signal ${esc(tag)}</b><div>Snapshot ${esc(relative(raw.at))}</div><small>Nur 60 Sekunden freigegeben</small></div>`);m.on('click',()=>zoomToPing(loc,m));S.hunterMarkers.set(tag,{marker:m,at:raw.at})}notify('Radar-Snapshot',`${S.hunterMarkers.size} Hunter-Punkte für max. 60 Sekunden sichtbar.`,true)}
   async function getFresh(){if(!S.gpsWanted||!navigator.geolocation)return null;return new Promise(resolve=>{navigator.geolocation.getCurrentPosition(p=>{onPosition(p);resolve(S.myLocation) },()=>resolve(S.myLocation&&Date.now()-S.myLocation.at<45000?S.myLocation:null),{enableHighAccuracy:true,timeout:12000,maximumAge:0})})}
   async function sendMyRunnerPosition(slot){if(!S.gpsWanted)return;const pos=await getFresh();if(!pos||S.phase!=='playing')return;hostSend({t:'runner-location',slot,pos})}
   async function sendMyHunterPosition(slot){if(!S.gpsWanted)return;const pos=await getFresh();if(!pos||S.phase!=='playing')return;hostSend({t:'hunter-location',slot,pos})}
-  function onPosition(p){S.geoErrorShown=false;S.myLocation={lat:p.coords.latitude,lng:p.coords.longitude,accuracy:p.coords.accuracy,at:p.timestamp};if(!S.map)initMap();if(S.ownMarker){S.ownMarker.setLatLng([S.myLocation.lat,S.myLocation.lng])}else if(S.map){S.ownMarker=L.marker([S.myLocation.lat,S.myLocation.lng],{icon:markerIcon('own'),zIndexOffset:1000}).addTo(S.map).bindTooltip('Mein GPS',{direction:'top'});if(!S.settings.center)S.map.setView([S.myLocation.lat,S.myLocation.lng],14)}
-    if(S.host&&S.phase==='lobby'&&!S.settings.center){S.settings.center={lat:S.myLocation.lat,lng:S.myLocation.lng};sync();checkStart();updateMapDecor();zoomToArea()}
-    if(S.settings.center&&S.phase!=='ended'&&dist(S.settings.center,S.myLocation)>S.settings.radiusKm*1000&&(!S.lastOutsideNotify||Date.now()-S.lastOutsideNotify>60000)){S.lastOutsideNotify=Date.now();notify('Spielgebiet verlassen','Du befindest dich außerhalb des vereinbarten Radius.',true)}
+  function onPosition(p){S.geoErrorShown=false;S.myLocation={lat:p.coords.latitude,lng:p.coords.longitude,accuracy:p.coords.accuracy,at:p.timestamp};S.gpsHeading=Number.isFinite(p.coords.heading)&&p.coords.speed>0.5?p.coords.heading:null;if(!S.map)initMap();if(S.ownMarker){S.ownMarker.setLatLng([S.myLocation.lat,S.myLocation.lng])}else if(S.map){S.ownMarker=L.marker([S.myLocation.lat,S.myLocation.lng],{icon:L.divIcon({html:'<div class="position-beacon"><span class="direction-arrow"></span><span class="position-center"></span></div>',className:'',iconSize:[32,32],iconAnchor:[16,16]}),zIndexOffset:1000}).addTo(S.map).bindTooltip('Mein GPS',{direction:'top'});if(!S.settings.center)S.map.setView([S.myLocation.lat,S.myLocation.lng],14)}
+    updateHeading();if(S.host&&S.phase==='lobby'&&!isAreaMode()&&!S.settings.center){S.settings.center={lat:S.myLocation.lat,lng:S.myLocation.lng};sync();checkStart();updateMapDecor();zoomToArea()}
+    if(S.settings.center&&S.phase!=='ended'&&(!isAreaMode()||S.areaGeometry)&&!insidePlayArea(S.myLocation)&&(!S.lastOutsideNotify||Date.now()-S.lastOutsideNotify>60000)){S.lastOutsideNotify=Date.now();notify('Spielgebiet verlassen','Du befindest dich außerhalb des gewählten Spielgebiets.',true)}
     if(myRole()==='runner'&&S.challengeOpen&&!S.challengeWinner&&!S.claimedEvent&&S.challengePoint&&S.phase==='playing'&&p.coords.accuracy<=90&&dist(S.challengePoint,S.myLocation)<=Math.max(55,p.coords.accuracy)){
       S.claimedEvent=true;hostSend({t:'claim',pos:S.myLocation});setTimeout(()=>{S.claimedEvent=false},12000)
     }
@@ -720,7 +850,7 @@ html[data-theme="dark"] .leaflet-tile-pane{filter:grayscale(.25) invert(.92) hue
   function startGPS(){if(S.gpsWanted){stopGPS();return}if(!$('privacyConsent').checked){notify('GPS-Freigabe fehlt','Bitte zur Startseite zurück und zustimmen.');return}
     if(!navigator.geolocation){notify('GPS nicht verfügbar','HTTPS und ein GPS-fähiges Smartphone sind erforderlich.');return}
     S.gpsWanted=true;try{S.gpsWatch=navigator.geolocation.watchPosition(onPosition,e=>{if(!S.geoErrorShown){S.geoErrorShown=true;notify('GPS-Fehler',e.code===1?'Standort wurde nicht freigegeben.':'Standort konnte nicht bestimmt werden.')}if(e.code===1)stopGPS()},{enableHighAccuracy:true,maximumAge:5000,timeout:20000});notify('GPS aktiviert','Dein Live-Punkt ist nur für dich sichtbar. Andere sehen ausschließlich die vorgesehenen Pings.');renderGPS()}catch(e){S.gpsWanted=false;notify('GPS nicht verfügbar',e.message||String(e))}}
-  function stopGPS(){if(S.gpsWanted&&S.approved&&S.phase==='playing'&&myRole()==='runner')hostSend({t:'gps-off'});S.gpsWanted=false;if(S.gpsWatch!==null){navigator.geolocation?.clearWatch(S.gpsWatch);S.gpsWatch=null}S.myLocation=null;if(S.ownMarker){S.map?.removeLayer(S.ownMarker);S.ownMarker=null}renderGPS()}
+  function stopGPS(){S.compassEnabled=false;S.compassHeading=null;S.gpsHeading=null;window.removeEventListener('deviceorientation',onOrientation);window.removeEventListener('deviceorientationabsolute',onOrientation);$('enableCompass').textContent='➤ Richtung';if(S.gpsWanted&&S.approved&&S.phase==='playing'&&myRole()==='runner')hostSend({t:'gps-off'});S.gpsWanted=false;if(S.gpsWatch!==null){navigator.geolocation?.clearWatch(S.gpsWatch);S.gpsWatch=null}S.myLocation=null;if(S.ownMarker){S.map?.removeLayer(S.ownMarker);S.ownMarker=null}renderGPS()}
   function renderGPS(){$('gpsBtnLobby').textContent=S.gpsWanted?'⊘ GPS-Freigabe stoppen':'◎ Eigenen Standort aktivieren';$('gpsBtnGame').textContent=S.gpsWanted?'⊘ GPS stoppen':'◎ GPS aktivieren';$('geoState').textContent=S.gpsWanted?(S.myLocation?'AN':'SUCHE'):'AUS';$('geoState').style.color=S.gpsWanted?'#9af2bb':'#ff9d89'}
   function renderGame(){if(!['headstart','playing','ended'].includes(S.phase))return;const r=myRole();$('playRole').textContent=r==='hunter'?'● HUNTER':r==='runner'?'● RUNNER':'● ZUSCHAUER';$('playRole').className='role-pill '+r;
     $('phaseTitle').textContent=S.phase==='headstart'?'VORSPRUNG':S.phase==='playing'?'DIE JAGD LÄUFT':'SPIELENDE';const t=now();const remaining=S.phase==='ended'?0:S.phase==='headstart'?S.chaseAt-t:S.endAt-t;$('timeLeft').textContent=fmt(remaining);$('timeCaption').textContent=S.phase==='headstart'?'BIS JAGDBEGINN':S.phase==='ended'?'ZEIT ABGELAUFEN':'SPIELZEIT ÜBRIG';
@@ -729,7 +859,7 @@ html[data-theme="dark"] .leaflet-tile-pane{filter:grayscale(.25) invert(.92) hue
       const elapsed=Math.max(0,t-S.chaseAt),pi=Math.floor(elapsed/PING_MS)+1,si=Math.floor(elapsed/SCAN_MS)+1;
       $('nextPing').textContent=fmt(S.chaseAt+pi*PING_MS-t);$('nextScan').textContent=fmt(S.chaseAt+si*SCAN_MS-t)
     }else{$('nextPing').textContent='–';$('nextScan').textContent='–'}
-    $('roleHelp').textContent=r==='hunter'?'Runner-Punkte alle 5 Minuten. Punkte antippen und privat benennen.':r==='runner'?'Dein GPS geht nur beim 5-Minuten-Ping an die Hunter.':'Du erhältst keine fremden GPS-Signale.';
+    $('roleHelp').textContent=r==='hunter'?'Runner-Punkte alle 5 Minuten. Antippen zoomt zum letzten Ping; im Popup privat benennen.':r==='runner'?'Dein GPS geht nur beim 5-Minuten-Ping an die Hunter.':'Du erhältst keine fremden GPS-Signale.';
     const state=S.phase==='ended'?'Spiel beendet. Keine weiteren Standort-Pings.':S.phase==='headstart'?'Vorsprung läuft. Bis Jagdbeginn werden keine Runner-Pings verteilt.':r==='runner'?`Hunter-Radar alle 12 Minuten. ${S.scanVisibleUntil>t?'Aktive Radarzeit: '+fmt(S.scanVisibleUntil-t):'Nächstes Signal im Countdown oben.'}`:'Nur zeitversetzte Runner-Punkte. Keine Namen oder Live-Verfolgung.';
     $('gameInfo').textContent=state;
     const showEvent=S.challengeOpen||!!S.challengeWinner;$('challengeBanner').classList.toggle('hidden',!showEvent);if(showEvent){
@@ -740,7 +870,7 @@ html[data-theme="dark"] .leaflet-tile-pane{filter:grayscale(.25) invert(.92) hue
   }
   function tick(){if(S.host)hostTick();if(['headstart','playing','ended'].includes(S.phase))renderGame()}
   function reset(){closeWheel();stopGPS();clearRemoteMarkers();try{S.conn?.close()}catch{}for(const c of S.clients.values())try{c.close()}catch{}for(const x of S.pending.values())try{x.conn.close()}catch{}try{S.peer?.destroy()}catch{}
-    S.peer=null;S.conn=null;S.clients.clear();S.pending.clear();S.host=false;S.approved=false;S.myId='';S.players=[];S.phase='lobby';S.clockOffset=0;S.roomName='';S.roomCode='';S.challengePoint=null;S.challengeOpen=false;S.challengeWinner=null;S.challengeTriggered=false;S.scanVisibleUntil=0;S.pickMode='';S.settings={radiusKm:10,durationMin:60,headstartMin:5,center:null};S.startAt=0;S.chaseAt=0;S.endAt=0;S.anonTokens.clear();S.hunterTokens.clear();S.lastRunnerById.clear();S.lastHunterById.clear();S.camo.clear();S.runnerMarkers.clear();S.aliases={};connection('OFFLINE');updateMapDecor();setScreen('homeScreen')}
+    S.peer=null;S.conn=null;S.clients.clear();S.pending.clear();S.host=false;S.approved=false;S.myId='';S.players=[];S.phase='lobby';S.clockOffset=0;S.roomName='';S.roomCode='';S.challengePoint=null;S.challengeOpen=false;S.challengeWinner=null;S.challengeTriggered=false;S.scanVisibleUntil=0;S.pickMode='';S.settings={radiusKm:10,durationMin:60,headstartMin:5,center:null,mode:'radius',area:null};S.areaTab='radius';clearAreaBoundary();S.startAt=0;S.chaseAt=0;S.endAt=0;S.anonTokens.clear();S.hunterTokens.clear();S.lastRunnerById.clear();S.lastHunterById.clear();S.camo.clear();S.runnerMarkers.clear();S.aliases={};connection('OFFLINE');updateMapDecor();setScreen('homeScreen')}
   function confirmExit(){ask('Spiel verlassen?','Deine Verbindung wird geschlossen und die GPS-Freigabe gestoppt.',[{label:'Verlassen',kind:'danger',fn:reset},{label:'Bleiben',kind:'primary'}])}
   // Main layout: one Leaflet map is moved between lobby and game to preserve layers.
   const wrap=document.createElement('div');wrap.className='mapwrap';wrap.id='mapWrap';wrap.innerHTML='<div id="map" class="map"></div><div class="map-badge" id="mapStatus">SPIELGEBIET</div><div class="map-hint" id="mapHint"></div>';
@@ -750,14 +880,17 @@ html[data-theme="dark"] .leaflet-tile-pane{filter:grayscale(.25) invert(.92) hue
   $('prefRunner').onclick=()=>{S.preferredRole='runner';$('prefRunner').classList.add('selected');$('prefHunter').classList.remove('selected')};
   $('joinCode').oninput=e=>e.target.value=e.target.value.toUpperCase().replace(/[^A-HJ-NP-Z2-9]/g,'').slice(0,4);
   $('copyCode').onclick=async()=>{try{await navigator.clipboard.writeText(S.roomCode);notify('Code kopiert',S.roomCode)}catch{ask('Raumcode',`Teile diesen Code: ${S.roomCode}`,[{label:'Okay',kind:'primary'}])}};
+  $('areaModeRadius').onclick=()=>setAreaMode('radius');$('areaModeAdmin').onclick=()=>setAreaMode('area');
+  $('areaSearchBtn').onclick=searchAreas;$('areaSearch').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();searchAreas()}});
   $('radiusRange').oninput=e=>{if(!S.host||S.phase!=='lobby')return;S.settings.radiusKm=Number(e.target.value);if(S.challengePoint&&S.settings.center&&dist(S.settings.center,S.challengePoint)>S.settings.radiusKm*1000){S.challengePoint=null;notify('Bonuspunkt gelöscht','Durch den neuen Radius liegt er außerhalb des Gebiets.')}renderAll();sync()};
   $('durationRange').oninput=e=>{if(!S.host||S.phase!=='lobby')return;S.settings.durationMin=Number(e.target.value);renderAll();sync()};
   $('leadRange').oninput=e=>{if(!S.host||S.phase!=='lobby')return;S.settings.headstartMin=Number(e.target.value);renderAll();sync()};
-  $('setCenterGPS').onclick=()=>{if(!S.myLocation){notify('Kein GPS-Punkt','Aktiviere zuerst deinen eigenen Standort.');return}S.settings.center={lat:S.myLocation.lat,lng:S.myLocation.lng};if(S.challengePoint&&dist(S.settings.center,S.challengePoint)>S.settings.radiusKm*1000)S.challengePoint=null;updateMapDecor();checkStart();sync();zoomToArea()};
-  $('pickCenter').onclick=()=>{S.pickMode='center';updateMapDecor();notify('Kartenmodus','Jetzt auf deinen Startpunkt tippen.')};
-  $('pickChallenge').onclick=()=>{S.pickMode='challenge';updateMapDecor();notify('Bonuspunkt setzen','Wähle einen öffentlichen, gefahrlos erreichbaren Punkt innerhalb des Kreises.')};
-  $('gpsBtnLobby').onclick=startGPS;$('gpsBtnGame').onclick=startGPS;$('centerOnMe').onclick=()=>{if(S.myLocation)S.map?.setView([S.myLocation.lat,S.myLocation.lng],15);else notify('Kein GPS','Bitte zuerst den Standort aktivieren.')};
-  $('startGame').onclick=()=>ask('Jagd starten?',`Vorsprung ${S.settings.headstartMin} min · Jagd ${S.settings.durationMin} min · Radius ${S.settings.radiusKm} km. Sind alle bereit?`,[{label:'Jetzt starten',kind:'orange',fn:start},{label:'Zurück'}]);
+  $('setCenterGPS').onclick=()=>{if(isAreaMode()){notify('Stadtgebiet aktiv','Der Startpunkt wird durch die gewählte Stadt ersetzt.');return}if(!S.myLocation){notify('Kein GPS-Punkt','Aktiviere zuerst deinen eigenen Standort.');return}S.settings.center={lat:S.myLocation.lat,lng:S.myLocation.lng};if(S.challengePoint&&dist(S.settings.center,S.challengePoint)>S.settings.radiusKm*1000)S.challengePoint=null;updateMapDecor();checkStart();sync();zoomToArea()};
+  $('pickCenter').onclick=()=>{if(isAreaMode())return;S.pickMode='center';updateMapDecor();notify('Kartenmodus','Jetzt auf deinen Startpunkt tippen.')};
+  $('pickChallenge').onclick=()=>{if(isAreaMode()&&!S.areaGeometry){notify('Stadtgrenze fehlt','Bitte zuerst Stadt oder Stadtteil auswählen.');return}S.pickMode='challenge';updateMapDecor();notify('Bonuspunkt setzen','Wähle einen öffentlichen, gefahrlos erreichbaren Punkt innerhalb des Kreises.')};
+  $('gpsBtnLobby').onclick=startGPS;$('gpsBtnGame').onclick=startGPS;$('enableCompass').onclick=enableCompass;
+  $('map').addEventListener('click',e=>{const btn=e.target.closest?.('[data-alias]');if(btn&&myRole()==='hunter')openAlias(clean(btn.dataset.alias,10))});$('centerOnMe').onclick=()=>{if(S.myLocation)S.map?.setView([S.myLocation.lat,S.myLocation.lng],15);else notify('Kein GPS','Bitte zuerst den Standort aktivieren.')};
+  $('startGame').onclick=()=>ask('Jagd starten?',`Vorsprung ${S.settings.headstartMin} min · Jagd ${S.settings.durationMin} min · Gebiet: ${isAreaMode()?S.settings.area?.name:S.settings.radiusKm+' km Umkreis'}. Sind alle bereit?`,[{label:'Jetzt starten',kind:'orange',fn:start},{label:'Zurück'}]);
   $('endGame').onclick=()=>ask('Spiel beenden?','Damit wird die Jagd für alle Spieler beendet. Standort-Pings stoppen.',[{label:'Für alle beenden',kind:'danger',fn:finish},{label:'Abbrechen'}]);
   $('leaveLobby').onclick=confirmExit;$('exitGame').onclick=confirmExit;
   $('soundBtn').onclick=()=>{S.soundEnabled=!S.soundEnabled;$('soundBtn').textContent='Ton: '+(S.soundEnabled?'An':'Aus');if(S.soundEnabled)beep()};
