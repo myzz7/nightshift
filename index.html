@@ -283,6 +283,31 @@ html[data-theme="dark"] .leaflet-tile-pane{filter:brightness(.7) saturate(.8)!im
 .position-beacon.has-heading .direction-arrow{display:block}
 .map-legend{font-size:11px;color:var(--muted);margin-top:9px;line-height:1.5}
 @media(max-width:400px){.area-search-row{flex-wrap:wrap}.area-search-row .btn{width:100%}}
+  
+/* Apple-Karten-inspirierte, lizenzkonforme OSM-Karte; kein Apple-Kartenmaterial. */
+.mapwrap{border-radius:23px;box-shadow:0 12px 38px rgba(43,75,112,.12);border:1px solid rgba(127,155,183,.22);isolation:isolate}
+.map{background:#e9f0f4}
+.leaflet-container{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",Arial,sans-serif!important}
+.leaflet-control-zoom{border:0!important;box-shadow:0 4px 18px #34485c24!important;border-radius:14px!important;overflow:hidden}
+.leaflet-control-zoom a{width:36px!important;height:36px!important;line-height:36px!important}
+.map-badge{border-radius:100px;box-shadow:0 3px 16px #26384e1c;font-size:11px;padding:10px 15px}
+.leaflet-popup-content-wrapper{border-radius:17px!important;box-shadow:0 7px 24px #25394d30!important}
+.dotmarker.mock{background:#ef385f;box-shadow:0 0 0 11px #ff457c44,0 0 0 22px #ff457c1e,0 0 30px #ec3d79aa}
+.live-actions{padding:15px 17px}
+.live-caption{display:flex;justify-content:space-between;align-items:center;gap:9px;margin-bottom:11px;font-weight:700;font-size:13px}
+.emoji-buttons{display:flex;flex-wrap:wrap;gap:8px}
+.emoji-buttons button{font-size:23px;width:50px;height:47px;background:var(--soft);border:1px solid var(--line);border-radius:15px;transition:transform .12s}
+.emoji-buttons button:active{transform:scale(.83)}
+.reaction-stream{position:fixed;right:clamp(8px,3vw,28px);bottom:calc(105px + env(safe-area-inset-bottom));z-index:900;pointer-events:none;width:68px;height:55dvh;overflow:hidden}
+.reaction-bubble{position:absolute;bottom:0;left:var(--left,4px);font-size:35px;animation:emojiFloat 3.3s ease-out forwards;filter:drop-shadow(0 3px 6px #0004)}
+@keyframes emojiFloat{0%{opacity:0;transform:translateY(0) scale(.65) rotate(-10deg)}15%{opacity:1}78%{opacity:1}100%{opacity:0;transform:translateY(-47dvh) scale(1.35) rotate(15deg)}}
+.mock-panel{border-top:1px solid var(--line);margin-top:14px;padding-top:13px}
+.mock-panel .row{display:flex;gap:9px;align-items:stretch;flex-wrap:wrap}
+.mock-panel select{flex:1;min-width:140px}
+.mock-panel button{flex:1}
+.mock-note{display:block;color:var(--muted);font-size:11px;line-height:1.45;margin-top:8px}
+@media(prefers-reduced-motion:reduce){.reaction-bubble{animation:emojiFloatReduced 1.3s linear forwards}@keyframes emojiFloatReduced{from{opacity:1}to{opacity:0}}}
+
   </style>
 </head>
 <body>
@@ -299,7 +324,7 @@ html[data-theme="dark"] .leaflet-tile-pane{filter:brightness(.7) saturate(.8)!im
     <div class="hero">
       <div class="eyebrow">OUTDOOR · TEAMGAME</div>
       <h1>Die Stadt ist <span>dein Spielfeld.</span></h1>
-      <p>Verstecken, suchen, clever spielen. Erlebe NIGHTSHIFT mit Freunden – zwei Teams, taktische GPS-Signale und eine echte Mission draußen.</p>
+      <p>Verstecken, suchen, clever spielen. Erlebe NIGHTSHIFT mit Freunden – zwei Teams, taktische GPS-Signale, Live-Reaktionen und eine echte Mission draußen.</p>
       <div class="hero-features" aria-label="Spielvorteile"><span><i class="feature-dot blue-dot"></i> Zwei Teams</span><span><i class="feature-dot orange-dot"></i> GPS-Signale</span><span><i class="feature-dot green-dot"></i> Ohne Konto</span></div>
     </div>
     <div class="home-grid">
@@ -345,7 +370,7 @@ html[data-theme="dark"] .leaflet-tile-pane{filter:brightness(.7) saturate(.8)!im
       </div>
       <label class="label" for="durationRange">Spieldauer</label><div class="number-row"><span class="sub">Ab Beginn der Jagd</span><span class="number" id="durationValue">60 min</span></div><input id="durationRange" class="range" type="range" min="20" max="180" step="10" value="60">
       <label class="label" for="leadRange">Runner-Vorsprung</label><div class="number-row"><span class="sub">Vor dem ersten Hunter-Start</span><span class="number" id="leadValue">5 min</span></div><input id="leadRange" class="range" type="range" min="0" max="15" step="1" value="5">
-      <p class="micro">Runner → Hunter: GPS alle 5 Minuten. Hunter → Runner: 12-Minuten-Snapshot für 60 Sekunden. Zur Halbzeit: Bonusziel für 2 unterdrückte Runner-Pings.</p>
+      <p class="micro">Runner → Hunter: GPS alle 5 Minuten. Hunter → Runner: 12-Minuten-Snapshot für 60 Sekunden. Zur Halbzeit: Bonusziel für 2 unterdrückte Runner-Pings. Alle aktiven Spieler benötigen GPS. Nach 60 Sekunden freiwilliger Abschaltung oder 3 Minuten fehlendem GPS-Status scheidet die Person für diese Runde aus. Standortfreigabe ist jederzeit stoppbar.</p>
     </div>
     <div class="panel mt" id="teamPanel">
       <div class="row-between"><div><div class="panel-title">Teamboard</div><div class="sub" id="teamHint">Spieler verschieben oder antippen.</div></div><span class="pill" id="hostBadge">HOST</span></div>
@@ -366,6 +391,15 @@ html[data-theme="dark"] .leaflet-tile-pane{filter:brightness(.7) saturate(.8)!im
     <div class="timeline"><div id="progressLine"></div></div>
     <div class="stats"><div class="stat"><b id="nextPing">05:00</b><small>NÄCHSTER RUNNER-PING</small></div><div class="stat"><b id="nextScan">12:00</b><small>NÄCHSTER HUNTER-SCAN</small></div><div class="stat"><b id="geoState">AUS</b><small>MEIN GPS</small></div></div>
     <div id="gameMapDock"></div>
+    <div class="panel live-actions mt" id="livePanel"><div class="live-caption"><span>Live-Reaktionen</span><span class="sub">Für alle sichtbar · ohne Standortdaten</span></div>
+      <div class="emoji-buttons" id="emojiButtons" aria-label="Live-Emoji senden"><button type="button" data-react="❤️" aria-label="Herz senden">❤️</button><button type="button" data-react="😂" aria-label="Lachen senden">😂</button><button type="button" data-react="🔥" aria-label="Feuer senden">🔥</button><button type="button" data-react="👏" aria-label="Applaus senden">👏</button><button type="button" data-react="😱" aria-label="Überraschung senden">😱</button><button type="button" data-react="👀" aria-label="Augen senden">👀</button></div>
+      <div id="mockPanel" class="mock-panel hidden"><div class="live-caption">Mock-Sound <span id="mockStatus" class="sub">3 von 3 verfügbar</span></div><div class="row">
+        <select id="mockSoundSelect" class="field" aria-label="Mock-Sound auswählen"><option value="whistle">Pfeifen</option><option value="steps">Schritte</option><option value="beacon">Signalton</option></select>
+        <button id="mockBtn" type="button" class="btn orange">Sound auslösen</button></div>
+        <small class="mock-note">Nur Runner: Dein echter GPS-Punkt erscheint beim Hunter für 3 Sekunden. Höchstens 3 Sounds pro Runde, 90 Sekunden Abstand. Erfordert aktives, genaues GPS.</small>
+      </div>
+    </div>
+    <div id="reactionStream" class="reaction-stream" aria-hidden="true"></div>
     <div id="challengeBanner" class="event-box hidden"><span class="event-spark">✦ MITTERNACHTS-SIGNAL</span><h3 id="challengeHeadline">BONUSZIEL AKTIV</h3><p id="challengeInfo">Der erste Runner im Zielkreis erhält zwei geheime Ping-Runden.</p><div class="scan-list" id="challengeMeta"></div></div>
     <div class="panel mt"><div class="row-between"><div><div class="panel-title">Taktik-Hub</div><div class="sub" id="roleHelp">Dein Standort bleibt kontrollierbar.</div></div><button id="soundBtn" class="btn tiny">Ton: An</button></div><div class="controls mt"><button id="gpsBtnGame" class="btn">◎ GPS aktivieren</button><button id="centerOnMe" class="btn">⌖ Zentrieren</button><button id="enableCompass" class="btn">➤ Richtung</button></div><div class="map-legend">➤ Blauer Pfeil: deine eigene Bewegungs- oder Blickrichtung. Antippen eines freigegebenen Spieler-Pings zoomt auf dessen letzte Momentaufnahme, nicht auf einen Live-Standort.</div><div id="gameInfo" class="micro mt">Hunter sehen ausschließlich zeitversetzte und anonyme Runner-Punkte. Standortfreigabe ist jederzeit stoppbar.</div><button id="endGame" class="btn block danger mt hidden">Spiel für alle beenden</button><button id="exitGame" class="btn block mt">Spiel verlassen</button></div>
     <div class="footerline">BLEIB AUF ÖFFENTLICHEN WEGEN · KEIN BETRETEN PRIVATER FLÄCHEN</div>
@@ -387,6 +421,8 @@ html[data-theme="dark"] .leaflet-tile-pane{filter:brightness(.7) saturate(.8)!im
 (()=>{'use strict';
   const $ = id=>document.getElementById(id);
   const PING_MS=5*60*1000,SCAN_MS=12*60*1000,SCAN_DISPLAY_MS=60*1000;
+  const GPS_STALE_MS=90*1000, MOCK_COOLDOWN_MS=90*1000, MOCK_DURATION_MS=3000;
+  const REACTIONS=['❤️','😂','🔥','👏','😱','👀'],MOCK_SOUNDS=['whistle','steps','beacon'];
   const ROOM_PREFIX='nightshift-';
   const allowedRoles=['hunter','runner','none'];
   const S={peer:null,conn:null,clients:new Map(),pending:new Map(),host:false,approved:false,
@@ -400,7 +436,9 @@ html[data-theme="dark"] .leaflet-tile-pane{filter:brightness(.7) saturate(.8)!im
     gpsWatch:null,myLocation:null,gpsWanted:false,geoErrorShown:false,runnerMarkers:new Map(),
     hunterMarkers:new Map(),anonTokens:new Map(),hunterTokens:new Map(),lastRunnerById:new Map(),lastHunterById:new Map(),aliases:{},lastPingSlot:0,lastScanSlot:0,
     camo:new Map(),scanSamples:new Map(),scanVisibleUntil:0,
-    soundEnabled:true,audio:null,timer:null,joining:false,lastLocationSend:0,claimedEvent:false};
+     soundEnabled:true,audio:null,timer:null,joining:false,lastLocationSend:0,claimedEvent:false,
+    gpsStatus:new Map(),reactionRate:new Map(),mockRate:new Map(),mockCount:new Map(),mockMarkers:new Map(),
+    lastGPSHeartbeat:0,lastReactionAttempt:0,lastMockAttempt:0,localMockNext:0,localMockRemaining:3};
   const clean=(str,max=30)=>String(str??'').replace(/[<>\u0000-\u001f]/g,'').trim().slice(0,max);
   const esc=str=>String(str??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const toLatLng=x=>x&&Number.isFinite(+x.lat)&&Number.isFinite(+x.lng)&&Math.abs(x.lat)<=90&&Math.abs(x.lng)<=180?{lat:+x.lat,lng:+x.lng}:null;
@@ -435,10 +473,10 @@ html[data-theme="dark"] .leaflet-tile-pane{filter:brightness(.7) saturate(.8)!im
     peer.on('open',()=>connection('VERBUNDEN',true));
   };
   const initPeer=(id=null)=>new Promise((resolve,reject)=>{try{if(!window.Peer)throw Error('PeerJS konnte nicht geladen werden. Internetverbindung prüfen.');const p=new Peer(id,{debug:0,config:{iceServers:[{urls:'stun:stun.l.google.com:19302'}]}});let settled=false;const timeout=setTimeout(()=>{if(!settled){settled=true;p.destroy();reject(Error('PeerJS-Server antwortet nicht.'))}},15000);p.once('open',pid=>{if(settled)return;settled=true;clearTimeout(timeout);S.peer=p;attachPeerErrors(p);resolve(pid)});p.once('error',e=>{if(!settled){settled=true;clearTimeout(timeout);p.destroy();reject(e)}})}catch(e){reject(e)}});
-  const checkStart=()=>{const h=S.players.filter(p=>p.role==='hunter').length,r=S.players.filter(p=>p.role==='runner').length;const ok=S.host&&S.phase==='lobby'&&h>=1&&r>=1&&!!S.settings.center&&!!S.challengePoint&&(S.settings.mode!=='area'||!!S.areaGeometry);
-    $('readyText').textContent=!S.host?'Warte darauf, dass der Host das Spiel startet.':!S.settings.center?'Bitte einen Startpunkt auf der Karte bestimmen.':S.settings.mode==='area'&&!S.areaGeometry?'Stadt-/Stadtteilgrenze wird geladen.':!S.challengePoint?'Bitte vor dem Start einen sicheren Bonuspunkt setzen.':!h||!r?'Es braucht mindestens einen Hunter und einen Runner.':'Alle Voraussetzungen erfüllt — das Spiel kann beginnen.';$('startGame').disabled=!ok};
+  const checkStart=()=>{const gpsReady=S.players.filter(p=>['hunter','runner'].includes(p.role)).every(p=>{const g=S.gpsStatus.get(p.id);return g?.on&&Date.now()-g.at<GPS_STALE_MS});const h=S.players.filter(p=>p.role==='hunter').length,r=S.players.filter(p=>p.role==='runner').length;const ok=S.host&&S.phase==='lobby'&&h>=1&&r>=1&&!!S.settings.center&&!!S.challengePoint&&(S.settings.mode!=='area'||!!S.areaGeometry)&&gpsReady;
+    $('readyText').textContent=!S.host?'Warte darauf, dass der Host das Spiel startet.':!S.settings.center?'Bitte einen Startpunkt auf der Karte bestimmen.':S.settings.mode==='area'&&!S.areaGeometry?'Stadt-/Stadtteilgrenze wird geladen.':!S.challengePoint?'Bitte vor dem Start einen sicheren Bonuspunkt setzen.':!h||!r?'Es braucht mindestens einen Hunter und einen Runner.':!gpsReady?'Alle Hunter und Runner müssen GPS aktivieren und ein aktuelles Signal haben.':'Alle Voraussetzungen erfüllt — das Spiel kann beginnen.';$('startGame').disabled=!ok};
   const buildRoom=()=>{S.approved=true;S.players=[{id:S.myId,name:S.myName,role:S.preferredRole,preference:S.preferredRole,host:true}];S.roomName=clean($('createRoomName').value,30)||'Nachtjagd';S.settings={radiusKm:10,durationMin:60,headstartMin:5,center:null,mode:'radius',area:null};clearAreaBoundary();S.phase='lobby';S.challengePoint=null;
-    S.anonTokens.clear();S.hunterTokens.clear();S.lastRunnerById.clear();S.lastHunterById.clear();S.camo.clear();S.runnerMarkers.clear();S.hunterMarkers.clear();S.startAt=0;S.chaseAt=0;S.endAt=0;S.challengeOpen=false;S.challengeWinner=null;S.pending.clear();S.clients.clear();S.clockOffset=0;
+    S.anonTokens.clear();S.hunterTokens.clear();S.lastRunnerById.clear();S.lastHunterById.clear();S.camo.clear();S.runnerMarkers.clear();S.hunterMarkers.clear();S.gpsStatus.clear();S.reactionRate.clear();S.mockRate.clear();S.mockCount.clear();clearMockSignals();S.startAt=0;S.chaseAt=0;S.endAt=0;S.challengeOpen=false;S.challengeWinner=null;S.pending.clear();S.clients.clear();S.clockOffset=0;
     showRoom();sync();notify('Raum erstellt',`Code ${S.roomCode} · Gib ihn deinen Freunden weiter.`,true)};
   const gatherProfile=()=>{const name=clean($('myName').value,20);if(!name){notify('Name fehlt','Bitte zuerst einen Spielernamen eingeben.');return false}if(!$('privacyConsent').checked){notify('Zustimmung erforderlich','Bestätige die freiwillige GPS-Freigabe, bevor du beitrittst.');return false}S.myName=name;return true};
   async function createRoom(){if(S.joining||!gatherProfile())return;S.joining=true;$('createBtn').disabled=true;try{const code=randCode();S.host=true;S.roomCode=code;S.myId=await initPeer(ROOM_PREFIX+code);S.roomCode=code;S.peer.on('connection',attachIncoming);buildRoom()}catch(e){notify('Raum nicht erstellt',e.message||String(e));reset()}finally{S.joining=false;$('createBtn').disabled=false}}
@@ -449,15 +487,15 @@ html[data-theme="dark"] .leaflet-tile-pane{filter:brightness(.7) saturate(.8)!im
   }
   function attachIncoming(c){if(!S.host){c.close();return}let joined=false;const timer=setTimeout(()=>{if(!joined)c.close()},12000);c.on('data',data=>{if(!data||typeof data!=='object')return;if(data.t==='join'&&!joined){joined=true;clearTimeout(timer);
         if(S.phase!=='lobby'){safeSend(c,{t:'denied',reason:'Das Spiel läuft bereits.'});setTimeout(()=>c.close(),150);return}
-        const id=c.peer;if(S.clients.has(id)||S.pending.has(id)){safeSend(c,{t:'denied',reason:'Bereits verbunden.'});return}
+        const id=c.peer;if(S.players.length+S.pending.size>=24){safeSend(c,{t:'denied',reason:'Raum ist voll.'});setTimeout(()=>c.close(),150);return}if(S.clients.has(id)||S.pending.has(id)){safeSend(c,{t:'denied',reason:'Bereits verbunden.'});return}
         const name=clean(data.name,20);if(!name){safeSend(c,{t:'denied',reason:'Kein Name angegeben.'});return}
         const item={id,name,preference:data.preference==='runner'?'runner':'hunter',conn:c};S.pending.set(id,item);safeSend(c,{t:'waiting'});renderPending();notify('Neue Beitrittsanfrage',`${name} möchte in den Raum.`,true);return}
       if(S.clients.get(c.peer)===c)onHostData(c,data)});
-    c.on('close',()=>{clearTimeout(timer);S.pending.delete(c.peer);if(S.clients.get(c.peer)===c){if(roleOf(c.peer)==='runner'){const tag=S.anonTokens.get(c.peer);if(tag)sendAll({t:'runner-hide',tag},'hunter')}S.clients.delete(c.peer);S.players=S.players.filter(p=>p.id!==c.peer);sync();renderTeams();checkStart();notify('Spieler getrennt','Eine Verbindung wurde geschlossen.') }renderPending()});
+    c.on('close',()=>{clearTimeout(timer);S.pending.delete(c.peer);if(S.clients.get(c.peer)===c){/* Historische Pings bleiben sichtbare Momentaufnahmen; GPS-Aus stoppt nur neue Daten. */S.clients.delete(c.peer);S.gpsStatus.delete(c.peer);S.players=S.players.filter(p=>p.id!==c.peer);sync();renderTeams();checkStart();notify('Spieler getrennt','Eine Verbindung wurde geschlossen.') }renderPending()});
     c.on('error',()=>{S.pending.delete(c.peer);renderPending()});
   }
   function approve(id,ok){const item=S.pending.get(id);if(!item)return;S.pending.delete(id);if(ok){S.clients.set(id,item.conn);S.players.push({id,name:item.name,role:'none',preference:item.preference,host:false});safeSend(item.conn,{t:'approved'});sync();notify('Spieler aufgenommen',item.name)}else{safeSend(item.conn,{t:'denied',reason:'Der Host hat die Anfrage abgelehnt.'});setTimeout(()=>item.conn.close(),180)}renderPending();renderTeams();checkStart()}
-  function receiveHostMessage(data){if(!data||typeof data!=='object'||!['snapshot','waiting','denied','approved','ping','runner-hide','hunter-scan','radar-stop','camo','event','pulse-runner','pulse-hunter','stop'].includes(data.t))return;
+  function receiveHostMessage(data){if(!data||typeof data!=='object'||!['snapshot','waiting','denied','approved','ping','runner-hide','hunter-scan','radar-stop','camo','event','pulse-runner','pulse-hunter','stop','reaction','mock-signal','mock-accepted','mock-denied'].includes(data.t))return;
     if(data.t==='waiting'){$('waitApproval').classList.remove('hidden');return}
     if(data.t==='denied'){notify('Anfrage abgelehnt',data.reason||'Kein Zutritt');reset();return}
     if(data.t==='approved'){S.approved=true;$('waitApproval').classList.add('hidden');notify('Zugang freigegeben','Du bist jetzt im Raum.',true);return}
@@ -479,43 +517,120 @@ html[data-theme="dark"] .leaflet-tile-pane{filter:brightness(.7) saturate(.8)!im
       case 'hunter-scan':if(myRole()==='runner')showHunterScan(data);break;
       case 'radar-stop':clearHunterScan();break;
       case 'camo':notify('Tarnung aktiv!',`Die nächsten ${data.credits} Runner-Pings werden unterdrückt.`,true);break;
-      case 'event':notify(data.heading||'Event',data.message||'',true);break;
+      case 'event':notify(clean(data.heading,80)||'Event',clean(data.message,220),true);break;
+      case 'reaction':if(['headstart','playing'].includes(S.phase)&&REACTIONS.includes(data.emoji))showReaction(data.emoji);break;
+      case 'mock-signal':if(myRole()==='hunter')showMockSignal(data);break;
+      case 'mock-accepted':S.localMockRemaining=Math.max(0,Math.min(3,Number(data.remaining)||0));S.localMockNext=Number(data.nextAt)||0;notify('Mock-Sound gesendet','Dein Standort ist für 3 Sekunden beim Hunter sichtbar.',true);renderMockControl();break;
+      case 'mock-denied':notify('Mock-Sound nicht möglich',clean(data.reason,120));S.lastMockAttempt=0;renderMockControl();break;
       case 'stop':stopGPS();break;
     }
   }
+
+  function showReaction(emoji){
+    if(!REACTIONS.includes(emoji)||!['headstart','playing'].includes(S.phase))return;
+    const parent=$('reactionStream');if(parent.childElementCount>15)parent.firstElementChild?.remove();
+    const node=document.createElement('span');node.className='reaction-bubble';node.textContent=emoji;
+    node.style.setProperty('--left',Math.round(Math.random()*24)+'px');parent.append(node);
+    setTimeout(()=>node.remove(),3500);
+  }
+  function playMockSound(kind){
+    if(!S.soundEnabled)return;
+    try{if(!S.audio)S.audio=new(window.AudioContext||window.webkitAudioContext)();if(S.audio.state==='suspended')S.audio.resume();
+      const c=S.audio,t=c.currentTime,notes=kind==='steps'?[145,115,145,115]:kind==='beacon'?[680,880,680]:[1100,1370];
+      notes.forEach((freq,i)=>{const o=c.createOscillator(),g=c.createGain();o.type=kind==='steps'?'triangle':'sine';o.frequency.setValueAtTime(freq,t+i*.13);g.gain.setValueAtTime(.0001,t+i*.13);g.gain.exponentialRampToValueAtTime(.055,t+i*.13+.02);g.gain.exponentialRampToValueAtTime(.0001,t+i*.13+.11);o.connect(g).connect(c.destination);o.start(t+i*.13);o.stop(t+i*.13+.12)});
+    }catch{}
+  }
+  function clearMockSignals(){for(const item of S.mockMarkers.values()){clearTimeout(item.timer);S.map?.removeLayer(item.marker)}S.mockMarkers.clear()}
+  function showMockSignal(data){
+    if(S.phase!=='playing'||myRole()!=='hunter'||!MOCK_SOUNDS.includes(data.sound)||now()>=Number(data.until))return;
+    const loc=toLatLng(data),tag=clean(data.tag,10);if(!loc||!tag)return;
+    const old=S.mockMarkers.get(tag);if(old){clearTimeout(old.timer);S.map?.removeLayer(old.marker)}
+    const marker=L.marker([loc.lat,loc.lng],{icon:markerIcon('mock'),zIndexOffset:1500}).addTo(S.map);
+    marker.bindTooltip('Mock-Sound · '+tag,{permanent:false});
+    S.map.flyTo([loc.lat,loc.lng],Math.max(14,Math.min(17,S.map.getZoom())),{duration:.35});
+    const timer=setTimeout(()=>{S.map?.removeLayer(marker);if(S.mockMarkers.get(tag)?.marker===marker)S.mockMarkers.delete(tag)},Math.max(50,Number(data.until)-now()));
+    S.mockMarkers.set(tag,{marker,timer});playMockSound(data.sound);
+    notify('Mock-Sound!','Runner '+tag+' ist 3 Sekunden sichtbar.',false);
+  }
+  async function sendMockSound(){
+    if(!S.approved||S.phase!=='playing'||myRole()!=='runner'||me()?.disqualified)return;
+    if(!S.gpsWanted){notify('GPS erforderlich','Aktiviere zuerst deinen Standort.');return}
+    if(Date.now()-S.lastMockAttempt<3000||S.localMockRemaining<=0||now()<S.localMockNext)return;
+    S.lastMockAttempt=Date.now();renderMockControl();
+    const sound=$('mockSoundSelect').value;
+    const pos=await getFresh();
+    if(!S.gpsWanted||!pos||Date.now()-pos.at>15000||pos.accuracy>100||!insidePlayArea(pos)){
+      S.lastMockAttempt=0;notify('GPS-Punkt nicht geeignet','Es wird ein genauer, aktueller Standort im Spielgebiet benötigt.');renderMockControl();return;
+    }
+    playMockSound(sound);hostSend({t:'mock',sound,pos});
+  }
+  function renderMockControl(){
+    const allowed=S.phase==='playing'&&myRole()==='runner'&&S.approved&&!me()?.disqualified;
+    $('mockPanel').classList.toggle('hidden',!allowed);
+    $('emojiButtons').querySelectorAll('button').forEach(b=>b.disabled=S.phase==='ended');
+    if(!allowed)return;
+    const cd=Math.max(0,S.localMockNext-now());
+    $('mockBtn').disabled=!S.gpsWanted||S.localMockRemaining===0||cd>0||Date.now()-S.lastMockAttempt<2200;
+    $('mockStatus').textContent=S.localMockRemaining+' von 3 übrig'+(cd>0?' · Pause '+fmt(cd):'');
+  }
+
   const validPoint=p=>{const loc=toLatLng(p);const accuracy=Number(p?.accuracy);const ts=Number(p?.at);return loc&&Number.isFinite(accuracy)&&accuracy>=0&&accuracy<=150&&Number.isFinite(ts)&&Math.abs(Date.now()-ts)<120000?{...loc,accuracy,at:ts}:null};
-  function onHostData(conn,data){if(!S.host||!data||typeof data!=='object')return;const id=conn.peer;if(!S.players.some(p=>p.id===id))return;const role=roleOf(id);
-    if(data.t==='gps-off'&&role==='runner'){const tag=S.anonTokens.get(id);if(tag)sendAll({t:'runner-hide',tag},'hunter');return;}
+  function onHostData(conn,data){if(!S.host||!data||typeof data!=='object')return;const id=conn.peer;if(!S.players.some(p=>p.id===id))return;const role=roleOf(id),player=S.players.find(p=>p.id===id);
+    if(data.t==='gps-off'){S.gpsStatus.set(id,{on:false,at:Date.now(),offSince:Date.now()});if(S.phase==='lobby')checkStart();return;}
+    if(data.t==='gps-status'){
+      const prev=S.gpsStatus.get(id),on=data.on===true;
+      if(prev&&on&&Date.now()-prev.at<4000)return;
+      S.gpsStatus.set(id,{on,at:Date.now(),offSince:on?0:(prev?.offSince||Date.now())});
+      if(S.phase==='lobby')checkStart();
+      return;
+    }
+    if(data.t==='reaction'&&['headstart','playing'].includes(S.phase)&&REACTIONS.includes(data.emoji)&&['hunter','runner'].includes(role)){
+      const t=Date.now();if(t-(S.reactionRate.get(id)||0)<1100)return;
+      S.reactionRate.set(id,t);sendAll({t:'reaction',emoji:data.emoji});return;
+    }
+    if(data.t==='mock'&&role==='runner'&&S.phase==='playing'&&!player?.disqualified){
+      const t=Date.now(),used=S.mockCount.get(id)||0,last=S.mockRate.get(id)||0;
+      if(used>=3||t-last<MOCK_COOLDOWN_MS){sendTo(id,{t:'mock-denied',reason:used>=3?'Deine 3 Sounds sind verbraucht.':'Die Abklingzeit läuft noch.'});return}
+      const pos=validPoint(data.pos);
+      if(!S.gpsStatus.get(id)?.on||!pos||pos.accuracy>100||t-pos.at>15000||!insidePlayArea(pos)){
+        sendTo(id,{t:'mock-denied',reason:'Aktuelles GPS mit höchstens 100 m Abweichung innerhalb des Spielgebiets nötig.'});return;
+      }
+      if(!MOCK_SOUNDS.includes(data.sound))return;
+      S.mockCount.set(id,used+1);S.mockRate.set(id,t);
+      sendTo(id,{t:'mock-accepted',remaining:2-used,nextAt:t+MOCK_COOLDOWN_MS});
+      sendAll({t:'mock-signal',tag:S.anonTokens.get(id),sound:data.sound,lat:pos.lat,lng:pos.lng,until:t+MOCK_DURATION_MS},'hunter');return;
+    }
     if(data.t==='runner-location'&&role==='runner'&&S.phase==='playing'){
-      const slot=Number(data.slot),current=Math.floor((now()-S.chaseAt)/PING_MS);if(slot!==current||slot!==S.lastPingSlot||S.camo.get(id)>0||S.lastRunnerById.get(id)===slot)return;
-      const pos=validPoint(data.pos);if(!pos)return;if(!insidePlayArea(pos))return;
+      const slot=Number(data.slot),current=Math.floor((now()-S.chaseAt)/PING_MS);if(player?.disqualified||!S.gpsStatus.get(id)?.on||slot!==current||slot!==S.lastPingSlot||S.camo.get(id)>0||S.lastRunnerById.get(id)===slot||now()-(S.chaseAt+slot*PING_MS)>45000)return;
+      const pos=validPoint(data.pos);if(!pos||Date.now()-pos.at>30000)return;if(!insidePlayArea(pos))return;
       S.lastRunnerById.set(id,slot);const tag=S.anonTokens.get(id);if(!tag)return;sendAll({t:'ping',tag,lat:pos.lat,lng:pos.lng,at:Date.now(),slot},'hunter');return;
     }
     if(data.t==='hunter-location'&&role==='hunter'&&S.phase==='playing'){
-      const slot=Number(data.slot),current=Math.floor((now()-S.chaseAt)/SCAN_MS);if(slot!==current||slot!==S.lastScanSlot||slot<1||S.lastHunterById.get(id)===slot)return;
+      const slot=Number(data.slot),current=Math.floor((now()-S.chaseAt)/SCAN_MS);if(player?.disqualified||!S.gpsStatus.get(id)?.on||slot!==current||slot!==S.lastScanSlot||slot<1||S.lastHunterById.get(id)===slot||now()-(S.chaseAt+slot*SCAN_MS)>45000)return;
       const pos=validPoint(data.pos);if(!pos)return;if(!insidePlayArea(pos))return;
-      S.lastHunterById.set(id,slot);S.scanSamples.set(id,{tag:S.hunterTokens.get(id)||'H-???',lat:pos.lat,lng:pos.lng,at:Date.now()});broadcastScan();return;
+      if(Date.now()-pos.at>30000)return;S.lastHunterById.set(id,slot);S.scanSamples.set(id,{tag:S.hunterTokens.get(id)||'H-???',lat:pos.lat,lng:pos.lng,at:Date.now()});broadcastScan();return;
     }
-    if(data.t==='claim'&&role==='runner'&&S.phase==='playing'&&S.challengeOpen&&!S.challengeWinner&&now()<S.challengeUntil){
-      const pos=validPoint(data.pos);if(!pos||pos.accuracy>90||!S.challengePoint)return;
-      if(dist(pos,S.challengePoint)>Math.max(55,pos.accuracy))return;
-      S.challengeWinner=id;S.challengeOpen=false;S.camo.set(id,2);const tag=S.anonTokens.get(id);if(tag)sendAll({t:'runner-hide',tag},'hunter');
+    if(data.t==='claim'&&role==='runner'&&!player?.disqualified&&S.gpsStatus.get(id)?.on&&S.phase==='playing'&&S.challengeOpen&&!S.challengeWinner&&now()<S.challengeUntil){
+      const pos=validPoint(data.pos);if(!pos||pos.accuracy>65||Date.now()-pos.at>15000||!S.challengePoint||!insidePlayArea(pos))return;
+      if(dist(pos,S.challengePoint)>55)return;
+      S.challengeWinner=id;S.challengeOpen=false;S.camo.set(id,2);/* Tarnung betrifft nur zukünftige GPS-Runden, nicht alte Momentaufnahmen. */
       sendTo(id,{t:'camo',credits:2});sendAll({t:'event',heading:'Bonusziel erreicht',message:'Ein Runner hat zwei verdeckte Ping-Runden gewonnen!'});sync();return;
     }
   }
   function broadcastScan(){if(S.phase!=='playing')return;const samples=[...S.scanSamples.values()];sendAll({t:'hunter-scan',samples,until:S.scanVisibleUntil},'runner')}
-  function start(){if(!S.host||S.phase!=='lobby')return;checkStart();if($('startGame').disabled)return;const t=Date.now();S.startAt=t;S.chaseAt=t+S.settings.headstartMin*60000;S.endAt=S.chaseAt+S.settings.durationMin*60000;S.phase=S.settings.headstartMin>0?'headstart':'playing';S.challengeWinner=null;S.challengeOpen=false;S.challengeUntil=0;S.challengeTriggered=false;S.lastPingSlot=0;S.lastScanSlot=0;S.camo.clear();S.scanSamples.clear();S.anonTokens.clear();S.hunterTokens.clear();S.lastRunnerById.clear();S.lastHunterById.clear();S.claimedEvent=false;
-    for(const p of S.players){const used=p.role==='runner'?S.anonTokens:S.hunterTokens;const prefix=p.role==='runner'?'R-':'H-';let token;do{token=prefix+Math.floor(100+Math.random()*899)}while([...used.values()].includes(token));used.set(p.id,token)}
+  function start(){if(!S.host||S.phase!=='lobby')return;checkStart();if($('startGame').disabled)return;const t=Date.now();S.startAt=t;S.chaseAt=t+S.settings.headstartMin*60000;S.endAt=S.chaseAt+S.settings.durationMin*60000;S.phase=S.settings.headstartMin>0?'headstart':'playing';S.challengeWinner=null;S.challengeOpen=false;S.challengeUntil=0;S.challengeTriggered=false;S.lastPingSlot=0;S.lastScanSlot=0;S.camo.clear();S.scanSamples.clear();S.mockRate.clear();S.mockCount.clear();S.reactionRate.clear();S.localMockNext=0;S.localMockRemaining=3;S.anonTokens.clear();S.hunterTokens.clear();S.lastRunnerById.clear();S.lastHunterById.clear();S.claimedEvent=false;
+    for(const p of S.players){p.disqualified=false;const used=p.role==='runner'?S.anonTokens:S.hunterTokens;const prefix=p.role==='runner'?'R-':'H-';let token;do{token=prefix+Math.floor(100+Math.random()*899)}while([...used.values()].includes(token));used.set(p.id,token)}
     sync();showGame();notify('Spiel gestartet',S.phase==='headstart'?'Runner haben jetzt Vorsprung!':'Die Jagd läuft!',true);tick()}
-  function hostTick(){if(!S.host)return;const t=Date.now();if(S.phase==='headstart'&&t>=S.chaseAt){S.phase='playing';sync();sendAll({t:'event',heading:'Die Jagd beginnt!',message:'Hunter dürfen los. Die Runner-Pings beginnen jetzt.'});notify('Vorsprung vorbei','Hunter starten jetzt.',true)}
+  function hostTick(){if(!S.host)return;const t=Date.now();if(['headstart','playing'].includes(S.phase)){let changed=false;for(const p of S.players.filter(p=>['hunter','runner'].includes(p.role)&&!p.disqualified)){const gps=S.gpsStatus.get(p.id);if(!gps||(!gps.on&&t-(gps.offSince||gps.at)>60000)||(gps.on&&t-gps.at>180000)){p.disqualified=true;changed=true;sendAll({t:'event',heading:'Fairplay: GPS ausgefallen',message:p.name+' ist wegen längerer GPS-Unterbrechung für diese Runde ausgeschieden.'})}}if(changed)sync()}
+    if(S.phase==='headstart'&&t>=S.chaseAt){S.phase='playing';sync();sendAll({t:'event',heading:'Die Jagd beginnt!',message:'Hunter dürfen los. Die Runner-Pings beginnen jetzt.'});notify('Vorsprung vorbei','Hunter starten jetzt.',true)}
     if(S.phase!=='playing')return;if(t>=S.endAt){finish();return}
     const pingSlot=Math.floor((t-S.chaseAt)/PING_MS);if(pingSlot>S.lastPingSlot){S.lastPingSlot=pingSlot;for(const p of S.players.filter(x=>x.role==='runner')){
-       const cam=S.camo.get(p.id)||0;if(cam>0){S.camo.set(p.id,cam-1);sendTo(p.id,{t:'camo',credits:cam-1});continue}
+       if(p.disqualified)continue;const cam=S.camo.get(p.id)||0;if(cam>0){S.camo.set(p.id,cam-1);sendTo(p.id,{t:'camo',credits:cam-1});continue}
        sendTo(p.id,{t:'pulse-runner',slot:pingSlot})}
        if(pingSlot>0)notify('GPS-Ping',`Runde ${pingSlot+1}: Runner-Punkte aktualisiert.`,true)
     }
     const scanSlot=Math.floor((t-S.chaseAt)/SCAN_MS);if(scanSlot>S.lastScanSlot&&scanSlot>=1){S.lastScanSlot=scanSlot;S.scanSamples.clear();S.scanVisibleUntil=t+SCAN_DISPLAY_MS;
-      sendAll({t:'event',heading:'Hunter-Radar!',message:'Runner sehen jetzt für 60 Sekunden die zuletzt gemeldeten Hunter-Positionen.'},'runner');for(const p of S.players.filter(p=>p.role==='hunter'))sendTo(p.id,{t:'pulse-hunter',slot:scanSlot});notify('Hunter-Scan',`Scan ${scanSlot} ausgelöst.`)}
+      sendAll({t:'event',heading:'Hunter-Radar!',message:'Runner sehen jetzt für 60 Sekunden die zuletzt gemeldeten Hunter-Positionen.'},'runner');for(const p of S.players.filter(p=>p.role==='hunter'&&!p.disqualified))sendTo(p.id,{t:'pulse-hunter',slot:scanSlot});notify('Hunter-Scan',`Scan ${scanSlot} ausgelöst.`)}
     if(S.scanVisibleUntil&&t>=S.scanVisibleUntil){S.scanVisibleUntil=0;S.scanSamples.clear();sendAll({t:'radar-stop'},'runner')}
     if(!S.challengeTriggered&&t>=S.chaseAt+S.settings.durationMin*60000/2&&t<S.endAt){
       S.challengeTriggered=true;S.challengeOpen=true;S.challengeUntil=Math.min(S.endAt,t+8*60000);S.claimedEvent=false;
@@ -523,8 +638,8 @@ html[data-theme="dark"] .leaflet-tile-pane{filter:brightness(.7) saturate(.8)!im
     }
     if(S.challengeOpen&&t>=S.challengeUntil){S.challengeOpen=false;sendAll({t:'event',heading:'Bonusziel geschlossen',message:'Niemand hat das Ziel rechtzeitig erreicht.'});sync()}
   }
-  function finish(){if(!S.host||S.phase==='ended')return;S.phase='ended';S.challengeOpen=false;S.scanVisibleUntil=0;S.scanSamples.clear();sync();sendAll({t:'stop'});clearRemoteMarkers();stopGPS();notify('Zeit abgelaufen','Die Runde ist beendet.',true)}
-  function clearRemoteMarkers(){S.runnerMarkers.forEach(v=>S.map?.removeLayer(v.marker));S.runnerMarkers.clear();clearHunterScan()}
+  function finish(){if(!S.host||S.phase==='ended')return;S.phase='ended';S.challengeOpen=false;S.scanVisibleUntil=0;S.scanSamples.clear();clearMockSignals();sync();sendAll({t:'stop'});clearRemoteMarkers();stopGPS();notify('Zeit abgelaufen','Die Runde ist beendet.',true)}
+  function clearRemoteMarkers(){S.runnerMarkers.forEach(v=>S.map?.removeLayer(v.marker));S.runnerMarkers.clear();clearHunterScan();clearMockSignals()}
   function clearHunterScan(){S.hunterMarkers.forEach(v=>S.map?.removeLayer(v.marker));S.hunterMarkers.clear();S.scanVisibleUntil=0}
   const markerIcon=cls=>L.divIcon({html:`<div class="dotmarker ${cls} pulse-circle"></div>`,className:'',iconSize:[22,22],iconAnchor:[11,11]});
   // Die administrative Gebietsgrenze wird lokal geladen, nicht als großes GeoJSON über PeerJS verschickt.
@@ -839,10 +954,10 @@ html[data-theme="dark"] .leaflet-tile-pane{filter:brightness(.7) saturate(.8)!im
   async function getFresh(){if(!S.gpsWanted||!navigator.geolocation)return null;return new Promise(resolve=>{navigator.geolocation.getCurrentPosition(p=>{onPosition(p);resolve(S.myLocation) },()=>resolve(S.myLocation&&Date.now()-S.myLocation.at<45000?S.myLocation:null),{enableHighAccuracy:true,timeout:12000,maximumAge:0})})}
   async function sendMyRunnerPosition(slot){if(!S.gpsWanted)return;const pos=await getFresh();if(!pos||S.phase!=='playing')return;hostSend({t:'runner-location',slot,pos})}
   async function sendMyHunterPosition(slot){if(!S.gpsWanted)return;const pos=await getFresh();if(!pos||S.phase!=='playing')return;hostSend({t:'hunter-location',slot,pos})}
-  function onPosition(p){S.geoErrorShown=false;S.myLocation={lat:p.coords.latitude,lng:p.coords.longitude,accuracy:p.coords.accuracy,at:p.timestamp};S.gpsHeading=Number.isFinite(p.coords.heading)&&p.coords.speed>0.5?p.coords.heading:null;if(!S.map)initMap();if(S.ownMarker){S.ownMarker.setLatLng([S.myLocation.lat,S.myLocation.lng])}else if(S.map){S.ownMarker=L.marker([S.myLocation.lat,S.myLocation.lng],{icon:L.divIcon({html:'<div class="position-beacon"><span class="direction-arrow"></span><span class="position-center"></span></div>',className:'',iconSize:[32,32],iconAnchor:[16,16]}),zIndexOffset:1000}).addTo(S.map).bindTooltip('Mein GPS',{direction:'top'});if(!S.settings.center)S.map.setView([S.myLocation.lat,S.myLocation.lng],14)}
+  function onPosition(p){S.geoErrorShown=false;S.myLocation={lat:p.coords.latitude,lng:p.coords.longitude,accuracy:p.coords.accuracy,at:p.timestamp};if(S.approved&&Date.now()-S.lastGPSHeartbeat>12000){S.lastGPSHeartbeat=Date.now();hostSend({t:'gps-status',on:true})}S.gpsHeading=Number.isFinite(p.coords.heading)&&p.coords.speed>0.5?p.coords.heading:null;if(!S.map)initMap();if(S.ownMarker){S.ownMarker.setLatLng([S.myLocation.lat,S.myLocation.lng])}else if(S.map){S.ownMarker=L.marker([S.myLocation.lat,S.myLocation.lng],{icon:L.divIcon({html:'<div class="position-beacon"><span class="direction-arrow"></span><span class="position-center"></span></div>',className:'',iconSize:[32,32],iconAnchor:[16,16]}),zIndexOffset:1000}).addTo(S.map).bindTooltip('Mein GPS',{direction:'top'});if(!S.settings.center)S.map.setView([S.myLocation.lat,S.myLocation.lng],14)}
     updateHeading();if(S.host&&S.phase==='lobby'&&!isAreaMode()&&!S.settings.center){S.settings.center={lat:S.myLocation.lat,lng:S.myLocation.lng};sync();checkStart();updateMapDecor();zoomToArea()}
     if(S.settings.center&&S.phase!=='ended'&&(!isAreaMode()||S.areaGeometry)&&!insidePlayArea(S.myLocation)&&(!S.lastOutsideNotify||Date.now()-S.lastOutsideNotify>60000)){S.lastOutsideNotify=Date.now();notify('Spielgebiet verlassen','Du befindest dich außerhalb des gewählten Spielgebiets.',true)}
-    if(myRole()==='runner'&&S.challengeOpen&&!S.challengeWinner&&!S.claimedEvent&&S.challengePoint&&S.phase==='playing'&&p.coords.accuracy<=90&&dist(S.challengePoint,S.myLocation)<=Math.max(55,p.coords.accuracy)){
+    if(myRole()==='runner'&&!me()?.disqualified&&S.challengeOpen&&!S.challengeWinner&&!S.claimedEvent&&S.challengePoint&&S.phase==='playing'&&p.coords.accuracy<=90&&dist(S.challengePoint,S.myLocation)<=Math.max(55,p.coords.accuracy)){
       S.claimedEvent=true;hostSend({t:'claim',pos:S.myLocation});setTimeout(()=>{S.claimedEvent=false},12000)
     }
     renderGPS();
@@ -850,7 +965,7 @@ html[data-theme="dark"] .leaflet-tile-pane{filter:brightness(.7) saturate(.8)!im
   function startGPS(){if(S.gpsWanted){stopGPS();return}if(!$('privacyConsent').checked){notify('GPS-Freigabe fehlt','Bitte zur Startseite zurück und zustimmen.');return}
     if(!navigator.geolocation){notify('GPS nicht verfügbar','HTTPS und ein GPS-fähiges Smartphone sind erforderlich.');return}
     S.gpsWanted=true;try{S.gpsWatch=navigator.geolocation.watchPosition(onPosition,e=>{if(!S.geoErrorShown){S.geoErrorShown=true;notify('GPS-Fehler',e.code===1?'Standort wurde nicht freigegeben.':'Standort konnte nicht bestimmt werden.')}if(e.code===1)stopGPS()},{enableHighAccuracy:true,maximumAge:5000,timeout:20000});notify('GPS aktiviert','Dein Live-Punkt ist nur für dich sichtbar. Andere sehen ausschließlich die vorgesehenen Pings.');renderGPS()}catch(e){S.gpsWanted=false;notify('GPS nicht verfügbar',e.message||String(e))}}
-  function stopGPS(){S.compassEnabled=false;S.compassHeading=null;S.gpsHeading=null;window.removeEventListener('deviceorientation',onOrientation);window.removeEventListener('deviceorientationabsolute',onOrientation);$('enableCompass').textContent='➤ Richtung';if(S.gpsWanted&&S.approved&&S.phase==='playing'&&myRole()==='runner')hostSend({t:'gps-off'});S.gpsWanted=false;if(S.gpsWatch!==null){navigator.geolocation?.clearWatch(S.gpsWatch);S.gpsWatch=null}S.myLocation=null;if(S.ownMarker){S.map?.removeLayer(S.ownMarker);S.ownMarker=null}renderGPS()}
+  function stopGPS(){S.compassEnabled=false;S.compassHeading=null;S.gpsHeading=null;window.removeEventListener('deviceorientation',onOrientation);window.removeEventListener('deviceorientationabsolute',onOrientation);$('enableCompass').textContent='➤ Richtung';if(S.gpsWanted&&S.approved)hostSend({t:'gps-status',on:false});S.gpsWanted=false;if(S.gpsWatch!==null){navigator.geolocation?.clearWatch(S.gpsWatch);S.gpsWatch=null}S.myLocation=null;if(S.ownMarker){S.map?.removeLayer(S.ownMarker);S.ownMarker=null}renderGPS()}
   function renderGPS(){$('gpsBtnLobby').textContent=S.gpsWanted?'⊘ GPS-Freigabe stoppen':'◎ Eigenen Standort aktivieren';$('gpsBtnGame').textContent=S.gpsWanted?'⊘ GPS stoppen':'◎ GPS aktivieren';$('geoState').textContent=S.gpsWanted?(S.myLocation?'AN':'SUCHE'):'AUS';$('geoState').style.color=S.gpsWanted?'#9af2bb':'#ff9d89'}
   function renderGame(){if(!['headstart','playing','ended'].includes(S.phase))return;const r=myRole();$('playRole').textContent=r==='hunter'?'● HUNTER':r==='runner'?'● RUNNER':'● ZUSCHAUER';$('playRole').className='role-pill '+r;
     $('phaseTitle').textContent=S.phase==='headstart'?'VORSPRUNG':S.phase==='playing'?'DIE JAGD LÄUFT':'SPIELENDE';const t=now();const remaining=S.phase==='ended'?0:S.phase==='headstart'?S.chaseAt-t:S.endAt-t;$('timeLeft').textContent=fmt(remaining);$('timeCaption').textContent=S.phase==='headstart'?'BIS JAGDBEGINN':S.phase==='ended'?'ZEIT ABGELAUFEN':'SPIELZEIT ÜBRIG';
@@ -859,18 +974,18 @@ html[data-theme="dark"] .leaflet-tile-pane{filter:brightness(.7) saturate(.8)!im
       const elapsed=Math.max(0,t-S.chaseAt),pi=Math.floor(elapsed/PING_MS)+1,si=Math.floor(elapsed/SCAN_MS)+1;
       $('nextPing').textContent=fmt(S.chaseAt+pi*PING_MS-t);$('nextScan').textContent=fmt(S.chaseAt+si*SCAN_MS-t)
     }else{$('nextPing').textContent='–';$('nextScan').textContent='–'}
-    $('roleHelp').textContent=r==='hunter'?'Runner-Punkte alle 5 Minuten. Antippen zoomt zum letzten Ping; im Popup privat benennen.':r==='runner'?'Dein GPS geht nur beim 5-Minuten-Ping an die Hunter.':'Du erhältst keine fremden GPS-Signale.';
+    $('roleHelp').textContent=r==='hunter'?'Runner-Punkte alle 5 Minuten. Antippen zoomt zum letzten Ping; im Popup privat benennen.':r==='runner'?'GPS-Pings alle 5 Minuten; Mock-Sound verrät deinen Ort freiwillig für 3 Sekunden.':'Du erhältst keine fremden GPS-Signale.';
     const state=S.phase==='ended'?'Spiel beendet. Keine weiteren Standort-Pings.':S.phase==='headstart'?'Vorsprung läuft. Bis Jagdbeginn werden keine Runner-Pings verteilt.':r==='runner'?`Hunter-Radar alle 12 Minuten. ${S.scanVisibleUntil>t?'Aktive Radarzeit: '+fmt(S.scanVisibleUntil-t):'Nächstes Signal im Countdown oben.'}`:'Nur zeitversetzte Runner-Punkte. Keine Namen oder Live-Verfolgung.';
     $('gameInfo').textContent=state;
     const showEvent=S.challengeOpen||!!S.challengeWinner;$('challengeBanner').classList.toggle('hidden',!showEvent);if(showEvent){
       $('challengeHeadline').textContent=S.challengeWinner?'BONUS VERGEBEN':'BONUSZIEL AKTIV';$('challengeInfo').textContent=S.challengeWinner?(S.challengeWinner===S.myId?'Du hast zwei Tarn-Pings gewonnen.':'Ein Runner hat das Ziel erreicht und zwei Tarn-Pings gewonnen.'):(r==='runner'?'Erreiche den markierten Punkt zuerst. Genauigkeit und GPS entscheiden.':'Ein temporäres Bonusziel ist aktiv. Die Zielkoordinaten werden nur Runnern angezeigt.');
       $('challengeMeta').replaceChildren();const el=document.createElement('span');el.textContent=S.challengeWinner?'Tarnung: 2 Pings':`Noch ${fmt(S.challengeUntil-t)} · Zielkreis 55 m`;$('challengeMeta').append(el)
     }
-    if(S.scanVisibleUntil&&t>=S.scanVisibleUntil)clearHunterScan();refreshMarkerLabels();renderGPS();
+    if(S.scanVisibleUntil&&t>=S.scanVisibleUntil)clearHunterScan();refreshMarkerLabels();renderGPS();renderMockControl();
   }
   function tick(){if(S.host)hostTick();if(['headstart','playing','ended'].includes(S.phase))renderGame()}
   function reset(){closeWheel();stopGPS();clearRemoteMarkers();try{S.conn?.close()}catch{}for(const c of S.clients.values())try{c.close()}catch{}for(const x of S.pending.values())try{x.conn.close()}catch{}try{S.peer?.destroy()}catch{}
-    S.peer=null;S.conn=null;S.clients.clear();S.pending.clear();S.host=false;S.approved=false;S.myId='';S.players=[];S.phase='lobby';S.clockOffset=0;S.roomName='';S.roomCode='';S.challengePoint=null;S.challengeOpen=false;S.challengeWinner=null;S.challengeTriggered=false;S.scanVisibleUntil=0;S.pickMode='';S.settings={radiusKm:10,durationMin:60,headstartMin:5,center:null,mode:'radius',area:null};S.areaTab='radius';clearAreaBoundary();S.startAt=0;S.chaseAt=0;S.endAt=0;S.anonTokens.clear();S.hunterTokens.clear();S.lastRunnerById.clear();S.lastHunterById.clear();S.camo.clear();S.runnerMarkers.clear();S.aliases={};connection('OFFLINE');updateMapDecor();setScreen('homeScreen')}
+    S.peer=null;S.conn=null;S.clients.clear();S.pending.clear();S.host=false;S.approved=false;S.myId='';S.players=[];S.phase='lobby';S.clockOffset=0;S.roomName='';S.gpsStatus.clear();S.reactionRate.clear();S.mockRate.clear();S.mockCount.clear();S.lastGPSHeartbeat=0;S.localMockRemaining=3;S.localMockNext=0;S.roomCode='';S.challengePoint=null;S.challengeOpen=false;S.challengeWinner=null;S.challengeTriggered=false;S.scanVisibleUntil=0;S.pickMode='';S.settings={radiusKm:10,durationMin:60,headstartMin:5,center:null,mode:'radius',area:null};S.areaTab='radius';clearAreaBoundary();S.startAt=0;S.chaseAt=0;S.endAt=0;S.anonTokens.clear();S.hunterTokens.clear();S.lastRunnerById.clear();S.lastHunterById.clear();S.camo.clear();S.runnerMarkers.clear();S.aliases={};connection('OFFLINE');updateMapDecor();setScreen('homeScreen')}
   function confirmExit(){ask('Spiel verlassen?','Deine Verbindung wird geschlossen und die GPS-Freigabe gestoppt.',[{label:'Verlassen',kind:'danger',fn:reset},{label:'Bleiben',kind:'primary'}])}
   // Main layout: one Leaflet map is moved between lobby and game to preserve layers.
   const wrap=document.createElement('div');wrap.className='mapwrap';wrap.id='mapWrap';wrap.innerHTML='<div id="map" class="map"></div><div class="map-badge" id="mapStatus">SPIELGEBIET</div><div class="map-hint" id="mapHint"></div>';
@@ -896,7 +1011,9 @@ html[data-theme="dark"] .leaflet-tile-pane{filter:brightness(.7) saturate(.8)!im
   $('soundBtn').onclick=()=>{S.soundEnabled=!S.soundEnabled;$('soundBtn').textContent='Ton: '+(S.soundEnabled?'An':'Aus');if(S.soundEnabled)beep()};
   $('modal').addEventListener('click',e=>{if(e.target===$('modal'))closeModal()});
   document.addEventListener('visibilitychange',()=>{if(!document.hidden&&S.approved){S.map?.invalidateSize();if(S.phase==='playing'&&S.host)hostTick();notify('Willkommen zurück','Prüfe GPS-Verbindung und Timer. Hintergrundbetrieb ist nicht garantiert.')}});
-  S.timer=setInterval(tick,1000);
+  document.querySelectorAll('[data-react]').forEach(b=>b.addEventListener('click',()=>{if(!S.approved||!['headstart','playing'].includes(S.phase)||!['hunter','runner'].includes(myRole()))return;if(Date.now()-S.lastReactionAttempt<1100)return;S.lastReactionAttempt=Date.now();hostSend({t:'reaction',emoji:b.dataset.react})}));
+  $('mockBtn').onclick=sendMockSound;
+  S.timer=setInterval(()=>{if(S.gpsWanted&&S.myLocation&&S.approved&&Date.now()-S.lastGPSHeartbeat>20000){S.lastGPSHeartbeat=Date.now();hostSend({t:'gps-status',on:true})}tick()},1000);
   if(!window.isSecureContext)notify('Hinweis: HTTPS nötig','Für GPS auf Smartphones die Datei über eine HTTPS-Seite öffnen.');
 })();
 </script>
