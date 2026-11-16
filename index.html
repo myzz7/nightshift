@@ -1286,7 +1286,7 @@ html[data-theme="dark"] .leaflet-tile-pane{filter:brightness(.7) saturate(.8)!im
   function renderGame(){if(!['headstart','playing','ended'].includes(S.phase))return;const r=myRole();$('playRole').textContent=me()?.disqualified?'● AUSGESCHIEDEN':r==='hunter'?'● HUNTER':r==='runner'?'● RUNNER':'● ZUSCHAUER';$('playRole').className='role-pill '+r;
     $('phaseTitle').textContent=S.phase==='headstart'?'VORSPRUNG':S.phase==='playing'?'DIE JAGD LÄUFT':'SPIELENDE';const t=now();const remaining=S.phase==='ended'?0:S.phase==='headstart'?S.chaseAt-t:S.endAt-t;$('timeLeft').textContent=fmt(remaining);$('timeCaption').textContent=S.phase==='headstart'?'BIS JAGDBEGINN':S.phase==='ended'?'ZEIT ABGELAUFEN':'SPIELZEIT ÜBRIG';
     $('progressLine').style.width=S.phase==='ended'?'100%':S.phase==='headstart'?'0%':Math.max(0,Math.min(100,(t-S.chaseAt)/(S.endAt-S.chaseAt)*100))+'%';
-    if(S.phase==='headstart'){$('nextPing').textContent=fmt(S.chaseAt-t);$('nextScan').textContent=fmt(S.chaseAt+SCAN_MS-t)}else if(S.phase==='playing'){
+    if(S.phase==='headstart'){$('nextPing').textContent=fmt(S.chaseAt+PING_MS-t);$('nextScan').textContent=fmt(S.chaseAt+SCAN_MS-t)}else if(S.phase==='playing'){
       const elapsed=Math.max(0,t-S.chaseAt),pi=Math.floor(elapsed/PING_MS)+1,si=Math.floor(elapsed/SCAN_MS)+1;
       $('nextPing').textContent=fmt(S.chaseAt+pi*PING_MS-t);$('nextScan').textContent=fmt(S.chaseAt+si*SCAN_MS-t)
     }else{$('nextPing').textContent='–';$('nextScan').textContent='–'}
