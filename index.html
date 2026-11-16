@@ -370,7 +370,7 @@ html[data-theme="dark"] .leaflet-tile-pane{filter:brightness(.7) saturate(.8)!im
       </div>
       <label class="label" for="durationRange">Spieldauer</label><div class="number-row"><span class="sub">Ab Beginn der Jagd</span><span class="number" id="durationValue">60 min</span></div><input id="durationRange" class="range" type="range" min="20" max="180" step="10" value="60">
       <label class="label" for="leadRange">Runner-Vorsprung</label><div class="number-row"><span class="sub">Vor dem ersten Hunter-Start</span><span class="number" id="leadValue">5 min</span></div><input id="leadRange" class="range" type="range" min="0" max="15" step="1" value="5">
-      <p class="micro">Runner → Hunter: GPS alle 5 Minuten. Hunter → Runner: 12-Minuten-Snapshot für 60 Sekunden. Zur Halbzeit: Bonusziel für 2 unterdrückte Runner-Pings. Alle aktiven Spieler benötigen GPS. Nach 60 Sekunden freiwilliger Abschaltung oder 3 Minuten fehlendem GPS-Status scheidet die Person für diese Runde aus. Standortfreigabe ist jederzeit stoppbar.</p>
+      <p class="micro">Runner → Hunter: GPS alle 5 Minuten. Hunter → Runner: 12-Minuten-Snapshot für 60 Sekunden. Zur Halbzeit: Bonusziel für 2 unterdrückte Runner-Pings. Alle aktiven Spieler benötigen GPS. Freiwilliges GPS-Abschalten während der Runde führt zum Ausscheiden; bei GPS-Ausfall gilt eine kurze Frist. Fällige GPS-Pings und Radar-Scans müssen innerhalb von 65 Sekunden eintreffen. Standortfreigabe ist jederzeit stoppbar.</p>
     </div>
     <div class="panel mt" id="teamPanel">
       <div class="row-between"><div><div class="panel-title">Teamboard</div><div class="sub" id="teamHint">Spieler verschieben oder antippen.</div></div><span class="pill" id="hostBadge">HOST</span></div>
@@ -459,7 +459,7 @@ html[data-theme="dark"] .leaflet-tile-pane{filter:brightness(.7) saturate(.8)!im
   const safeSend=(conn,obj)=>{try{if(conn?.open)conn.send(obj);return!!conn?.open}catch{return false}};
   const hostSend=(obj)=>{if(S.host){onHostData({peer:S.myId},obj);return true}return safeSend(S.conn,obj)};
   const sendTo=(id,obj)=>id===S.myId?receiveHostMessage(obj):safeSend(S.clients.get(id),obj);
-  const sendAll=(obj,role=null)=>{for(const p of S.players){if(role&&p.role!==role)continue;sendTo(p.id,obj)}};
+  const sendAll=(obj,role=null)=>{for(const p of S.players){if(role&&p.role!==role)continue;if(p.disqualified&&['ping','hunter-scan','mock-signal','pulse-runner','pulse-hunter'].includes(obj.t))continue;sendTo(p.id,obj)}};
   const getSettingsPublic=()=>({...S.settings,center:S.settings.center?{...S.settings.center}:null,area:S.settings.area?{...S.settings.area}:null});
   const snapshotFor=id=>({t:'snapshot',clock:Date.now(),code:S.roomCode,roomName:S.roomName,players:S.players.map(p=>({...p})),phase:S.phase,
     settings:getSettingsPublic(),startAt:S.startAt,chaseAt:S.chaseAt,endAt:S.endAt,
@@ -549,7 +549,7 @@ html[data-theme="dark"] .leaflet-tile-pane{filter:brightness(.7) saturate(.8)!im
     marker.bindTooltip('Mock-Sound · '+tag,{permanent:false});
     S.map.flyTo([loc.lat,loc.lng],Math.max(14,Math.min(17,S.map.getZoom())),{duration:.35});
     const timer=setTimeout(()=>{S.map?.removeLayer(marker);if(S.mockMarkers.get(tag)?.marker===marker)S.mockMarkers.delete(tag)},Math.max(50,Number(data.until)-now()));
-    S.mockMarkers.set(tag,{marker,timer});playMockSound(data.sound);
+    S.mockMarkers.set(tag,{marker,timer,until:Number(data.until)});playMockSound(data.sound);
     notify('Mock-Sound!','Runner '+tag+' ist 3 Sekunden sichtbar.',false);
   }
   async function sendMockSound(){
@@ -559,7 +559,7 @@ html[data-theme="dark"] .leaflet-tile-pane{filter:brightness(.7) saturate(.8)!im
     S.lastMockAttempt=Date.now();renderMockControl();
     const sound=$('mockSoundSelect').value;
     const pos=await getFresh();
-    if(!S.gpsWanted||!pos||Date.now()-pos.at>15000||pos.accuracy>100||!insidePlayArea(pos)){
+    if(!S.gpsWanted||!pos||Math.abs(Date.now()-pos.at)>15000||pos.accuracy>100||!insidePlayArea(pos)){
       S.lastMockAttempt=0;notify('GPS-Punkt nicht geeignet','Es wird ein genauer, aktueller Standort im Spielgebiet benötigt.');renderMockControl();return;
     }
     playMockSound(sound);hostSend({t:'mock',sound,pos});
@@ -581,6 +581,10 @@ html[data-theme="dark"] .leaflet-tile-pane{filter:brightness(.7) saturate(.8)!im
       const prev=S.gpsStatus.get(id),on=data.on===true;
       if(prev&&on&&Date.now()-prev.at<4000)return;
       S.gpsStatus.set(id,{on,at:Date.now(),offSince:on?0:(prev?.offSince||Date.now())});
+      if(!on&&['headstart','playing'].includes(S.phase)&&['hunter','runner'].includes(role)&&!player.disqualified){
+        player.disqualified=true;
+        sendAll({t:'event',heading:'Fairplay: GPS gestoppt',message:player.name+' ist für diese Runde ausgeschieden.'});sync();
+      }
       if(S.phase==='lobby')checkStart();
       return;
     }
@@ -602,16 +606,16 @@ html[data-theme="dark"] .leaflet-tile-pane{filter:brightness(.7) saturate(.8)!im
     }
     if(data.t==='runner-location'&&role==='runner'&&S.phase==='playing'){
       const slot=Number(data.slot),current=Math.floor((now()-S.chaseAt)/PING_MS);if(player?.disqualified||!S.gpsStatus.get(id)?.on||slot!==current||slot!==S.lastPingSlot||S.camo.get(id)>0||S.lastRunnerById.get(id)===slot||now()-(S.chaseAt+slot*PING_MS)>45000)return;
-      const pos=validPoint(data.pos);if(!pos||Date.now()-pos.at>30000)return;if(!insidePlayArea(pos))return;
+      const pos=validPoint(data.pos);if(!pos||Math.abs(Date.now()-pos.at)>30000)return;if(!insidePlayArea(pos))return;
       S.lastRunnerById.set(id,slot);const tag=S.anonTokens.get(id);if(!tag)return;sendAll({t:'ping',tag,lat:pos.lat,lng:pos.lng,at:Date.now(),slot},'hunter');return;
     }
     if(data.t==='hunter-location'&&role==='hunter'&&S.phase==='playing'){
       const slot=Number(data.slot),current=Math.floor((now()-S.chaseAt)/SCAN_MS);if(player?.disqualified||!S.gpsStatus.get(id)?.on||slot!==current||slot!==S.lastScanSlot||slot<1||S.lastHunterById.get(id)===slot||now()-(S.chaseAt+slot*SCAN_MS)>45000)return;
       const pos=validPoint(data.pos);if(!pos)return;if(!insidePlayArea(pos))return;
-      if(Date.now()-pos.at>30000)return;S.lastHunterById.set(id,slot);S.scanSamples.set(id,{tag:S.hunterTokens.get(id)||'H-???',lat:pos.lat,lng:pos.lng,at:Date.now()});broadcastScan();return;
+      if(Math.abs(Date.now()-pos.at)>30000)return;S.lastHunterById.set(id,slot);S.scanSamples.set(id,{tag:S.hunterTokens.get(id)||'H-???',lat:pos.lat,lng:pos.lng,at:Date.now()});broadcastScan();return;
     }
     if(data.t==='claim'&&role==='runner'&&!player?.disqualified&&S.gpsStatus.get(id)?.on&&S.phase==='playing'&&S.challengeOpen&&!S.challengeWinner&&now()<S.challengeUntil){
-      const pos=validPoint(data.pos);if(!pos||pos.accuracy>65||Date.now()-pos.at>15000||!S.challengePoint||!insidePlayArea(pos))return;
+      const pos=validPoint(data.pos);if(!pos||pos.accuracy>65||Math.abs(Date.now()-pos.at)>15000||!S.challengePoint||!insidePlayArea(pos))return;
       if(dist(pos,S.challengePoint)>55)return;
       S.challengeWinner=id;S.challengeOpen=false;S.camo.set(id,2);/* Tarnung betrifft nur zukünftige GPS-Runden, nicht alte Momentaufnahmen. */
       sendTo(id,{t:'camo',credits:2});sendAll({t:'event',heading:'Bonusziel erreicht',message:'Ein Runner hat zwei verdeckte Ping-Runden gewonnen!'});sync();return;
@@ -625,12 +629,27 @@ html[data-theme="dark"] .leaflet-tile-pane{filter:brightness(.7) saturate(.8)!im
     if(S.phase==='headstart'&&t>=S.chaseAt){S.phase='playing';sync();sendAll({t:'event',heading:'Die Jagd beginnt!',message:'Hunter dürfen los. Die Runner-Pings beginnen jetzt.'});notify('Vorsprung vorbei','Hunter starten jetzt.',true)}
     if(S.phase!=='playing')return;if(t>=S.endAt){finish();return}
     const pingSlot=Math.floor((t-S.chaseAt)/PING_MS);if(pingSlot>S.lastPingSlot){S.lastPingSlot=pingSlot;for(const p of S.players.filter(x=>x.role==='runner')){
-       if(p.disqualified)continue;const cam=S.camo.get(p.id)||0;if(cam>0){S.camo.set(p.id,cam-1);sendTo(p.id,{t:'camo',credits:cam-1});continue}
+       if(p.disqualified)continue;const cam=S.camo.get(p.id)||0;if(cam>0){S.camo.set(p.id,cam-1);S.lastRunnerById.set(p.id,pingSlot);sendTo(p.id,{t:'camo',credits:cam-1});continue}
        sendTo(p.id,{t:'pulse-runner',slot:pingSlot})}
        if(pingSlot>0)notify('GPS-Ping',`Runde ${pingSlot+1}: Runner-Punkte aktualisiert.`,true)
     }
     const scanSlot=Math.floor((t-S.chaseAt)/SCAN_MS);if(scanSlot>S.lastScanSlot&&scanSlot>=1){S.lastScanSlot=scanSlot;S.scanSamples.clear();S.scanVisibleUntil=t+SCAN_DISPLAY_MS;
       sendAll({t:'event',heading:'Hunter-Radar!',message:'Runner sehen jetzt für 60 Sekunden die zuletzt gemeldeten Hunter-Positionen.'},'runner');for(const p of S.players.filter(p=>p.role==='hunter'&&!p.disqualified))sendTo(p.id,{t:'pulse-hunter',slot:scanSlot});notify('Hunter-Scan',`Scan ${scanSlot} ausgelöst.`)}
+    // Pings sind verbindlich: vorübergehendes GPS-Abschalten darf kein Signal überspringen.
+    if(S.lastPingSlot>0&&t-(S.chaseAt+S.lastPingSlot*PING_MS)>65000){
+      for(const p of S.players.filter(x=>x.role==='runner'&&!x.disqualified)){
+        if(S.lastRunnerById.get(p.id)!==S.lastPingSlot){
+          p.disqualified=true;sendAll({t:'event',heading:'Fairplay: Ping verpasst',message:p.name+' hat einen GPS-Ping verpasst und ist ausgeschieden.'});sync();
+        }
+      }
+    }
+    if(S.lastScanSlot>0&&t-(S.chaseAt+S.lastScanSlot*SCAN_MS)>65000){
+      for(const p of S.players.filter(x=>x.role==='hunter'&&!x.disqualified)){
+        if(S.lastHunterById.get(p.id)!==S.lastScanSlot){
+          p.disqualified=true;sendAll({t:'event',heading:'Fairplay: Radar verpasst',message:p.name+' hat einen GPS-Scan verpasst und ist ausgeschieden.'});sync();
+        }
+      }
+    }
     if(S.scanVisibleUntil&&t>=S.scanVisibleUntil){S.scanVisibleUntil=0;S.scanSamples.clear();sendAll({t:'radar-stop'},'runner')}
     if(!S.challengeTriggered&&t>=S.chaseAt+S.settings.durationMin*60000/2&&t<S.endAt){
       S.challengeTriggered=true;S.challengeOpen=true;S.challengeUntil=Math.min(S.endAt,t+8*60000);S.claimedEvent=false;
@@ -954,7 +973,7 @@ html[data-theme="dark"] .leaflet-tile-pane{filter:brightness(.7) saturate(.8)!im
   async function getFresh(){if(!S.gpsWanted||!navigator.geolocation)return null;return new Promise(resolve=>{navigator.geolocation.getCurrentPosition(p=>{onPosition(p);resolve(S.myLocation) },()=>resolve(S.myLocation&&Date.now()-S.myLocation.at<45000?S.myLocation:null),{enableHighAccuracy:true,timeout:12000,maximumAge:0})})}
   async function sendMyRunnerPosition(slot){if(!S.gpsWanted)return;const pos=await getFresh();if(!pos||S.phase!=='playing')return;hostSend({t:'runner-location',slot,pos})}
   async function sendMyHunterPosition(slot){if(!S.gpsWanted)return;const pos=await getFresh();if(!pos||S.phase!=='playing')return;hostSend({t:'hunter-location',slot,pos})}
-  function onPosition(p){S.geoErrorShown=false;S.myLocation={lat:p.coords.latitude,lng:p.coords.longitude,accuracy:p.coords.accuracy,at:p.timestamp};if(S.approved&&Date.now()-S.lastGPSHeartbeat>12000){S.lastGPSHeartbeat=Date.now();hostSend({t:'gps-status',on:true})}S.gpsHeading=Number.isFinite(p.coords.heading)&&p.coords.speed>0.5?p.coords.heading:null;if(!S.map)initMap();if(S.ownMarker){S.ownMarker.setLatLng([S.myLocation.lat,S.myLocation.lng])}else if(S.map){S.ownMarker=L.marker([S.myLocation.lat,S.myLocation.lng],{icon:L.divIcon({html:'<div class="position-beacon"><span class="direction-arrow"></span><span class="position-center"></span></div>',className:'',iconSize:[32,32],iconAnchor:[16,16]}),zIndexOffset:1000}).addTo(S.map).bindTooltip('Mein GPS',{direction:'top'});if(!S.settings.center)S.map.setView([S.myLocation.lat,S.myLocation.lng],14)}
+  function onPosition(p){S.geoErrorShown=false;S.myLocation={lat:p.coords.latitude,lng:p.coords.longitude,accuracy:p.coords.accuracy,at:p.timestamp};if(S.approved&&Date.now()-p.timestamp<40000&&Date.now()-S.lastGPSHeartbeat>12000){S.lastGPSHeartbeat=Date.now();hostSend({t:'gps-status',on:true})}S.gpsHeading=Number.isFinite(p.coords.heading)&&p.coords.speed>0.5?p.coords.heading:null;if(!S.map)initMap();if(S.ownMarker){S.ownMarker.setLatLng([S.myLocation.lat,S.myLocation.lng])}else if(S.map){S.ownMarker=L.marker([S.myLocation.lat,S.myLocation.lng],{icon:L.divIcon({html:'<div class="position-beacon"><span class="direction-arrow"></span><span class="position-center"></span></div>',className:'',iconSize:[32,32],iconAnchor:[16,16]}),zIndexOffset:1000}).addTo(S.map).bindTooltip('Mein GPS',{direction:'top'});if(!S.settings.center)S.map.setView([S.myLocation.lat,S.myLocation.lng],14)}
     updateHeading();if(S.host&&S.phase==='lobby'&&!isAreaMode()&&!S.settings.center){S.settings.center={lat:S.myLocation.lat,lng:S.myLocation.lng};sync();checkStart();updateMapDecor();zoomToArea()}
     if(S.settings.center&&S.phase!=='ended'&&(!isAreaMode()||S.areaGeometry)&&!insidePlayArea(S.myLocation)&&(!S.lastOutsideNotify||Date.now()-S.lastOutsideNotify>60000)){S.lastOutsideNotify=Date.now();notify('Spielgebiet verlassen','Du befindest dich außerhalb des gewählten Spielgebiets.',true)}
     if(myRole()==='runner'&&!me()?.disqualified&&S.challengeOpen&&!S.challengeWinner&&!S.claimedEvent&&S.challengePoint&&S.phase==='playing'&&p.coords.accuracy<=90&&dist(S.challengePoint,S.myLocation)<=Math.max(55,p.coords.accuracy)){
@@ -981,7 +1000,7 @@ html[data-theme="dark"] .leaflet-tile-pane{filter:brightness(.7) saturate(.8)!im
       $('challengeHeadline').textContent=S.challengeWinner?'BONUS VERGEBEN':'BONUSZIEL AKTIV';$('challengeInfo').textContent=S.challengeWinner?(S.challengeWinner===S.myId?'Du hast zwei Tarn-Pings gewonnen.':'Ein Runner hat das Ziel erreicht und zwei Tarn-Pings gewonnen.'):(r==='runner'?'Erreiche den markierten Punkt zuerst. Genauigkeit und GPS entscheiden.':'Ein temporäres Bonusziel ist aktiv. Die Zielkoordinaten werden nur Runnern angezeigt.');
       $('challengeMeta').replaceChildren();const el=document.createElement('span');el.textContent=S.challengeWinner?'Tarnung: 2 Pings':`Noch ${fmt(S.challengeUntil-t)} · Zielkreis 55 m`;$('challengeMeta').append(el)
     }
-    if(S.scanVisibleUntil&&t>=S.scanVisibleUntil)clearHunterScan();refreshMarkerLabels();renderGPS();renderMockControl();
+    if(S.scanVisibleUntil&&t>=S.scanVisibleUntil)clearHunterScan();for(const [tag,item] of S.mockMarkers){if(now()>=item.until){clearTimeout(item.timer);S.map?.removeLayer(item.marker);S.mockMarkers.delete(tag)}}refreshMarkerLabels();renderGPS();renderMockControl();
   }
   function tick(){if(S.host)hostTick();if(['headstart','playing','ended'].includes(S.phase))renderGame()}
   function reset(){closeWheel();stopGPS();clearRemoteMarkers();try{S.conn?.close()}catch{}for(const c of S.clients.values())try{c.close()}catch{}for(const x of S.pending.values())try{x.conn.close()}catch{}try{S.peer?.destroy()}catch{}
@@ -1013,7 +1032,7 @@ html[data-theme="dark"] .leaflet-tile-pane{filter:brightness(.7) saturate(.8)!im
   document.addEventListener('visibilitychange',()=>{if(!document.hidden&&S.approved){S.map?.invalidateSize();if(S.phase==='playing'&&S.host)hostTick();notify('Willkommen zurück','Prüfe GPS-Verbindung und Timer. Hintergrundbetrieb ist nicht garantiert.')}});
   document.querySelectorAll('[data-react]').forEach(b=>b.addEventListener('click',()=>{if(!S.approved||!['headstart','playing'].includes(S.phase)||!['hunter','runner'].includes(myRole()))return;if(Date.now()-S.lastReactionAttempt<1100)return;S.lastReactionAttempt=Date.now();hostSend({t:'reaction',emoji:b.dataset.react})}));
   $('mockBtn').onclick=sendMockSound;
-  S.timer=setInterval(()=>{if(S.gpsWanted&&S.myLocation&&S.approved&&Date.now()-S.lastGPSHeartbeat>20000){S.lastGPSHeartbeat=Date.now();hostSend({t:'gps-status',on:true})}tick()},1000);
+  S.timer=setInterval(()=>{if(S.gpsWanted&&S.myLocation&&Date.now()-S.myLocation.at<40000&&S.approved&&Date.now()-S.lastGPSHeartbeat>20000){S.lastGPSHeartbeat=Date.now();hostSend({t:'gps-status',on:true})}tick()},1000);
   if(!window.isSecureContext)notify('Hinweis: HTTPS nötig','Für GPS auf Smartphones die Datei über eine HTTPS-Seite öffnen.');
 })();
 </script>
