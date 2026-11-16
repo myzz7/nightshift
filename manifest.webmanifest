@@ -1,0 +1,13 @@
+{
+  "id": "./",
+  "name": "NIGHTSHIFT – Das Outdoor-Teamspiel",
+  "short_name": "NIGHTSHIFT",
+  "description": "Das Outdoor-Teamspiel mit GPS-Pings und bestätigten Fängen.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#080a0f",
+  "theme_color": "#f5f5f7",
+  "lang": "de",
+  "orientation": "portrait"
+}
