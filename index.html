@@ -461,7 +461,7 @@ html[data-theme="dark"] .leaflet-tile-pane{filter:brightness(.7) saturate(.8)!im
   const sendTo=(id,obj)=>id===S.myId?receiveHostMessage(obj):safeSend(S.clients.get(id),obj);
   const sendAll=(obj,role=null)=>{for(const p of S.players){if(role&&p.role!==role)continue;if(p.disqualified&&['ping','hunter-scan','mock-signal','pulse-runner','pulse-hunter'].includes(obj.t))continue;sendTo(p.id,obj)}};
   const getSettingsPublic=()=>({...S.settings,center:S.settings.center?{...S.settings.center}:null,area:S.settings.area?{...S.settings.area}:null});
-  const snapshotFor=id=>({t:'snapshot',clock:Date.now(),code:S.roomCode,roomName:S.roomName,players:S.players.map(p=>({...p})),phase:S.phase,
+  const snapshotFor=id=>({t:'snapshot',clock:Date.now(),code:S.roomCode,roomName:S.roomName,players:S.players.map(p=>({...p,gpsReady:!!S.gpsStatus.get(p.id)?.on&&Date.now()-S.gpsStatus.get(p.id).at<GPS_STALE_MS})),phase:S.phase,
     settings:getSettingsPublic(),startAt:S.startAt,chaseAt:S.chaseAt,endAt:S.endAt,
     challengeOpen:S.challengeOpen,challengeUntil:S.challengeUntil,challengeWinner:S.challengeWinner,
     challengePoint:(id===S.myId||(S.challengeOpen&&roleOf(id)==='runner'))?S.challengePoint:null,
@@ -576,7 +576,7 @@ html[data-theme="dark"] .leaflet-tile-pane{filter:brightness(.7) saturate(.8)!im
 
   const validPoint=p=>{const loc=toLatLng(p);const accuracy=Number(p?.accuracy);const ts=Number(p?.at);return loc&&Number.isFinite(accuracy)&&accuracy>=0&&accuracy<=150&&Number.isFinite(ts)&&Math.abs(Date.now()-ts)<120000?{...loc,accuracy,at:ts}:null};
   function onHostData(conn,data){if(!S.host||!data||typeof data!=='object')return;const id=conn.peer;if(!S.players.some(p=>p.id===id))return;const role=roleOf(id),player=S.players.find(p=>p.id===id);
-    if(data.t==='gps-off'){S.gpsStatus.set(id,{on:false,at:Date.now(),offSince:Date.now()});if(S.phase==='lobby')checkStart();return;}
+    if(data.t==='gps-off'){/* Veralteter Nachrichtentyp: GPS-Aus muss über gps-status gemeldet werden. */return;}
     if(data.t==='gps-status'){
       const prev=S.gpsStatus.get(id),on=data.on===true;
       if(prev&&on&&Date.now()-prev.at<4000)return;
@@ -585,7 +585,7 @@ html[data-theme="dark"] .leaflet-tile-pane{filter:brightness(.7) saturate(.8)!im
         player.disqualified=true;
         sendAll({t:'event',heading:'Fairplay: GPS gestoppt',message:player.name+' ist für diese Runde ausgeschieden.'});sync();
       }
-      if(S.phase==='lobby')checkStart();
+      if(S.phase==='lobby'){checkStart();if(!prev||prev.on!==on)sync()}
       return;
     }
     if(data.t==='reaction'&&['headstart','playing'].includes(S.phase)&&REACTIONS.includes(data.emoji)&&['hunter','runner'].includes(role)){
@@ -779,7 +779,7 @@ html[data-theme="dark"] .leaflet-tile-pane{filter:brightness(.7) saturate(.8)!im
     renderAreaControls();$('radiusRange').value=S.settings.radiusKm;$('radiusValue').textContent=S.settings.radiusKm+' km';$('durationRange').value=S.settings.durationMin;$('durationValue').textContent=S.settings.durationMin+' min';$('leadRange').value=S.settings.headstartMin;$('leadValue').textContent=S.settings.headstartMin+' min';
     const role=myRole();$('myTeamPill').textContent=role==='hunter'?'● HUNTER':role==='runner'?'● RUNNER':'TEAM OFFEN';renderTeams();renderPending();checkStart();updateMapDecor();renderGame()}
   function renderTeams(){refreshWheelHostControl();const targets={hunter:$('hunterCards'),runner:$('runnerCards'),none:$('benchCards')};Object.values(targets).forEach(e=>e.replaceChildren());for(const p of S.players){const div=document.createElement('div');div.className='player-card';div.dataset.pid=p.id;
-      const avatar=document.createElement('span');avatar.className='avatar';avatar.textContent=p.name.slice(0,1).toUpperCase();const detail=document.createElement('span');detail.style.minWidth='0';const bold=document.createElement('strong');bold.textContent=p.name+(p.host?' ★':'');const small=document.createElement('small');small.textContent=p.id===S.myId?'Du':p.role==='none'?`Wunsch: ${p.preference==='runner'?'Runner':'Hunter'}`:'Spieler';detail.append(bold,small);div.append(avatar,detail);targets[p.role]?.append(div);
+      const avatar=document.createElement('span');avatar.className='avatar';avatar.textContent=p.name.slice(0,1).toUpperCase();const detail=document.createElement('span');detail.style.minWidth='0';const bold=document.createElement('strong');bold.textContent=p.name+(p.host?' ★':'');const small=document.createElement('small');small.textContent=(p.id===S.myId?'Du · ':p.role==='none'?`Wunsch: ${p.preference==='runner'?'Runner':'Hunter'} · `:'')+(p.disqualified?'ausgeschieden':p.gpsReady?'GPS bereit':'GPS fehlt');detail.append(bold,small);div.append(avatar,detail);targets[p.role]?.append(div);
       if(S.host&&S.phase==='lobby')div.addEventListener('pointerdown',ev=>beginDrag(ev,div,p.id));}
   }
   function beginDrag(ev,el,id){if(ev.button&&ev.button!==0)return;if(!S.host||S.phase!=='lobby')return;const x=ev.clientX,y=ev.clientY;let moved=false,ghost=null;const move=e=>{if(!moved&&Math.hypot(e.clientX-x,e.clientY-y)<9)return;if(!moved){moved=true;ghost=el.cloneNode(true);ghost.classList.add('drag-ghost');document.body.append(ghost);el.classList.add('drag-origin')}ghost.style.left=e.clientX+'px';ghost.style.top=e.clientY+'px';document.querySelectorAll('[data-team]').forEach(z=>z.classList.toggle('over',!!z.contains(document.elementFromPoint(e.clientX,e.clientY))))};
@@ -984,9 +984,9 @@ html[data-theme="dark"] .leaflet-tile-pane{filter:brightness(.7) saturate(.8)!im
   function startGPS(){if(S.gpsWanted){stopGPS();return}if(!$('privacyConsent').checked){notify('GPS-Freigabe fehlt','Bitte zur Startseite zurück und zustimmen.');return}
     if(!navigator.geolocation){notify('GPS nicht verfügbar','HTTPS und ein GPS-fähiges Smartphone sind erforderlich.');return}
     S.gpsWanted=true;try{S.gpsWatch=navigator.geolocation.watchPosition(onPosition,e=>{if(!S.geoErrorShown){S.geoErrorShown=true;notify('GPS-Fehler',e.code===1?'Standort wurde nicht freigegeben.':'Standort konnte nicht bestimmt werden.')}if(e.code===1)stopGPS()},{enableHighAccuracy:true,maximumAge:5000,timeout:20000});notify('GPS aktiviert','Dein Live-Punkt ist nur für dich sichtbar. Andere sehen ausschließlich die vorgesehenen Pings.');renderGPS()}catch(e){S.gpsWanted=false;notify('GPS nicht verfügbar',e.message||String(e))}}
-  function stopGPS(){S.compassEnabled=false;S.compassHeading=null;S.gpsHeading=null;window.removeEventListener('deviceorientation',onOrientation);window.removeEventListener('deviceorientationabsolute',onOrientation);$('enableCompass').textContent='➤ Richtung';if(S.gpsWanted&&S.approved)hostSend({t:'gps-status',on:false});S.gpsWanted=false;if(S.gpsWatch!==null){navigator.geolocation?.clearWatch(S.gpsWatch);S.gpsWatch=null}S.myLocation=null;if(S.ownMarker){S.map?.removeLayer(S.ownMarker);S.ownMarker=null}renderGPS()}
+  function stopGPS(){S.compassEnabled=false;S.compassHeading=null;S.gpsHeading=null;window.removeEventListener('deviceorientation',onOrientation);window.removeEventListener('deviceorientationabsolute',onOrientation);$('enableCompass').textContent='➤ Richtung';if(S.gpsWanted&&S.approved)hostSend({t:'gps-status',on:false});S.gpsWanted=false;S.lastGPSRefresh=0;if(S.gpsWatch!==null){navigator.geolocation?.clearWatch(S.gpsWatch);S.gpsWatch=null}S.myLocation=null;if(S.ownMarker){S.map?.removeLayer(S.ownMarker);S.ownMarker=null}renderGPS()}
   function renderGPS(){$('gpsBtnLobby').textContent=S.gpsWanted?'⊘ GPS-Freigabe stoppen':'◎ Eigenen Standort aktivieren';$('gpsBtnGame').textContent=S.gpsWanted?'⊘ GPS stoppen':'◎ GPS aktivieren';$('geoState').textContent=S.gpsWanted?(S.myLocation?'AN':'SUCHE'):'AUS';$('geoState').style.color=S.gpsWanted?'#9af2bb':'#ff9d89'}
-  function renderGame(){if(!['headstart','playing','ended'].includes(S.phase))return;const r=myRole();$('playRole').textContent=r==='hunter'?'● HUNTER':r==='runner'?'● RUNNER':'● ZUSCHAUER';$('playRole').className='role-pill '+r;
+  function renderGame(){if(!['headstart','playing','ended'].includes(S.phase))return;const r=myRole();$('playRole').textContent=me()?.disqualified?'● AUSGESCHIEDEN':r==='hunter'?'● HUNTER':r==='runner'?'● RUNNER':'● ZUSCHAUER';$('playRole').className='role-pill '+r;
     $('phaseTitle').textContent=S.phase==='headstart'?'VORSPRUNG':S.phase==='playing'?'DIE JAGD LÄUFT':'SPIELENDE';const t=now();const remaining=S.phase==='ended'?0:S.phase==='headstart'?S.chaseAt-t:S.endAt-t;$('timeLeft').textContent=fmt(remaining);$('timeCaption').textContent=S.phase==='headstart'?'BIS JAGDBEGINN':S.phase==='ended'?'ZEIT ABGELAUFEN':'SPIELZEIT ÜBRIG';
     $('progressLine').style.width=S.phase==='ended'?'100%':S.phase==='headstart'?'0%':Math.max(0,Math.min(100,(t-S.chaseAt)/(S.endAt-S.chaseAt)*100))+'%';
     if(S.phase==='headstart'){$('nextPing').textContent=fmt(S.chaseAt-t);$('nextScan').textContent=fmt(S.chaseAt+SCAN_MS-t)}else if(S.phase==='playing'){
@@ -994,6 +994,7 @@ html[data-theme="dark"] .leaflet-tile-pane{filter:brightness(.7) saturate(.8)!im
       $('nextPing').textContent=fmt(S.chaseAt+pi*PING_MS-t);$('nextScan').textContent=fmt(S.chaseAt+si*SCAN_MS-t)
     }else{$('nextPing').textContent='–';$('nextScan').textContent='–'}
     $('roleHelp').textContent=r==='hunter'?'Runner-Punkte alle 5 Minuten. Antippen zoomt zum letzten Ping; im Popup privat benennen.':r==='runner'?'GPS-Pings alle 5 Minuten; Mock-Sound verrät deinen Ort freiwillig für 3 Sekunden.':'Du erhältst keine fremden GPS-Signale.';
+    if(me()?.disqualified)$('roleHelp').textContent='Du bist wegen einer fehlenden GPS-Meldung für diese Runde ausgeschieden.';
     const state=S.phase==='ended'?'Spiel beendet. Keine weiteren Standort-Pings.':S.phase==='headstart'?'Vorsprung läuft. Bis Jagdbeginn werden keine Runner-Pings verteilt.':r==='runner'?`Hunter-Radar alle 12 Minuten. ${S.scanVisibleUntil>t?'Aktive Radarzeit: '+fmt(S.scanVisibleUntil-t):'Nächstes Signal im Countdown oben.'}`:'Nur zeitversetzte Runner-Punkte. Keine Namen oder Live-Verfolgung.';
     $('gameInfo').textContent=state;
     const showEvent=S.challengeOpen||!!S.challengeWinner;$('challengeBanner').classList.toggle('hidden',!showEvent);if(showEvent){
@@ -1032,7 +1033,7 @@ html[data-theme="dark"] .leaflet-tile-pane{filter:brightness(.7) saturate(.8)!im
   document.addEventListener('visibilitychange',()=>{if(!document.hidden&&S.approved){S.map?.invalidateSize();if(S.phase==='playing'&&S.host)hostTick();notify('Willkommen zurück','Prüfe GPS-Verbindung und Timer. Hintergrundbetrieb ist nicht garantiert.')}});
   document.querySelectorAll('[data-react]').forEach(b=>b.addEventListener('click',()=>{if(!S.approved||!['headstart','playing'].includes(S.phase)||!['hunter','runner'].includes(myRole()))return;if(Date.now()-S.lastReactionAttempt<1100)return;S.lastReactionAttempt=Date.now();hostSend({t:'reaction',emoji:b.dataset.react})}));
   $('mockBtn').onclick=sendMockSound;
-  S.timer=setInterval(()=>{if(S.gpsWanted&&S.myLocation&&Date.now()-S.myLocation.at<40000&&S.approved&&Date.now()-S.lastGPSHeartbeat>20000){S.lastGPSHeartbeat=Date.now();hostSend({t:'gps-status',on:true})}tick()},1000);
+  S.timer=setInterval(()=>{if(S.gpsWanted&&S.approved&&!document.hidden&&Date.now()-(S.lastGPSRefresh||0)>35000&&(!S.myLocation||Date.now()-S.myLocation.at>30000)){S.lastGPSRefresh=Date.now();getFresh()}if(S.gpsWanted&&S.myLocation&&Date.now()-S.myLocation.at<40000&&S.approved&&Date.now()-S.lastGPSHeartbeat>20000){S.lastGPSHeartbeat=Date.now();hostSend({t:'gps-status',on:true})}tick()},1000);
   if(!window.isSecureContext)notify('Hinweis: HTTPS nötig','Für GPS auf Smartphones die Datei über eine HTTPS-Seite öffnen.');
 })();
 </script>
