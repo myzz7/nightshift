@@ -9,6 +9,7 @@
   <meta name="description" content="NIGHTSHIFT — ein kostenloses, standortbasiertes Teamspiel mit Peer-to-Peer-Verbindungen.">
   <title>NIGHTSHIFT — Das Outdoor-Teamspiel</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@6.3.0/dist/maplibre-gl.css">
   <script src="https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js"></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
@@ -307,6 +308,23 @@ html[data-theme="dark"] .leaflet-tile-pane{filter:brightness(.7) saturate(.8)!im
 .mock-panel button{flex:1}
 .mock-note{display:block;color:var(--muted);font-size:11px;line-height:1.45;margin-top:8px}
 @media(prefers-reduced-motion:reduce){.reaction-bubble{animation:emojiFloatReduced 1.3s linear forwards}@keyframes emojiFloatReduced{from{opacity:1}to{opacity:0}}}
+
+
+/* NIGHTSHIFT Map 2.0: Apple-inspirierter Vektor-Kartenstil mit OSM-Notfallkarte. */
+/* Alte Farbfilter nicht auf die Vektorkarte anwenden: sie verfälschen Farben und Beschriftungen. */
+.leaflet-tile-pane,html[data-theme="dark"] .leaflet-tile-pane{filter:none!important}
+.mapwrap{background:#e9eef3;border:1px solid #dce4eb;border-radius:22px}
+.map{background:#e9eef3}
+.map-badge{background:rgba(255,255,255,.94)!important;color:#273448!important;border-color:rgba(71,85,105,.1)!important;box-shadow:0 2px 16px #25394d1c;max-width:calc(100% - 150px);font-size:11px;letter-spacing:.015em;min-height:40px;display:flex;align-items:center}
+.map-style-toggle{position:absolute;right:12px;top:12px;z-index:480;display:flex;align-items:center;justify-content:center;gap:6px;min-height:40px;max-width:142px;padding:9px 11px;border:1px solid rgba(57,77,102,.12);border-radius:999px;background:rgba(255,255,255,.96);color:#273448;font-size:11px;font-weight:800;line-height:1.15;box-shadow:0 3px 16px #26384e20;cursor:pointer;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.map-style-toggle:active{transform:scale(.97)}
+.map-style-toggle:focus-visible{outline:3px solid #007aff;outline-offset:2px}
+.leaflet-control-attribution,html[data-theme="dark"] .leaflet-control-attribution{background:rgba(255,255,255,.92)!important;color:#415269!important;font-size:10px!important;padding:3px 6px!important;line-height:1.3!important}
+.leaflet-control-attribution a,html[data-theme="dark"] .leaflet-control-attribution a{color:#176ac5!important}
+.leaflet-control-zoom a,html[data-theme="dark"] .leaflet-control-zoom a{background:#fff!important;color:#243449!important;border-color:#e6ebf0!important}
+.leaflet-control-zoom{margin-bottom:25px!important}
+/* Lesbar auf Mobilgeräten, auch bei schmalem Bildschirm. */
+@media(max-width:380px){.map-badge{max-width:calc(100% - 147px);padding:8px 11px}.map-style-toggle{right:9px;padding:8px 9px;font-size:10px}}
 
   </style>
 </head>
@@ -751,10 +769,92 @@ html[data-theme="dark"] .leaflet-tile-pane{filter:brightness(.7) saturate(.8)!im
       S.compassEnabled=true;$('enableCompass').textContent='➤ Kompass an';notify('Kompass eingeschaltet','Der Pfeil zeigt die Ausrichtung deines Geräts.');
     }catch(e){notify('Kompass nicht verfügbar',e.message||String(e))}
   }
+  // Kartenquellen: kein API-Key nötig. Die OSM-Standardkarte bleibt bei Problemen sichtbar.
+  // Positron von OpenFreeMap ist der bevorzugte Apple-Karten-inspirierte Vektorstil.
+  const MAP_STYLE_URL='https://tiles.openfreemap.org/styles/positron';
+  let mapOsmLayer=null,mapVectorLayer=null,mapVectorPane=null,mapVectorReady=false;
+  let mapVectorUnavailable=false,mapVectorLoading=null;
+  let preferModernMap=true;
+  try{preferModernMap=localStorage.getItem('nightshift-map-style')!=='street'}catch(e){}
+  function updateMapStyleButton(){
+    const b=$('mapStyleToggle');if(!b)return;
+    const modern=preferModernMap&&mapVectorReady;
+    b.textContent=modern?'▧ Helle Karte':preferModernMap&&!mapVectorUnavailable?'▧ Helle Karte lädt':'▧ Straßenkarte';
+    b.title=preferModernMap?'Zur klassischen Straßenkarte wechseln':'Zum hellen Kartenstil wechseln';
+    b.setAttribute('aria-label',b.title);
+    b.setAttribute('aria-pressed',modern?'true':'false');
+  }
+  function displayOsmMap(){
+    if(!S.map)return;
+    if(mapVectorLayer&&S.map.hasLayer(mapVectorLayer))S.map.removeLayer(mapVectorLayer);
+    if(mapVectorPane)mapVectorPane.style.opacity='0';
+    if(mapOsmLayer&&!S.map.hasLayer(mapOsmLayer))mapOsmLayer.addTo(S.map);
+  }
+  function displayModernMap(){
+    if(!S.map||!mapVectorLayer||!mapVectorReady)return false;
+    if(!S.map.hasLayer(mapVectorLayer))mapVectorLayer.addTo(S.map);
+    if(mapVectorPane)mapVectorPane.style.opacity='1';
+    if(mapOsmLayer&&S.map.hasLayer(mapOsmLayer))S.map.removeLayer(mapOsmLayer);
+    return true;
+  }
+  async function loadModernMap(){
+    if(mapVectorLoading||mapVectorReady||mapVectorUnavailable||!preferModernMap||!S.map)return;
+    mapVectorLoading=(async()=>{
+      try{
+        // Liefert die bestehende Leaflet-Karte weiterhin unverändert an GPS und Spiellogik.
+        // MapLibre rendert lediglich die optisch modernere Karte im Hintergrund.
+        const maplibregl=await import('https://cdn.jsdelivr.net/npm/maplibre-gl@6.3.0/dist/maplibre-gl.mjs');
+        window.maplibregl=maplibregl;
+        await import('https://cdn.jsdelivr.net/npm/@maplibre/maplibre-gl-leaflet@0.1.4/leaflet-maplibre-gl.js');
+        if(!L.maplibreGL)throw Error('MapLibre-Kartenadapter nicht geladen');
+        if(!S.map||!preferModernMap)return;
+        mapVectorPane=S.map.createPane('nightshiftVectorPane');
+        mapVectorPane.style.zIndex='210';
+        mapVectorPane.style.opacity='0';
+        mapVectorPane.style.pointerEvents='none';
+        mapVectorLayer=L.maplibreGL({
+          pane:'nightshiftVectorPane',style:MAP_STYLE_URL,
+          attribution:'&copy; <a href="https://openfreemap.org/">OpenFreeMap</a> · &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        }).addTo(S.map);
+        const glMap=mapVectorLayer.getMaplibreMap();
+        if(!glMap)throw Error('Moderne Kartenansicht nicht initialisiert');
+        await new Promise((resolve,reject)=>{
+          if(glMap.loaded()){resolve();return}
+          const deadline=setTimeout(()=>{glMap.off('load',ready);reject(Error('Kartenstil konnte nicht geladen werden'))},14000);
+          function ready(){clearTimeout(deadline);resolve()}
+          glMap.once('load',ready);
+        });
+        mapVectorReady=true;
+        if(preferModernMap)displayModernMap();else displayOsmMap();
+      }catch(e){
+        // Kein blockierender Fehler: bereits geladene Standardkarte bleibt nutzbar.
+        mapVectorUnavailable=true;mapVectorReady=false;
+        if(mapVectorLayer&&S.map?.hasLayer(mapVectorLayer))S.map.removeLayer(mapVectorLayer);
+        mapVectorLayer=null;
+        displayOsmMap();
+        if(preferModernMap){preferModernMap=false;notify('Karte verfügbar','Der helle Kartenstil lädt nicht. Die Straßenkarte funktioniert weiter.');}
+        console.warn('NIGHTSHIFT: Vektorkarte nicht verfügbar; OSM-Fallback aktiv.',e);
+      }finally{updateMapStyleButton()}
+    })();
+    try{await mapVectorLoading}finally{mapVectorLoading=null}
+  }
+  function toggleMapStyle(){
+    preferModernMap=!preferModernMap;
+    try{localStorage.setItem('nightshift-map-style',preferModernMap?'modern':'street')}catch(e){}
+    if(preferModernMap){mapVectorUnavailable=false;if(!displayModernMap()){displayOsmMap();void loadModernMap()}}
+    else displayOsmMap();
+    updateMapStyleButton();
+  }
   function initMap(){if(S.map)return;if(!window.L){notify('Karte nicht geladen','Bitte Internetverbindung prüfen und neu laden.');return}
-    S.map=L.map('map',{zoomControl:false,preferCanvas:true}).setView([50.75,9.1],6);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{subdomains:'abcd',maxZoom:20,maxNativeZoom:19,minZoom:3,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap-Mitwirkende</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',updateWhenIdle:true,keepBuffer:2}).addTo(S.map);
+    S.map=L.map('map',{zoomControl:false,preferCanvas:true,minZoom:3,maxZoom:20}).setView([50.75,9.1],6);
+    mapOsmLayer=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{
+      maxZoom:20,maxNativeZoom:19,minZoom:3,
+      attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap-Mitwirkende</a>',
+      updateWhenIdle:true,keepBuffer:2
+    }).addTo(S.map);
     L.control.zoom({position:'bottomright'}).addTo(S.map);
+    updateMapStyleButton();
+    if(preferModernMap)void loadModernMap();
     S.map.on('click',e=>{if(!S.host||S.phase!=='lobby'||!S.pickMode)return;const pos={lat:e.latlng.lat,lng:e.latlng.lng};if(S.pickMode==='center'){if(isAreaMode())return;S.settings.center=pos;if(S.challengePoint&&!insidePlayArea(S.challengePoint)){S.challengePoint=null;notify('Bonuspunkt zurückgesetzt','Bitte Bonuspunkt innerhalb des neuen Spielgebiets neu setzen.')}}
       if(S.pickMode==='challenge'){if(!S.settings.center){notify('Erst den Startpunkt festlegen');return}if(!insidePlayArea(pos)){notify('Außerhalb des Spielgebiets','Setze den Bonuspunkt innerhalb der gewählten Grenze.');return}S.challengePoint=pos;notify('Bonuspunkt gesetzt','Nur öffentliche und gefahrlos erreichbare Orte verwenden.')}
       S.pickMode='';updateMapDecor();sync();checkStart()})
@@ -1008,8 +1108,9 @@ html[data-theme="dark"] .leaflet-tile-pane{filter:brightness(.7) saturate(.8)!im
     S.peer=null;S.conn=null;S.clients.clear();S.pending.clear();S.host=false;S.approved=false;S.myId='';S.players=[];S.phase='lobby';S.clockOffset=0;S.roomName='';S.gpsStatus.clear();S.reactionRate.clear();S.mockRate.clear();S.mockCount.clear();S.lastGPSHeartbeat=0;S.localMockRemaining=3;S.localMockNext=0;S.roomCode='';S.challengePoint=null;S.challengeOpen=false;S.challengeWinner=null;S.challengeTriggered=false;S.scanVisibleUntil=0;S.pickMode='';S.settings={radiusKm:10,durationMin:60,headstartMin:5,center:null,mode:'radius',area:null};S.areaTab='radius';clearAreaBoundary();S.startAt=0;S.chaseAt=0;S.endAt=0;S.anonTokens.clear();S.hunterTokens.clear();S.lastRunnerById.clear();S.lastHunterById.clear();S.camo.clear();S.runnerMarkers.clear();S.aliases={};connection('OFFLINE');updateMapDecor();setScreen('homeScreen')}
   function confirmExit(){ask('Spiel verlassen?','Deine Verbindung wird geschlossen und die GPS-Freigabe gestoppt.',[{label:'Verlassen',kind:'danger',fn:reset},{label:'Bleiben',kind:'primary'}])}
   // Main layout: one Leaflet map is moved between lobby and game to preserve layers.
-  const wrap=document.createElement('div');wrap.className='mapwrap';wrap.id='mapWrap';wrap.innerHTML='<div id="map" class="map"></div><div class="map-badge" id="mapStatus">SPIELGEBIET</div><div class="map-hint" id="mapHint"></div>';
+  const wrap=document.createElement('div');wrap.className='mapwrap';wrap.id='mapWrap';wrap.innerHTML='<div id="map" class="map"></div><div class="map-badge" id="mapStatus">SPIELGEBIET</div><button type="button" id="mapStyleToggle" class="map-style-toggle" aria-label="Kartenstil wechseln" title="Kartenstil wechseln">▧ Helle Karte</button><div class="map-hint" id="mapHint"></div>';
   $('mapDock').append(wrap);
+  $('mapStyleToggle').onclick=toggleMapStyle;
   $('createBtn').onclick=createRoom;$('joinBtn').onclick=joinRoom;$('privacyConsent').onchange=()=>{if(!$('privacyConsent').checked)stopGPS()};
   $('prefHunter').onclick=()=>{S.preferredRole='hunter';$('prefHunter').classList.add('selected');$('prefRunner').classList.remove('selected')};
   $('prefRunner').onclick=()=>{S.preferredRole='runner';$('prefRunner').classList.add('selected');$('prefHunter').classList.remove('selected')};
