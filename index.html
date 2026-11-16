@@ -1337,6 +1337,8 @@ html[data-theme="dark"] .leaflet-tile-pane{filter:brightness(.7) saturate(.8)!im
   $('vehicleBtn').onclick=toggleVehicle;
   $('systemNotifyBtn').onclick=enableSystemAlerts;
   $('announcementDismiss').onclick=closeAnnouncement;
+  // iOS: AudioContext bei einer echten Nutzerberührung freischalten, damit spätere Ereignistöne hörbar sein können.
+  document.addEventListener('pointerdown',()=>{if(!S.soundEnabled)return;try{if(!S.audio)S.audio=new(window.AudioContext||window.webkitAudioContext)();if(S.audio.state==='suspended')S.audio.resume()}catch(e){}},{once:true});
   $('mockBtn').onclick=sendMockSound;
   S.timer=setInterval(()=>{if(S.gpsWanted&&S.approved&&!document.hidden&&Date.now()-(S.lastGPSRefresh||0)>35000&&(!S.myLocation||Date.now()-S.myLocation.at>30000)){S.lastGPSRefresh=Date.now();getFresh()}if(S.gpsWanted&&S.myLocation&&Date.now()-S.myLocation.at<40000&&S.approved&&Date.now()-S.lastGPSHeartbeat>20000){S.lastGPSHeartbeat=Date.now();hostSend({t:'gps-status',on:true})}tick()},1000);
   if(!window.isSecureContext)notify('Hinweis: HTTPS nötig','Für GPS auf Smartphones die Datei über eine HTTPS-Seite öffnen.');
