@@ -515,8 +515,6 @@ body{background:var(--bg)}
     <div class="game-headline"><div><span id="playRole" class="role-pill">TEAM</span><h2 id="phaseTitle">VORSPRUNG</h2><div class="sub" id="gameName">NIGHTSHIFT</div></div><div><div class="big-timer" id="timeLeft">60:00</div><div class="timer-sub" id="timeCaption">VERBLEIBEND</div></div></div>
     <div class="timeline"><div id="progressLine"></div></div>
     <div class="stats"><div class="stat"><b id="nextPing">05:00</b><small>NÄCHSTER RUNNER-PING</small></div><div class="stat"><b id="nextScan">12:00</b><small>NÄCHSTER HUNTER-SCAN</small></div><div class="stat"><b id="geoState">AUS</b><small>MEIN GPS</small></div></div>
-    <div id="gameMapDock"></div>
-    <div id="outStatus" class="event-box hidden" role="status"><span class="event-spark">RUNDE BEENDET</span><h3>Du bist ausgeschieden</h3><p id="outReason">Du kannst die Runde weiter verfolgen, aber nicht mehr mitspielen.</p></div>
     <div class="catch-panel hidden" id="capturePanel">
       <div class="panel-title">Runner gefangen?</div>
       <div class="sub">Wähle den Runner, den du persönlich erreicht hast. Er muss den Fang selbst bestätigen. Kein Festhalten oder körperlicher Kontakt.</div>
@@ -524,6 +522,8 @@ body{background:var(--bg)}
       <button class="btn orange block" type="button" id="captureBtn">Fangbestätigung anfragen</button>
       <div id="captureHint" class="micro mt"></div>
     </div>
+    <div id="gameMapDock"></div>
+    <div id="outStatus" class="event-box hidden" role="status"><span class="event-spark">RUNDE BEENDET</span><h3>Du bist ausgeschieden</h3><p id="outReason">Du kannst die Runde weiter verfolgen, aber nicht mehr mitspielen.</p></div>
     <div class="catch-panel hidden" id="vehiclePanel">
       <div class="panel-title">Fahrzeugregel · 10 Minuten gesamt</div>
       <div class="vehicle-clock" id="vehicleClock">10:00</div>
@@ -682,7 +682,7 @@ body{background:var(--bg)}
   function renderCatchAndVehicle(){
     const live=S.phase==='playing'||S.phase==='headstart',playing=S.phase==='playing';
     const active=live&&!me()?.disqualified&&['hunter','runner'].includes(myRole());
-    $('capturePanel').classList.toggle('hidden',!active||!playing||myRole()!=='hunter');
+    $('capturePanel').classList.toggle('hidden',!active||myRole()!=='hunter');
     const runners=S.players.filter(p=>p.role==='runner'&&!p.disqualified);
     const listKey=runners.map(p=>p.id+'|'+p.name).join(';');
     if(listKey!==S.captureSelectKey){
@@ -690,8 +690,8 @@ body{background:var(--bg)}
       for(const p of runners){const o=document.createElement('option');o.value=p.id;o.textContent=p.name;select.append(o)}
       if(runners.some(p=>p.id===before))select.value=before;S.captureSelectKey=listKey;
     }
-    $('captureBtn').disabled=!runners.length;
-    $('captureHint').textContent=runners.length?'Ein Fang zählt erst nach Bestätigung auf dem Handy des Runners.':'Keine aktiven Runner übrig.';
+    $('captureBtn').disabled=!playing||!runners.length;
+    $('captureHint').textContent=!playing?'Fangbestätigung ist ab Beginn der Jagd verfügbar.':runners.length?'Ein Fang zählt erst nach Bestätigung auf dem Handy des Runners.':'Keine aktiven Runner übrig.';
     $('vehiclePanel').classList.toggle('hidden',!active||myRole()!=='runner');
     const p=me(),used=(Number(p?.vehicleUsedMs)||0)+(p?.vehicleSince?Math.max(0,now()-p.vehicleSince):0),remain=Math.max(0,VEHICLE_LIMIT_MS-used);
     $('vehicleClock').textContent=fmt(remain);
