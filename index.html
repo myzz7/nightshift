@@ -613,7 +613,25 @@ body{background:var(--bg)}
     <input id="fxVolume" class="fx-volume" type="range" min="0" max="100" value="65" step="5">
     <div class="label">Effekte testen</div>
     <div class="fx-tests"><button type="button" class="btn" data-fx-test="start">Start</button><button type="button" class="btn" data-fx-test="radar">Radar</button><button type="button" class="btn" data-fx-test="ping">Ping</button><button type="button" class="btn" data-fx-test="bonus">Bonus</button><button type="button" class="btn" data-fx-test="capture">Fang</button><button type="button" class="btn" data-fx-test="end">Ende</button></div>
-    <button type="button" class="btn block" id="fxVoiceTest">Sprachansage testen</button>
+    <label class="label" for="fxVoiceChoice">Eingesprochene Ansage auswählen</label>
+    <select id="fxVoiceChoice" class="field">
+      <option value="preview">01 · Intro</option>
+      <option value="headstart">02 · Runner-Vorsprung</option>
+      <option value="start">03–04 · Jagdbeginn & Hunter-Freigabe</option>
+      <option value="hunter-release">04 · Hunter-Freigabe</option>
+      <option value="ping">05 · GPS-Ping</option>
+      <option value="radar">06 · Hunter-Radar</option>
+      <option value="bonus">07 · Halbzeit</option>
+      <option value="reward">08 · Bonus gesichert</option>
+      <option value="stealth">09 · Tarnung</option>
+      <option value="capture">10 · Fang bestätigt</option>
+      <option value="warning">11 · Warnung</option>
+      <option value="end">12 · Spielende</option>
+      <option value="countdown">13 · Countdown</option>
+      <option value="join">14 · Neuer Spieler</option>
+      <option value="wheel-win">15 · Zufallsauswahl</option>
+    </select>
+    <button type="button" class="btn block" id="fxVoiceTest">Ausgewählte Ansage abspielen</button>
     <p class="fine" style="margin-top:13px">Der erste Ton benötigt eine Berührung des Bildschirms. Das Gerät muss hörbar eingestellt sein. Manche Browser unterdrücken Sprachausgabe im Hintergrund.</p>
   </div>
 </div>
@@ -796,9 +814,32 @@ body{background:var(--bg)}
     capture:'Fang bestätigt. Verfügbare Standorte werden zehn Sekunden sichtbar.',
     end:'Zeit abgelaufen. NIGHTSHIFT ist beendet.',
     warning:'Achtung. Prüfe deine Position und die Spielregeln.',
-    preview:'NIGHTSHIFT. Verbindung steht. Deine Mission beginnt.'
+    preview:'NIGHTSHIFT. Verbindung steht. Deine Mission beginnt.',
+    countdown:'Fünf. Vier. Drei. Zwei. Eins.',
+    join:'Ein neuer Spieler ist verbunden.',
+    'wheel-win':'Zufallsauswahl abgeschlossen.',
+    'hunter-release':'Hunter, ihr seid jetzt freigegeben.'
   };
-  const FX={volume:.65,voice:true,visual:true,last:new Map(),voiceFiles:new Map(),lastWheelTick:0,visualTimer:0,scanTimer:0,countdown:'',lastVoice:'',voiceObject:null};
+  // Alle Ansagen sind als getrennte lokale MP3-Dateien im Repository hinterlegt.
+  const VOICE_FILES=Object.freeze({
+    preview:['01_intro.mp3'],
+    headstart:['02_runner_vorsprung.mp3'],
+    start:['03_jagd_beginnt.mp3','04_hunter_freigabe.mp3'],
+    'hunter-release':['04_hunter_freigabe.mp3'],
+    ping:['05_gps_signal.mp3'],
+    radar:['06_hunter_radar.mp3'],
+    bonus:['07_halbzeit.mp3'],
+    reward:['08_bonus_gesichert.mp3'],
+    stealth:['09_tarnung.mp3'],
+    capture:['10_fang_bestaetigt.mp3'],
+    warning:['11_achtung_regeln.mp3'],
+    end:['12_spielende.mp3'],
+    countdown:['13_countdown_5_bis_1.mp3'],
+    join:['14_spieler_verbunden.mp3'],
+    'wheel-win':['15_zufallsauswahl.mp3']
+  });
+  const VOICE_BASE='./audio/voices/';
+  const FX={volume:.65,voice:true,visual:true,last:new Map(),voiceFiles:new Map(),lastWheelTick:0,visualTimer:0,scanTimer:0,countdown:'',lastVoice:'',voiceObject:null,voiceToken:0,voicePrimed:false};
   try{const p=JSON.parse(localStorage.getItem(FX_SETTINGS_KEY)||'{}');
     if(typeof p.sound==='boolean')S.soundEnabled=p.sound;
     if(typeof p.voice==='boolean')FX.voice=p.voice;
@@ -875,13 +916,47 @@ body{background:var(--bg)}
   }
   function voiceCue(kind,force=false){
     if(!S.soundEnabled||FX.volume===0||document.hidden||(!FX.voice&&!force)||!FX_CUES[kind])return;
-    const phrase=FX_CUES[kind];
-    // An eingesprochener Fang liegt bereits in der Ausgangsdatei vor.
-    if(kind==='capture'&&!force){
-      const v=$('captureVoice');if(v){try{v.pause();v.currentTime=0;v.volume=FX.volume;v.play().catch(()=>synthVoice(phrase))}catch(e){synthVoice(phrase)}return}
+    const list=VOICE_FILES[kind],phrase=FX_CUES[kind];
+    if(!list?.length){synthVoice(phrase);return}
+    let player=FX.voiceObject;
+    if(!player){
+      player=new Audio();player.preload='auto';player.playsInline=true;FX.voiceObject=player;
     }
-    synthVoice(phrase);
+    const token=++FX.voiceToken;
+    try{window.speechSynthesis?.cancel()}catch(e){}
+    try{player.pause();player.onended=null;player.onerror=null;player.muted=false}catch(e){}
+    let index=0;
+    const fallback=()=>{if(FX.voiceToken!==token)return;player.onerror=null;player.onended=null;synthVoice(phrase)};
+    const next=()=>{
+      if(FX.voiceToken!==token)return;
+      if(index>=list.length){player.onended=null;player.onerror=null;return}
+      const file=list[index++];
+      player.onerror=fallback;
+      player.onended=next;
+      player.src=VOICE_BASE+file;
+      player.volume=FX.volume;
+      let play;
+      try{play=player.play()}catch(e){fallback();return}
+      if(play?.catch)play.catch(fallback);
+    };
+    next();
   }
+  // Startet auf Mobilgeräten vorsichtig mit der ersten echten Berührung.
+  // Falls der Browser spätere Autoplay-Versuche blockiert, bleibt die vorhandene Gerätestimme als Ersatz.
+  document.addEventListener('pointerdown',()=>{
+    if(FX.voicePrimed||!S.soundEnabled||!FX.voice)return;
+    FX.voicePrimed=true;
+    try{
+      const player=FX.voiceObject||(FX.voiceObject=new Audio());
+      player.preload='auto';player.playsInline=true;player.src=VOICE_BASE+VOICE_FILES.preview[0];player.muted=true;
+      const promise=player.play();
+      if(promise?.then)promise.then(()=>{
+        if(FX.voiceToken===0){player.pause();player.currentTime=0}
+        player.muted=false;
+      }).catch(()=>{player.muted=false});
+      else player.muted=false;
+    }catch(e){}
+  },{once:true});
   function synthVoice(text){
     try{
       if(!('speechSynthesis' in window))return;
@@ -891,7 +966,12 @@ body{background:var(--bg)}
       window.speechSynthesis.speak(ut);
     }catch(e){}
   }
-  function stopVoices(){try{window.speechSynthesis?.cancel()}catch(e){}try{$('captureVoice')?.pause()}catch(e){}}
+  function stopVoices(){
+    FX.voiceToken++;
+    try{window.speechSynthesis?.cancel()}catch(e){}
+    try{const p=FX.voiceObject;if(p){p.pause();p.onended=null;p.onerror=null;p.currentTime=0}}catch(e){}
+    try{$('captureVoice')?.pause()}catch(e){}
+  }
   function cue(kind,{voice=false,visual=false,force=false}={}){
     const t=Date.now(),last=FX.last.get(kind)||0;
     // Reduce duplicate host/client notifications and bursty network signals.
@@ -929,7 +1009,7 @@ body{background:var(--bg)}
     if(sec<1||sec>5)return;
     const key=S.phase+':'+dest+':'+sec;
     if(FX.countdown===key)return;
-    FX.countdown=key;cue('countdown',{force:true});
+    FX.countdown=key;cue('countdown',{force:true});if(sec===5)voiceCue('countdown');
     const t=$('timeLeft');const h=t?.closest('.game-headline');
     if(FX.visual&&h&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
       h.classList.remove('fx-countdown');void h.offsetWidth;h.classList.add('fx-countdown');
@@ -954,9 +1034,9 @@ body{background:var(--bg)}
   $('fxSoundOn').addEventListener('change',e=>{S.soundEnabled=e.target.checked;if(!S.soundEnabled)stopVoices();saveFxPrefs();syncFxControls();if(S.soundEnabled)cue('join',{force:true})});
   $('fxVoiceOn').addEventListener('change',e=>{FX.voice=e.target.checked;if(!FX.voice)stopVoices();saveFxPrefs();syncFxControls()});
   $('fxVisualOn').addEventListener('change',e=>{FX.visual=e.target.checked;if(!FX.visual)$('fxSignalLayer').classList.remove('active');saveFxPrefs();syncFxControls()});
-  $('fxVolume').addEventListener('input',e=>{FX.volume=Number(e.target.value)/100;saveFxPrefs();syncFxControls()});
+  $('fxVolume').addEventListener('input',e=>{FX.volume=Number(e.target.value)/100;if(FX.voiceObject)FX.voiceObject.volume=FX.volume;saveFxPrefs();syncFxControls()});
   document.querySelectorAll('[data-fx-test]').forEach(btn=>btn.addEventListener('click',()=>cue(btn.dataset.fxTest,{visual:true,force:true})));
-  $('fxVoiceTest').addEventListener('click',()=>voiceCue('preview',true));
+  $('fxVoiceTest').addEventListener('click',()=>voiceCue($('fxVoiceChoice').value,true));
   syncFxControls();
 
   const ask=(title,description,actions,extra=null)=>{$('modalTitle').textContent=title;$('modalDescription').textContent=description;$('modalCustom').replaceChildren();if(extra)$('modalCustom').append(extra);$('modalButtons').replaceChildren();for(const a of actions){const b=document.createElement('button');b.className='btn '+(a.kind||'');b.textContent=a.label;b.onclick=()=>{if(!a.keep)closeModal();a.fn?.()};$('modalButtons').append(b)}$('modal').classList.add('open')};
@@ -999,11 +1079,11 @@ body{background:var(--bg)}
     c.on('close',()=>{clearTimeout(timer);S.pending.delete(c.peer);if(S.clients.get(c.peer)===c){/* Historische Pings bleiben sichtbare Momentaufnahmen; GPS-Aus stoppt nur neue Daten. */S.clients.delete(c.peer);S.gpsStatus.delete(c.peer);if(['headstart','playing'].includes(S.phase)){eliminatePlayer(c.peer,'Verbindung zum Host getrennt.')}else{S.players=S.players.filter(p=>p.id!==c.peer);sync()}renderTeams();checkStart();notify('Spieler getrennt','Eine Verbindung wurde geschlossen.') }renderPending()});
     c.on('error',()=>{S.pending.delete(c.peer);renderPending()});
   }
-  function approve(id,ok){const item=S.pending.get(id);if(!item)return;S.pending.delete(id);if(ok){S.clients.set(id,item.conn);S.players.push({id,name:item.name,role:'none',preference:item.preference,host:false});safeSend(item.conn,{t:'approved'});sync();notify('Spieler aufgenommen',item.name)}else{safeSend(item.conn,{t:'denied',reason:'Der Host hat die Anfrage abgelehnt.'});setTimeout(()=>item.conn.close(),180)}renderPending();renderTeams();checkStart()}
+  function approve(id,ok){const item=S.pending.get(id);if(!item)return;S.pending.delete(id);if(ok){S.clients.set(id,item.conn);S.players.push({id,name:item.name,role:'none',preference:item.preference,host:false});safeSend(item.conn,{t:'approved'});sync();notify('Spieler aufgenommen',item.name);cue('join',{voice:true})}else{safeSend(item.conn,{t:'denied',reason:'Der Host hat die Anfrage abgelehnt.'});setTimeout(()=>item.conn.close(),180)}renderPending();renderTeams();checkStart()}
   function receiveHostMessage(data){if(!data||typeof data!=='object'||!['snapshot','waiting','denied','approved','ping','runner-hide','hunter-scan','radar-stop','camo','event','pulse-runner','pulse-hunter','stop','reaction','mock-signal','mock-accepted','mock-denied','capture-prompt','capture-result','announcement','capture-event','reveal-coordinate','reveal-hide'].includes(data.t))return;
     if(data.t==='waiting'){$('waitApproval').classList.remove('hidden');return}
     if(data.t==='denied'){notify('Anfrage abgelehnt',data.reason||'Kein Zutritt');reset();return}
-    if(data.t==='approved'){S.approved=true;$('waitApproval').classList.add('hidden');notify('Zugang freigegeben','Du bist jetzt im Raum.',true);return}
+    if(data.t==='approved'){S.approved=true;$('waitApproval').classList.add('hidden');notify('Zugang freigegeben','Du bist jetzt im Raum.',true);voiceCue('join');return}
     if(data.t==='snapshot'){
       S.approved=true;S.clockOffset=Number(data.clock)-Date.now();S.roomCode=data.code;S.roomName=data.roomName;S.players=Array.isArray(data.players)?data.players:[];
       const oldPhase=S.phase;S.phase=data.phase;S.settings={...data.settings,mode:data.settings?.mode==='area'?'area':'radius',area:data.settings?.area||null};ensureAreaBoundary();S.startAt=data.startAt;S.chaseAt=data.chaseAt;S.endAt=data.endAt;
@@ -1624,7 +1704,7 @@ body{background:var(--bg)}
       }else{
         wheel.winnerId=selected.id;
         $('wheelStatus').replaceChildren();const strong=document.createElement('strong');strong.textContent='Gewonnen: '+selected.name;
-        $('wheelStatus').append(strong);$('wheelActions').classList.remove('hidden');cue('wheel-win',{force:true});
+        $('wheelStatus').append(strong);$('wheelActions').classList.remove('hidden');cue('wheel-win',{force:true,voice:true});
         if(navigator.vibrate)navigator.vibrate([70,50,90]);
       }
       $('wheelRoster').textContent='Auf dem Rad ('+wheel.players.length+'): '+wheel.players.map(p=>p.name).join(' · ');

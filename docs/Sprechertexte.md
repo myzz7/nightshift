@@ -1,8 +1,8 @@
 # NIGHTSHIFT – Sprechertexte für den optionalen Voice-Pack
 
-Die aktuelle `index.html` enthält bereits lokal erzeugte Soundeffekte, ein Audio-Menü, visuelle FX und optionale deutsche Ansagen über die Sprachsynthese des Geräts. Die ursprünglich integrierte Fang-Sprachaufnahme bleibt erhalten.
+Die aktuelle `index.html` enthält lokal erzeugte Soundeffekte, ein Audio-Menü, visuelle FX sowie 15 eingesprochene Ansagen von „Nerio – German Narrator“. Die zuvor integrierte Fang-Sprachaufnahme bleibt als bestehender Bestandteil der HTML-Datei erhalten; für neue Fänge wird bevorzugt die neue MP3 verwendet.
 
-**Es müssen keine Aufnahmen erstellt werden, damit das Spiel funktioniert.** Die folgenden Texte dienen als Vorlage, falls später professionell eingesprochene Sprachdateien ergänzt werden sollen. Die Dateien sind **noch nicht** als separate MP3-Dateien eingebunden.
+**Es müssen keine Aufnahmen erstellt werden, damit das Spiel funktioniert.** Die folgenden Texte dienen als Vorlage, falls später professionell eingesprochene Sprachdateien ergänzt werden sollen. Die 15 deutschen MP3-Ansagen sind jetzt unter `audio/voices/` im Repository hinterlegt und werden in der `index.html` für passende Spielereignisse abgespielt. Eine Gerätestimme bleibt als Fallback verfügbar, falls das Laden oder Abspielen einer MP3 blockiert wird.
 
 ## Aufnahmestil
 Ruhig, präzise, futuristisch und leicht wie eine Funkdurchsage. Jede Zeile einzeln ohne Musik und Soundeffekte aufnehmen; ungefähr 0,2 Sekunden Stille vor und nach der Ansage. Bevorzugt WAV, 48 kHz mono, alternativ hochwertiges MP3.
