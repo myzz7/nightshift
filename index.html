@@ -472,14 +472,16 @@ body{background:var(--bg)}
 
   </style>
 <style>
-.proximity-alert{position:fixed;inset:0;z-index:1400;display:none;place-items:center;pointer-events:none;text-align:center;color:#fff;isolation:isolate;--danger:.25;--pulse:1.6s}
+.proximity-alert{position:fixed;inset:0;z-index:1400;display:none;place-items:center;pointer-events:none;text-align:center;color:#fff;isolation:isolate;overflow:hidden;background:rgba(20,0,5,.78);--danger:.25;--pulse:1.6s;min-width:100%;min-height:100%}
+html.proximity-full,html.proximity-full body{background-color:#33050d}
+html.proximity-full .ambient{background:#33050d}
 .proximity-alert.active{display:grid}
-.proximity-alert::before{content:"";position:absolute;inset:0;z-index:-1;box-shadow:inset 0 0 75px 18px rgba(255,16,45,var(--danger));background:radial-gradient(ellipse,transparent 35%,rgba(125,0,15,.12) 80%,rgba(190,0,25,.25));}
+.proximity-alert::before{content:"";position:absolute;inset:0;z-index:-1;background:radial-gradient(ellipse at 50% 50%,rgba(100,0,12,.15) 4%,rgba(175,0,24,.38) 52%,rgba(255,0,35,var(--danger)) 100%);box-shadow:inset 0 0 110px 35px rgba(255,10,35,var(--danger))}
 .proximity-alert.pulsing::before{animation:proximityGlow var(--pulse) ease-in-out infinite alternate}
-.proximity-copy{margin:16px;padding:20px 22px;max-width:560px;background:rgba(18,4,9,.86);border:1px solid #ff526b99;border-radius:18px;box-shadow:0 12px 35px #0008,0 0 26px #f1234655;backdrop-filter:blur(5px)}
-.proximity-copy strong{display:block;font-size:clamp(22px,5.8vw,39px);font-weight:950;letter-spacing:.055em;line-height:1.13;color:#fff;text-shadow:0 0 12px #ff284a}
-.proximity-copy span{display:block;margin-top:10px;color:#ff9da9;font-size:clamp(23px,6vw,38px);font-weight:900;font-variant-numeric:tabular-nums}
-.proximity-alert.no-effects::before{display:none}.proximity-alert.no-effects .proximity-copy{box-shadow:none}
+.proximity-copy{width:min(100%,680px);padding:calc(20px + env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) calc(20px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));background:none;border:0;box-shadow:none}
+.proximity-copy strong{display:block;font-size:clamp(28px,7vw,52px);font-weight:950;letter-spacing:.035em;line-height:1.1;color:#fff;text-shadow:0 3px 12px #000,0 0 26px #ff284a}
+.proximity-copy span{display:block;margin-top:18px;color:#fff;font-size:clamp(32px,8vw,60px);font-weight:900;font-variant-numeric:tabular-nums;text-shadow:0 2px 12px #000,0 0 20px #ff405d}
+.proximity-alert.no-effects{background:transparent}.proximity-alert.no-effects::before{display:none}.proximity-alert.no-effects .proximity-copy{background:#18040be8;border-radius:12px;max-width:94%;padding:20px}
 @keyframes proximityGlow{from{opacity:.55}to{opacity:1}}
 @media(prefers-reduced-motion:reduce){.proximity-alert.pulsing::before{animation:none}}
 </style>
@@ -611,7 +613,7 @@ body{background:var(--bg)}
       <label class="label" for="labRange">Simulierte Entfernung</label><input class="range" type="range" id="labRange" min="0" max="700" step="1" value="600">
       <div class="lab-grid mt" id="labDistances">
         <button class="btn" data-lab-distance="600">600 m · aus</button><button class="btn" data-lab-distance="500">500 m</button><button class="btn" data-lab-distance="400">400 m</button><button class="btn" data-lab-distance="300">300 m</button><button class="btn" data-lab-distance="200">200 m</button><button class="btn" data-lab-distance="100">100 m</button><button class="btn" data-lab-distance="0">0 m</button>
-      </div><div class="two mt"><button class="btn orange" id="labApproach">Hunter nähert sich</button><button class="btn" id="labStop">Alarm stoppen</button></div><p class="micro mt">Automatische Annäherung von 600 auf 0 Meter in 30 Sekunden. Der Alarm verwendet den echten Herzschlag und Pad-Sound.</p>
+      </div><div class="two mt"><button class="btn orange" id="labApproach">Hunter nähert sich</button><button class="btn" id="labStop">Alarm stoppen</button></div><p class="micro mt">Automatische Annäherung von 600 auf 0 Meter in 30 Sekunden. Der Alarm verwendet den echten Herzschlag und Pad-Sound.</p><p class="micro" id="labPadStatus" role="status">Original-Pad wird beim ersten Alarm geladen.</p>
     </div>
     <div class="panel mt"><div class="panel-title">Spielereignisse</div><div id="labEvents" class="lab-grid mt"></div><p class="sub mt" id="labEventStatus" role="status">Bereit zum Testen.</p></div>
     <div class="panel mt"><div class="panel-title">Aktionen</div><div class="lab-grid mt" id="labActions">
@@ -927,7 +929,7 @@ body{background:var(--bg)}
   function proximityStopSound(){
     if(proximity.beatTimer!==null){clearTimeout(proximity.beatTimer);proximity.beatTimer=null}
     const pad=proximity.pad;proximity.pad=null;
-    if(pad){try{const t=pad.c.currentTime;pad.gain.gain.cancelScheduledValues(t);pad.gain.gain.setTargetAtTime(0,t,.035);for(const o of pad.oscs)o.stop(t+.18)}catch(e){}}
+    if(pad){try{const t=pad.c.currentTime;pad.gain.gain.cancelScheduledValues(t);pad.gain.gain.setTargetAtTime(0,t,.035);pad.source.stop(t+.18)}catch(e){}}
   }
   function proximityClear(all=false){
     proximity.distance=null;proximity.receivedAt=0;proximity.lastSent=0;proximity.refreshAt=0;
@@ -935,19 +937,41 @@ body{background:var(--bg)}
     proximityRender();
   }
   function proximityCanSound(){return proximity.active&&S.soundEnabled&&FX.volume>0&&!document.hidden}
+  // User-supplied ambient recording. Load once, then loop at its original pitch.
+  const PAD_FILES=['./audio/horrorcore-pad-ambient.mp3','./audio/horrorcore-pad-ambient.wav'];
+  const padAsset={buffer:null,pending:null,lastFailure:0};
+  function padStatus(message){const status=$('labPadStatus');if(status)status.textContent=message}
+  async function loadProximityPad(c){
+    if(padAsset.buffer)return padAsset.buffer;
+    if(padAsset.pending)return padAsset.pending;
+    if(Date.now()-padAsset.lastFailure<30000)return null;
+    padStatus('Pad-Sound wird geladen …');
+    padAsset.pending=(async()=>{
+      for(const path of PAD_FILES){try{
+        const res=await fetch(path);if(!res.ok)continue;
+        const decoded=await c.decodeAudioData(await res.arrayBuffer());
+        padAsset.buffer=decoded;padStatus('Original-Pad geladen · bereit');return decoded;
+      }catch(e){}}
+      padAsset.lastFailure=Date.now();padStatus('Original-Pad fehlt: Audiodatei im Ordner audio/ erforderlich. Herzschlag funktioniert weiterhin.');return null;
+    })();
+    try{return await padAsset.pending}finally{padAsset.pending=null}
+  }
   function proximityPad(){
     const c=audioContext();if(!c||c.state!=='running')return;
-    const intensity=1-(proximity.distance/500);
+    if(!padAsset.buffer){
+      if(!padAsset.pending&&Date.now()-padAsset.lastFailure>=30000)void loadProximityPad(c).then(buffer=>{if(buffer&&proximityCanSound())proximityPad()});
+      return;
+    }
+    const intensity=1-proximity.distance/500;
     if(!proximity.pad){
-      const gain=c.createGain();gain.gain.value=0;gain.connect(c.destination);
-      const oscs=[55,82.4,116.5,130.8].map((f,i)=>{
-        const o=c.createOscillator();o.type=i===0?'sine':'triangle';o.frequency.value=f;o.detune.value=i%2?4:-4;
-        o.connect(gain);o.start();return o;
-      });
-      proximity.pad={c,gain,oscs};
+      try{
+        const source=c.createBufferSource(),gain=c.createGain();source.buffer=padAsset.buffer;source.loop=true;
+        gain.gain.value=0;source.connect(gain);gain.connect(c.destination);source.onended=()=>{source.disconnect();gain.disconnect()};
+        source.start();proximity.pad={c,gain,source};
+      }catch(e){return}
     }
     const pad=proximity.pad;
-    pad.gain.gain.setTargetAtTime((.006+.018*intensity)*FX.volume,c.currentTime,.3);
+    pad.gain.gain.setTargetAtTime((.14+.32*intensity)*FX.volume,c.currentTime,.25);
   }
   function proximityBeat(){
     proximity.beatTimer=null;
@@ -966,6 +990,12 @@ body{background:var(--bg)}
     const active=d!==null&&(lab.active?lab.meters!==null&&lab.meters<=PROX_LIMIT:S.approved&&S.phase==='playing'&&myRole()==='runner'&&!me()?.disqualified&&S.gpsWanted&&$('privacyConsent').checked&&(S.host||S.conn?.open)&&Date.now()-proximity.receivedAt<5000);
     const el=$('proximityAlert');proximity.active=!!active;
     el.classList.toggle('active',!!active);el.setAttribute('aria-hidden',String(!active));
+    const full=!!active&&FX.visual;
+    const root=document.documentElement;
+    if(root.classList.contains('proximity-full')!==full){
+      root.classList.toggle('proximity-full',full);
+      document.querySelector('meta[name="theme-color"]')?.setAttribute('content',full?'#33050d':root.dataset.theme==='dark'?'#101217':'#f5f5f7');
+    }
     if(!active){proximityStopSound();return}
     $('proximityMeters').textContent=d+' Meter';
     const intensity=1-d/500;
@@ -2101,7 +2131,7 @@ body{background:var(--bg)}
     toggle.setAttribute('aria-label', mode==='dark'?'Hellmodus einschalten':'Dunkelmodus einschalten');
     toggle.title=mode==='dark'?'Helles Design':'Dunkles Design';
     const meta=document.querySelector('meta[name="theme-color"]');
-    if(meta)meta.setAttribute('content',mode==='dark'?'#101217':'#f5f5f7');
+    if(meta)meta.setAttribute('content',root.classList.contains('proximity-full')?'#33050d':mode==='dark'?'#101217':'#f5f5f7');
   }
   let initial='light';
   try{initial=localStorage.getItem(key)==='dark'?'dark':'light'}catch(e){}
