@@ -483,6 +483,15 @@ body{background:var(--bg)}
 @keyframes proximityGlow{from{opacity:.55}to{opacity:1}}
 @media(prefers-reduced-motion:reduce){.proximity-alert.pulsing::before{animation:none}}
 </style>
+<style>
+.lab-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}
+.lab-grid .btn{min-height:44px;white-space:normal;line-height:1.25}
+.lab-distance{font-size:clamp(28px,7vw,44px);font-weight:900;font-variant-numeric:tabular-nums}
+.lab-status{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.lab-stop{position:fixed;z-index:1401;bottom:calc(12px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);display:none;min-width:180px}
+.lab-stop.active{display:block}
+.lab-vehicle{font-weight:850;font-size:27px;font-variant-numeric:tabular-nums}
+</style>
 </head>
 <body>
 <div class="ambient"></div><div class="grain"></div>
@@ -516,7 +525,7 @@ body{background:var(--bg)}
         <div class="panel-heading"><span class="step-icon">02</span><div><div class="panel-title">Spiel starten</div><div class="sub">Erstelle eine neue Lobby oder tritt Freunden bei.</div></div></div>
         <div class="join-section"><div class="action-heading"><span class="action-symbol">＋</span><strong>Neues Spiel</strong></div><label class="label" for="createRoomName">Raumname</label><input class="field" id="createRoomName" maxlength="30" placeholder="z. B. Nachtjagd"><button id="createBtn" class="btn primary block mt">Raum erstellen <span aria-hidden="true">↗</span></button></div>
         <div class="or-divider"><span>ODER</span></div>
-        <div class="join-section"><div class="action-heading"><span class="action-symbol">→</span><strong>Bestehendem Spiel beitreten</strong></div><label class="label" for="joinCode">Einladungscode</label><input class="field" id="joinCode" maxlength="4" placeholder="4-STELLIGER CODE" autocomplete="off" autocapitalize="characters" style="text-transform:uppercase;letter-spacing:.18em"><button id="joinBtn" class="btn secondary block mt">Mit Code beitreten <span aria-hidden="true">→</span></button></div>
+        <div class="join-section"><div class="action-heading"><span class="action-symbol">→</span><strong>Bestehendem Spiel beitreten</strong></div><label class="label" for="joinCode">Einladungscode</label><input class="field" id="joinCode" maxlength="5" placeholder="4-STELLIGER CODE" autocomplete="off" autocapitalize="characters" style="text-transform:uppercase;letter-spacing:.18em"><button id="joinBtn" class="btn secondary block mt">Mit Code beitreten <span aria-hidden="true">→</span></button></div>
       </div>
     </div>
     <div class="privacy-note"><span aria-hidden="true">🔒</span><p><strong>Privat und unkompliziert.</strong> Kein Benutzerkonto, kostenlos und Peer-to-Peer. Für GPS benötigst du HTTPS und eine Standortfreigabe. Lass dein Smartphone während des Spiels geöffnet.</p></div>
@@ -596,7 +605,24 @@ body{background:var(--bg)}
     <div class="panel mt"><div class="row-between"><div><div class="panel-title">Taktik-Hub</div><div class="sub" id="roleHelp">Dein Standort bleibt kontrollierbar.</div></div><button id="soundBtn" class="btn tiny">Ton: An</button></div><div class="controls mt"><button id="gpsBtnGame" class="btn">◎ GPS aktivieren</button><button id="centerOnMe" class="btn">⌖ Zentrieren</button><button id="enableCompass" class="btn">➤ Richtung</button></div><div class="map-legend">➤ Blauer Pfeil: deine eigene Bewegungs- oder Blickrichtung. Antippen eines freigegebenen Spieler-Pings zoomt auf dessen letzte Momentaufnahme, nicht auf einen Live-Standort.</div><div id="gameInfo" class="micro mt">Hunter sehen ausschließlich zeitversetzte und anonyme Runner-Punkte. Standortfreigabe ist jederzeit stoppbar.</div><button id="endGame" class="btn block danger mt hidden">Spiel für alle beenden</button><button id="exitGame" class="btn block mt">Spiel verlassen</button></div>
     <div class="footerline">BLEIB AUF ÖFFENTLICHEN WEGEN · KEIN BETRETEN PRIVATER FLÄCHEN</div>
   </section>
-</div>
+  <section class="screen" id="labScreen">
+    <div class="panel"><div class="eyebrow">NIGHTSHIFT / LOKALE SIMULATION</div><h2>TESTRAUM</h2><p class="sub">Alle Tests laufen nur auf diesem Gerät. Keine echte Lobby, kein GPS, keine Nachrichten an Mitspieler.</p><div class="two mt"><button type="button" class="btn" id="labAudio">Audio &amp; Effekte</button><button type="button" class="btn danger" id="labExit">Testraum verlassen</button></div></div>
+    <div class="panel mt"><div class="panel-title">Hunter-Näherungsalarm</div><div class="lab-status"><div id="labMeters" class="lab-distance">AUS</div><strong id="labBpm">0 BPM</strong></div>
+      <label class="label" for="labRange">Simulierte Entfernung</label><input class="range" type="range" id="labRange" min="0" max="700" step="1" value="600">
+      <div class="lab-grid mt" id="labDistances">
+        <button class="btn" data-lab-distance="600">600 m · aus</button><button class="btn" data-lab-distance="500">500 m</button><button class="btn" data-lab-distance="400">400 m</button><button class="btn" data-lab-distance="300">300 m</button><button class="btn" data-lab-distance="200">200 m</button><button class="btn" data-lab-distance="100">100 m</button><button class="btn" data-lab-distance="0">0 m</button>
+      </div><div class="two mt"><button class="btn orange" id="labApproach">Hunter nähert sich</button><button class="btn" id="labStop">Alarm stoppen</button></div><p class="micro mt">Automatische Annäherung von 600 auf 0 Meter in 30 Sekunden. Der Alarm verwendet den echten Herzschlag und Pad-Sound.</p>
+    </div>
+    <div class="panel mt"><div class="panel-title">Spielereignisse</div><div id="labEvents" class="lab-grid mt"></div><p class="sub mt" id="labEventStatus" role="status">Bereit zum Testen.</p></div>
+    <div class="panel mt"><div class="panel-title">Aktionen</div><div class="lab-grid mt" id="labActions">
+      <button class="btn" data-lab-action="capture-prompt">Fanganfrage</button><button class="btn" data-lab-action="capture">Fang + 10s Live-Reveal</button><button class="btn" data-lab-action="elimination">Ausscheiden</button><button class="btn" data-lab-action="reveal-end">Live-Reveal beenden</button><button class="btn" data-lab-action="countdown">5-Sekunden-Countdown</button><button class="btn" data-lab-action="vehicle">Fahrzeugzeit Start/Stopp</button><button class="btn" data-lab-action="vehicle-limit">Fahrzeuglimit erreicht</button><button class="btn" data-lab-action="vehicle-reset">Fahrzeugzeit zurücksetzen</button>
+      </div><div class="lab-status mt"><span class="sub">Fahrzeugzeit verbleibend</span><span id="labVehicle" class="lab-vehicle">10:00</span></div>
+    </div>
+    <div class="panel mt"><div class="panel-title">Mock-Sounds</div><div class="lab-grid mt" id="labMocks"><button class="btn" data-lab-mock="whistle">Pfeifen</button><button class="btn" data-lab-mock="steps">Schritte</button><button class="btn" data-lab-mock="beacon">Signalton</button></div><div class="panel-title mt">Live-Reaktionen</div><div class="emoji-buttons" id="labEmoji"></div><div class="reaction-stream" id="labReactions" aria-hidden="true"></div></div>
+    <div class="panel mt"><div class="panel-title">Alle Soundeffekte</div><div class="lab-grid mt" id="labSounds"></div></div>
+    <div class="panel mt"><div class="panel-title">Alle Sprachansagen</div><div class="lab-grid mt" id="labVoices"></div><button class="btn block mt" id="labSilence">Wiedergabe stoppen</button></div>
+  </section>
+</div><button class="btn danger lab-stop" id="labOverlayStop" type="button">Testalarm beenden</button>
 <div class="wheel-back" id="wheelModal" aria-hidden="true">
   <div class="wheel-sheet" role="dialog" aria-modal="true" aria-labelledby="wheelTitle" aria-describedby="wheelHelp">
     <div class="wheel-top"><div><div class="eyebrow">TEAMVERLOSUNG</div><h3 id="wheelTitle">Glücksrad</h3><div id="wheelHelp" class="sub">Rad mit dem Finger oder der Maus ziehen und schnell loslassen.</div></div><button id="wheelClose" class="btn wheel-close" type="button" aria-label="Glücksrad schließen">×</button></div>
@@ -669,6 +695,12 @@ body{background:var(--bg)}
   const ROOM_PREFIX='nightshift-';
   const allowedRoles=['hunter','runner','none'];
   const PROX_LIMIT=500, PROX_SEND_MS=2000, PROX_FRESH_MS=15000;
+  const LOCAL_TEST_CODE='11117';
+  const lab={active:false,meters:null,approach:null,countdown:null,vehicleSince:0,vehicleUsed:0};
+  function normalizeJoinCode(raw){
+    const value=String(raw).toUpperCase().replace(/\s/g,'');
+    return LOCAL_TEST_CODE.startsWith(value)?value:value.replace(/[^A-HJ-NP-Z2-9]/g,'').slice(0,4);
+  }
   const proximity={samples:new Map(),lastSent:0,refreshAt:0,refreshing:false,distance:null,receivedAt:0,beatTimer:null,pad:null,active:false};
   const proximityBpm=meters=>Math.max(100,Math.min(500,600-meters));
   const S={peer:null,conn:null,clients:new Map(),pending:new Map(),host:false,approved:false,
@@ -720,7 +752,7 @@ body{background:var(--bg)}
     S.activityEvents.unshift(detail);S.activityEvents=S.activityEvents.slice(0,6);
     const feed=$('catchFeed');feed.replaceChildren();
     for(const item of S.activityEvents){const p=document.createElement('p');p.textContent=item;feed.append(p)}
-    systemAlert(heading,detail);
+    if(!lab.active)systemAlert(heading,detail);
   }
   function closeAnnouncement(){$('announcement').classList.add('hidden');clearTimeout(S.announcementTimer);S.announcementTimer=null}
   async function systemAlert(title,body){
@@ -931,7 +963,7 @@ body{background:var(--bg)}
   }
   function proximityRender(){
     const d=proximity.distance;
-    const active=S.approved&&S.phase==='playing'&&myRole()==='runner'&&!me()?.disqualified&&S.gpsWanted&&$('privacyConsent').checked&&(S.host||S.conn?.open)&&d!==null&&Date.now()-proximity.receivedAt<5000;
+    const active=d!==null&&(lab.active?lab.meters!==null&&lab.meters<=PROX_LIMIT:S.approved&&S.phase==='playing'&&myRole()==='runner'&&!me()?.disqualified&&S.gpsWanted&&$('privacyConsent').checked&&(S.host||S.conn?.open)&&Date.now()-proximity.receivedAt<5000);
     const el=$('proximityAlert');proximity.active=!!active;
     el.classList.toggle('active',!!active);el.setAttribute('aria-hidden',String(!active));
     if(!active){proximityStopSound();return}
@@ -1135,7 +1167,7 @@ body{background:var(--bg)}
     showRoom();sync();notify('Raum erstellt',`Code ${S.roomCode} · Gib ihn deinen Freunden weiter.`,true)};
   const gatherProfile=()=>{const name=clean($('myName').value,20);if(!name){notify('Name fehlt','Bitte zuerst einen Spielernamen eingeben.');return false}if(!$('privacyConsent').checked){notify('Zustimmung erforderlich','Bestätige die freiwillige GPS-Freigabe, bevor du beitrittst.');return false}S.myName=name;return true};
   async function createRoom(){if(S.joining||!gatherProfile())return;S.joining=true;$('createBtn').disabled=true;try{const code=randCode();S.host=true;S.roomCode=code;S.myId=await initPeer(ROOM_PREFIX+code);S.roomCode=code;S.peer.on('connection',attachIncoming);buildRoom()}catch(e){notify('Raum nicht erstellt',e.message||String(e));reset()}finally{S.joining=false;$('createBtn').disabled=false}}
-  async function joinRoom(){if(S.joining||!gatherProfile())return;const code=clean($('joinCode').value,4).toUpperCase();if(!/^[A-HJ-NP-Z2-9]{4}$/.test(code)){notify('Ungültiger Raumcode','Gib vier Zeichen ein, zum Beispiel 7K9P.');return}S.roomCode=code;S.host=false;S.approved=false;S.joining=true;$('joinBtn').disabled=true;try{S.myId=await initPeer();connectHost();showRoom()}catch(e){notify('Beitritt fehlgeschlagen',e.message||String(e));reset()}finally{S.joining=false;$('joinBtn').disabled=false}}
+  async function joinRoom(){if(S.joining||lab.active)return;const entered=normalizeJoinCode($('joinCode').value);if(entered===LOCAL_TEST_CODE){openLab();return}if(!gatherProfile())return;const code=entered;if(!/^[A-HJ-NP-Z2-9]{4}$/.test(code)){notify('Ungültiger Raumcode','Gib vier Zeichen ein, zum Beispiel 7K9P.');return}S.roomCode=code;S.host=false;S.approved=false;S.joining=true;$('joinBtn').disabled=true;try{S.myId=await initPeer();connectHost();showRoom()}catch(e){notify('Beitritt fehlgeschlagen',e.message||String(e));reset()}finally{S.joining=false;$('joinBtn').disabled=false}}
   function connectHost(){if(!S.peer||S.host)return;const c=S.peer.connect(ROOM_PREFIX+S.roomCode,{reliable:true,serialization:'json'});S.conn=c;let opened=false;const timeout=setTimeout(()=>{if(!opened&&!S.approved)notify('Raum nicht gefunden','Prüfe den Code. Der Host muss die App geöffnet haben.')},13000);
     c.on('open',()=>{opened=true;clearTimeout(timeout);connection('VERBUNDEN',true);safeSend(c,{t:'join',name:S.myName,preference:S.preferredRole});notify('Beitrittsanfrage gesendet','Warte auf die Freigabe durch den Host.')});
     c.on('data',receiveHostMessage);c.on('close',()=>{clearTimeout(timeout);if(S.conn!==c)return;connection('HOST OFFLINE');notify('Host nicht erreichbar','Das Spiel benötigt ein aktives Host-Gerät.');if(S.phase!=='ended'){clearRemoteMarkers();$('roomSubtitle').textContent='Verbindung zum Host getrennt'}});c.on('error',e=>notify('Netzwerkfehler',e.message||'Verbindungsproblem'));
@@ -1259,7 +1291,7 @@ body{background:var(--bg)}
     if(S.soundEnabled&&navigator.vibrate)navigator.vibrate([110,70,180,100,95]);
   }
   function startReveal(data){
-    if(S.phase!=='playing')return;
+    if(!lab.active&&S.phase!=='playing')return;
     const until=Number(data.until),id=String(data.eventId||'');
     if(!id||!Number.isFinite(until)||until<=now()||until>now()+REVEAL_MS+1500)return;
     const name=clean(data.name,20)||'Ein Spieler';
@@ -1277,8 +1309,8 @@ body{background:var(--bg)}
     if(S.gpsWanted)void getFresh();
   }
   function showReaction(emoji){
-    if(!REACTIONS.includes(emoji)||!['headstart','playing'].includes(S.phase))return;
-    const parent=$('reactionStream');if(parent.childElementCount>15)parent.firstElementChild?.remove();
+    if(!REACTIONS.includes(emoji)||(!lab.active&&!['headstart','playing'].includes(S.phase)))return;
+    const parent=$(lab.active?'labReactions':'reactionStream');if(parent.childElementCount>15)parent.firstElementChild?.remove();
     const node=document.createElement('span');node.className='reaction-bubble';node.textContent=emoji;
     node.style.setProperty('--left',Math.round(Math.random()*24)+'px');parent.append(node);
     setTimeout(()=>node.remove(),3500);
@@ -1926,9 +1958,89 @@ body{background:var(--bg)}
     }
     if(S.scanVisibleUntil&&t>=S.scanVisibleUntil)clearHunterScan();for(const [tag,item] of S.mockMarkers){if(now()>=item.until){clearTimeout(item.timer);S.map?.removeLayer(item.marker);S.mockMarkers.delete(tag)}}refreshMarkerLabels();renderGPS();renderMockControl();
   }
-  function tick(){countdownFx();proximitySend();if(S.host){hostTick();proximityHost()}proximityRender();if(['headstart','playing','ended'].includes(S.phase))renderGame();if(S.revealUntil>now())updateRevealHud();else if(S.revealUntil)endReveal()}
-  function reset(){proximityClear(true);stopVoices();endReveal();closeWheel();stopGPS();clearRemoteMarkers();try{S.conn?.close()}catch{}for(const c of S.clients.values())try{c.close()}catch{}for(const x of S.pending.values())try{x.conn.close()}catch{}try{S.peer?.destroy()}catch{}
+  function tick(){if(lab.active){labTick();return}countdownFx();proximitySend();if(S.host){hostTick();proximityHost()}proximityRender();if(['headstart','playing','ended'].includes(S.phase))renderGame();if(S.revealUntil>now())updateRevealHud();else if(S.revealUntil)endReveal()}
+  function reset(){if(lab.active)closeLab();proximityClear(true);stopVoices();endReveal();closeWheel();stopGPS();clearRemoteMarkers();try{S.conn?.close()}catch{}for(const c of S.clients.values())try{c.close()}catch{}for(const x of S.pending.values())try{x.conn.close()}catch{}try{S.peer?.destroy()}catch{}
     S.peer=null;S.conn=null;S.clients.clear();S.pending.clear();S.host=false;S.approved=false;S.myId='';S.players=[];S.phase='lobby';S.clockOffset=0;S.roomName='';S.gpsStatus.clear();S.reactionRate.clear();S.mockRate.clear();S.mockCount.clear();S.lastGPSHeartbeat=0;S.localMockRemaining=3;S.localMockNext=0;S.captureRequests.clear();S.captureRate.clear();S.captureSelectKey='';S.activityEvents=[];closeAnnouncement();$('pingFloat').classList.add('hidden');S.roomCode='';S.challengePoint=null;S.challengeOpen=false;S.challengeWinner=null;S.challengeTriggered=false;S.scanVisibleUntil=0;S.pickMode='';S.settings={radiusKm:10,durationMin:60,headstartMin:5,center:null,mode:'radius',area:null};S.areaTab='radius';clearAreaBoundary();S.startAt=0;S.chaseAt=0;S.endAt=0;S.anonTokens.clear();S.hunterTokens.clear();S.lastRunnerById.clear();S.lastHunterById.clear();S.camo.clear();S.runnerMarkers.clear();S.aliases={};connection('OFFLINE');updateMapDecor();setScreen('homeScreen')}
+  const labLabels={'headstart':'Runner-Vorsprung','start':'Jagdbeginn','hunter-release':'Hunter-Freigabe','ping':'GPS-Ping','radar':'Hunter-Radar','bonus':'Halbzeit / Bonusziel','reward':'Bonus gesichert','stealth':'Tarnung','capture':'Fang bestätigt','end':'Spielende','warning':'Regelwarnung','preview':'Intro','countdown':'Countdown','join':'Spieler verbunden','wheel-win':'Glücksrad-Gewinner','tap':'Tastenton','pending':'Beitrittsanfrage','wheel-tick':'Glücksrad-Tick','reaction':'Reaktion','gps':'GPS-Signal','mock':'Mock-Signal','reveal-end':'Live-Reveal endet'};
+  function labButtons(id,kinds,action){
+    const container=$(id);container.replaceChildren();
+    for(const kind of kinds){const b=document.createElement('button');b.type='button';b.className='btn';b.textContent=labLabels[kind]||kind;b.onclick=()=>{if(lab.active){audioContext();action(kind)}};container.append(b)}
+  }
+  function openLab(){
+    // No game-state, GPS, or peer connection is created by the local tester.
+    if(S.approved||S.joining||S.peer||S.gpsWanted||!$('homeScreen').classList.contains('active'))return;
+    lab.active=true;lab.vehicleSince=0;lab.vehicleUsed=0;$('joinCode').value='';
+    setScreen('labScreen');connection('LOKALER TEST',true);audioContext();
+    labSetDistance(null);$('labEventStatus').textContent='Bereit zum Testen.';
+    labButtons('labEvents',['headstart','start','ping','radar','bonus','reward','stealth','warning','end','join','pending','wheel-win'],kind=>{
+      $('labEventStatus').textContent=labLabels[kind];
+      notify(labLabels[kind], 'Lokale Simulation',false);cue(kind,{voice:true,visual:true,force:true});
+    });
+    labButtons('labSounds',['tap','join','pending','headstart','start','ping','radar','warning','stealth','bonus','reward','capture','reveal-end','end','countdown','wheel-tick','wheel-win','reaction','gps','mock'],kind=>soundEffect(kind));
+    labButtons('labVoices',Object.keys(VOICE_FILES),kind=>voiceCue(kind,true));
+    const reactions=$('labEmoji');reactions.replaceChildren();
+    for(const emoji of REACTIONS){const b=document.createElement('button');b.type='button';b.textContent=emoji;b.onclick=()=>{if(lab.active){showReaction(emoji);cue('reaction',{force:true})}};reactions.append(b)}
+    labTick();
+  }
+  function labStopApproach(){if(lab.approach!==null){clearInterval(lab.approach);lab.approach=null}}
+  function labSetDistance(meters){
+    if(!lab.active)return;
+    lab.meters=meters===null?null:Math.max(0,Math.min(700,Math.round(meters)));
+    proximity.distance=lab.meters!==null&&lab.meters<=PROX_LIMIT?lab.meters:null;proximity.receivedAt=Date.now();
+    $('labMeters').textContent=lab.meters===null?'AUS':lab.meters+' Meter';
+    $('labBpm').textContent=(proximity.distance===null?0:proximityBpm(proximity.distance))+' BPM';
+    $('labRange').value=String(lab.meters??600);$('labOverlayStop').classList.toggle('active',proximity.distance!==null);
+    proximityRender();
+  }
+  function labTick(){
+    proximityRender();
+    if(S.revealUntil>now())updateRevealHud();else if(S.revealUntil)endReveal();
+    const used=lab.vehicleUsed+(lab.vehicleSince?Date.now()-lab.vehicleSince:0);
+    $('labVehicle').textContent=fmt(Math.max(0,VEHICLE_LIMIT_MS-used));
+    if(lab.vehicleSince&&used>=VEHICLE_LIMIT_MS){lab.vehicleSince=0;lab.vehicleUsed=VEHICLE_LIMIT_MS;notify('Fahrzeuglimit erreicht','Lokale Simulation: 10 Minuten verbraucht.',true)}
+  }
+  function labCountdownStop(){if(lab.countdown!==null){clearInterval(lab.countdown);lab.countdown=null}}
+  function labCapture(){
+    labSetDistance(null);labStopApproach();endReveal();
+    startReveal({eventId:'local-test-'+Date.now(),name:'Test-Runner',until:now()+REVEAL_MS});
+    $('labEventStatus').textContent='Fang bestätigt · Live-Reveal 10 Sekunden (ohne echte Standorte).';
+  }
+  function labAction(kind){
+    if(!lab.active)return;
+    audioContext();
+    if(kind==='capture-prompt'){
+      labStopApproach();labSetDistance(null);
+      ask('Wurdest du gefangen?','Test-Hunter meldet einen simulierten Fang.',[{label:'Ja, gefangen',kind:'orange',fn:labCapture},{label:'Nein',kind:'primary',fn:()=>notify('Fang abgelehnt','Lokale Simulation')}]);beep();
+    }else if(kind==='capture')labCapture();
+    else if(kind==='elimination'){labStopApproach();labSetDistance(null);announce({kind:'out',name:'Test-Runner',reason:'Simulierter Spielausschluss.'})}
+    else if(kind==='reveal-end')endReveal();
+    else if(kind==='countdown'){
+      labCountdownStop();let n=5;voiceCue('countdown',true);
+      const pulse=()=>{if(!lab.active){labCountdownStop();return}if(n===0){labCountdownStop();$('labEventStatus').textContent='Countdown beendet · Jagdbeginn';cue('start',{voice:true,visual:true,force:true});return}
+        $('labEventStatus').textContent='Countdown: '+n;soundEffect('countdown',{last:n===1});n--};
+      pulse();lab.countdown=setInterval(pulse,1000);
+    }else if(kind==='vehicle'){if(lab.vehicleSince){lab.vehicleUsed+=Date.now()-lab.vehicleSince;lab.vehicleSince=0}else if(lab.vehicleUsed<VEHICLE_LIMIT_MS)lab.vehicleSince=Date.now();labTick()}
+    else if(kind==='vehicle-limit'){lab.vehicleSince=0;lab.vehicleUsed=VEHICLE_LIMIT_MS;labTick();notify('Fahrzeuglimit erreicht','Lokale Simulation: 10 Minuten verbraucht.',true)}
+    else if(kind==='vehicle-reset'){lab.vehicleSince=0;lab.vehicleUsed=0;labTick()}
+  }
+  function labStopPlayback(){
+    labStopApproach();labCountdownStop();labSetDistance(null);endReveal();stopVoices();
+    clearTimeout(FX.visualTimer);clearTimeout(FX.scanTimer);$('fxSignalLayer').classList.remove('active');$('mapWrap')?.classList.remove('fx-map-scan');closeAnnouncement();closeModal();
+  }
+  function closeLab(){
+    if(!lab.active)return;labStopPlayback();lab.active=false;lab.meters=null;lab.vehicleSince=0;lab.vehicleUsed=0;
+    S.activityEvents=[];$('catchFeed').innerHTML='<p>Noch keine Meldungen.</p>';$('labReactions').replaceChildren();$('notifications').replaceChildren();
+    toggleFxPanel(false);proximityClear();FX.last.clear();connection('OFFLINE');setScreen('homeScreen');
+  }
+  $('labAudio').onclick=()=>{if(lab.active)toggleFxPanel(true)};
+  $('labExit').onclick=closeLab;
+  $('labStop').onclick=$('labOverlayStop').onclick=()=>{labStopApproach();labSetDistance(null)};
+  $('labRange').oninput=e=>{labStopApproach();labSetDistance(Number(e.target.value))};
+  $('labDistances').onclick=e=>{const b=e.target.closest('[data-lab-distance]');if(lab.active&&b){labStopApproach();labSetDistance(Number(b.dataset.labDistance))}};
+  $('labApproach').onclick=()=>{if(!lab.active)return;labStopApproach();audioContext();const began=Date.now();labSetDistance(600);lab.approach=setInterval(()=>{const d=Math.max(0,600-(Date.now()-began)/50);labSetDistance(d);if(d===0)labStopApproach()},100)};
+  $('labActions').onclick=e=>{const b=e.target.closest('[data-lab-action]');if(b)labAction(b.dataset.labAction)};
+  $('labMocks').onclick=e=>{const b=e.target.closest('[data-lab-mock]');if(lab.active&&b)playMockSound(b.dataset.labMock)};
+  $('labSilence').onclick=()=>{if(lab.active)labStopPlayback()};
   function confirmExit(){ask('Spiel verlassen?','Deine Verbindung wird geschlossen und die GPS-Freigabe gestoppt.',[{label:'Verlassen',kind:'danger',fn:reset},{label:'Bleiben',kind:'primary'}])}
   // Main layout: one Leaflet map is moved between lobby and game to preserve layers.
   const wrap=document.createElement('div');wrap.className='mapwrap';wrap.id='mapWrap';wrap.innerHTML='<div id="map" class="map"></div><div class="map-badge" id="mapStatus">SPIELGEBIET</div><button type="button" id="mapStyleToggle" class="map-style-toggle" aria-label="Kartenstil wechseln" title="Kartenstil wechseln">▧ Helle Karte</button><div class="map-hint" id="mapHint"></div>';
@@ -1937,7 +2049,8 @@ body{background:var(--bg)}
   $('createBtn').onclick=createRoom;$('joinBtn').onclick=joinRoom;$('privacyConsent').onchange=()=>{if(!$('privacyConsent').checked)stopGPS()};
   $('prefHunter').onclick=()=>{cue('tap');S.preferredRole='hunter';$('prefHunter').classList.add('selected');$('prefRunner').classList.remove('selected')};
   $('prefRunner').onclick=()=>{cue('tap');S.preferredRole='runner';$('prefRunner').classList.add('selected');$('prefHunter').classList.remove('selected')};
-  $('joinCode').oninput=e=>e.target.value=e.target.value.toUpperCase().replace(/[^A-HJ-NP-Z2-9]/g,'').slice(0,4);
+  $('joinCode').oninput=e=>e.target.value=normalizeJoinCode(e.target.value);
+  $('joinCode').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();joinRoom()}});
   $('copyCode').onclick=async()=>{try{await navigator.clipboard.writeText(S.roomCode);notify('Code kopiert',S.roomCode)}catch{ask('Raumcode',`Teile diesen Code: ${S.roomCode}`,[{label:'Okay',kind:'primary'}])}};
   $('areaModeRadius').onclick=()=>setAreaMode('radius');$('areaModeAdmin').onclick=()=>setAreaMode('area');
   $('areaSearchBtn').onclick=searchAreas;$('areaSearch').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();searchAreas()}});
