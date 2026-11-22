@@ -518,7 +518,7 @@ body{background:var(--bg)}
         <label class="label">Wunschteam</label>
         <div class="two team-choice"><button type="button" class="btn selected" id="prefHunter"><span class="team-dot hunter-dot"></span> Hunter</button><button type="button" class="btn" id="prefRunner"><span class="team-dot runner-dot"></span> Runner</button></div>
         <p class="profile-hint"><span aria-hidden="true">ⓘ</span> Der Host entscheidet später über die endgültige Teamverteilung.</p>
-        <label class="consent"><input id="privacyConsent" type="checkbox"><span>Ich stimme der GPS-Weitergabe während des Spiels zu (für Hunter optional, für Runner zur aktiven Teilnahme erforderlich). Während der Jagd erhält der Host aktuelle GPS-Punkte zur Berechnung der Nähe-Warnung; Runner erhalten nur die Entfernung zum nächsten Hunter. Nach einem von einem Runner bestätigten Fang ist mein Standort für zehn Sekunden für alle verbundenen Mitspieler auf der Karte sichtbar. Ich kann die Freigabe jederzeit stoppen.</span></label>
+        <label class="consent"><input id="privacyConsent" type="checkbox"><span>Ich stimme der GPS-Weitergabe während des Spiels zu (für Hunter optional, für Runner zur aktiven Teilnahme erforderlich). Runner senden alle fünf Minuten einen aktuellen GPS-Punkt. Hunter können freiwillig am Radar teilnehmen. Es gibt keine dauerhafte GPS-Abfrage und keine Live-Nähe-Warnung. Nach einem von einem Runner bestätigten Fang ist mein Standort für zehn Sekunden für alle verbundenen Mitspieler auf der Karte sichtbar. Ich kann die Freigabe jederzeit stoppen.</span></label>
       </div>
       <div class="panel play-panel">
         <div class="panel-heading"><span class="step-icon">02</span><div><div class="panel-title">Spiel starten</div><div class="sub">Erstelle eine neue Lobby oder tritt Freunden bei.</div></div></div>
@@ -527,7 +527,7 @@ body{background:var(--bg)}
         <div class="join-section"><div class="action-heading"><span class="action-symbol">→</span><strong>Bestehendem Spiel beitreten</strong></div><label class="label" for="joinCode">Einladungscode</label><input class="field" id="joinCode" maxlength="5" placeholder="4-STELLIGER CODE" autocomplete="off" autocapitalize="characters" style="text-transform:uppercase;letter-spacing:.18em"><button id="joinBtn" class="btn secondary block mt">Mit Code beitreten <span aria-hidden="true">→</span></button></div>
       </div>
     </div>
-    <div class="privacy-note"><span aria-hidden="true">🔒</span><p><strong>Privat und unkompliziert.</strong> Kein Benutzerkonto, kostenlos und Peer-to-Peer. Hunter können ohne GPS beitreten und spielen. Runner benötigen GPS; ohne Hunter-GPS sind Radar und Nähe-Warnung unvollständig. Für GPS benötigst du HTTPS und eine Standortfreigabe. Lass dein Smartphone während des Spiels geöffnet.</p></div>
+    <div class="privacy-note"><span aria-hidden="true">🔒</span><p><strong>Privat und unkompliziert.</strong> Kein Benutzerkonto, kostenlos und Peer-to-Peer. Hunter können ohne GPS beitreten und spielen. Runner benötigen GPS; GPS wird nur für einzelne Messungen aktiviert; eine Live-Nähe-Warnung gibt es im Akkusparmodus nicht. Für GPS benötigst du HTTPS und eine Standortfreigabe. Lass dein Smartphone während des Spiels geöffnet.</p></div>
     <div class="footerline">BUILT FOR THE NIGHT · PLAY RESPONSIBLY</div>
   </section>
   <section class="screen" id="roomScreen">
@@ -554,7 +554,7 @@ body{background:var(--bg)}
       <label class="label" for="durationRange">Spieldauer</label><div class="number-row"><span class="sub">Ab Beginn der Jagd</span><span class="number" id="durationValue">60 min</span></div><input id="durationRange" class="range" type="range" min="20" max="180" step="10" value="60">
       <label class="label" for="leadRange">Runner-Vorsprung</label><div class="number-row"><span class="sub">Vor dem ersten Hunter-Start</span><span class="number" id="leadValue">5 min</span></div><input id="leadRange" class="range" type="range" min="0" max="15" step="1" value="5">
       <p class="micro">Bei einem bestätigten Fang werden die aktuellen Standorte aller GPS-aktiven Spieler für exakt zehn Sekunden für alle Mitspieler sichtbar. Danach werden die temporären Marker gelöscht.</p>
-      <p class="micro">Fangen: Hunter stellt eine Anfrage; der Runner bestätigt persönlich auf seinem Gerät. Nur Runner dürfen Fahrzeuge insgesamt höchstens 10 Minuten je Runde nutzen (Fahrzeugmodus manuell starten/stoppen). Runner, die GPS freiwillig ausschalten, scheiden sofort aus. Hunter können GPS jederzeit ohne Ausscheiden stoppen. Aus Sicherheitsgründen niemanden anfassen, bedrängen oder über Straßen verfolgen.</p><p class="micro">Runner → Hunter: GPS alle 5 Minuten. Hunter → Runner: 12-Minuten-Snapshot für 60 Sekunden, nur bei freiwillig aktivem Hunter-GPS. Ohne Hunter-GPS gibt es für diesen Hunter keine Radar- oder Nähe-Warnung. Zur Halbzeit: Bonusziel für 2 unterdrückte Runner-Pings. Nur Runner benötigen GPS. Freiwilliges GPS-Abschalten während der Runde führt bei Runnern zum Ausscheiden; bei GPS-Ausfall gilt eine kurze Frist. Fällige Runner-Pings müssen innerhalb von 65 Sekunden eintreffen. Hunter-Radar ist freiwillig. Standortfreigabe ist jederzeit stoppbar.</p>
+      <p class="micro">Fangen: Hunter stellt eine Anfrage; der Runner bestätigt persönlich auf seinem Gerät. Nur Runner dürfen Fahrzeuge insgesamt höchstens 10 Minuten je Runde nutzen (Fahrzeugmodus manuell starten/stoppen). Runner, die GPS freiwillig ausschalten, scheiden sofort aus. Hunter können GPS jederzeit ohne Ausscheiden stoppen. Aus Sicherheitsgründen niemanden anfassen, bedrängen oder über Straßen verfolgen.</p><p class="micro">Runner → Hunter: GPS alle 5 Minuten. Hunter → Runner: 12-Minuten-Snapshot für 60 Sekunden, nur bei freiwillig aktivem Hunter-GPS. Ohne Hunter-GPS gibt es für diesen Hunter kein Radar-Signal. GPS wird nicht dauerhaft abgefragt; keine Live-Nähe-Warnung. Sonderaktionen lösen bei Bedarf eine einzelne Messung aus. Zur Halbzeit: Bonusziel für 2 unterdrückte Runner-Pings. Nur Runner benötigen GPS. Freiwilliges GPS-Abschalten während der Runde führt bei Runnern zum Ausscheiden; bei GPS-Ausfall gilt eine kurze Frist. Fällige Runner-Pings müssen innerhalb von 65 Sekunden eintreffen. Hunter-Radar ist freiwillig. Standortfreigabe ist jederzeit stoppbar.</p>
     </div>
     <div class="panel mt" id="teamPanel">
       <div class="row-between"><div><div class="panel-title">Teamboard</div><div class="sub" id="teamHint">Spieler verschieben oder antippen.</div></div><span class="pill" id="hostBadge">HOST</span></div>
@@ -600,7 +600,7 @@ body{background:var(--bg)}
       </div>
     </div>
     <div id="reactionStream" class="reaction-stream" aria-hidden="true"></div>
-    <div id="challengeBanner" class="event-box hidden"><span class="event-spark">✦ MITTERNACHTS-SIGNAL</span><h3 id="challengeHeadline">BONUSZIEL AKTIV</h3><p id="challengeInfo">Der erste Runner im Zielkreis erhält zwei geheime Ping-Runden.</p><div class="scan-list" id="challengeMeta"></div></div>
+    <div id="challengeBanner" class="event-box hidden"><span class="event-spark">✦ MITTERNACHTS-SIGNAL</span><h3 id="challengeHeadline">BONUSZIEL AKTIV</h3><p id="challengeInfo">Der erste Runner im Zielkreis erhält zwei geheime Ping-Runden.</p><div class="scan-list" id="challengeMeta"></div><button id="claimBonusGPS" class="btn orange block mt hidden" type="button">Bonusziel erreicht · GPS prüfen</button></div>
     <div class="panel mt"><div class="row-between"><div><div class="panel-title">Taktik-Hub</div><div class="sub" id="roleHelp">Dein Standort bleibt kontrollierbar.</div></div><button id="soundBtn" class="btn tiny">Ton: An</button></div><div class="controls mt"><button id="gpsBtnGame" class="btn">◎ GPS aktivieren</button><button id="centerOnMe" class="btn">⌖ Zentrieren</button><button id="enableCompass" class="btn">➤ Richtung</button></div><div class="map-legend">➤ Blauer Pfeil: deine eigene Bewegungs- oder Blickrichtung. Antippen eines freigegebenen Spieler-Pings zoomt auf dessen letzte Momentaufnahme, nicht auf einen Live-Standort.</div><div id="gameInfo" class="micro mt">Hunter sehen ausschließlich zeitversetzte und anonyme Runner-Punkte. Standortfreigabe ist jederzeit stoppbar.</div><button id="endGame" class="btn block danger mt hidden">Spiel für alle beenden</button><button id="exitGame" class="btn block mt">Spiel verlassen</button></div>
     <div class="footerline">BLEIB AUF ÖFFENTLICHEN WEGEN · KEIN BETRETEN PRIVATER FLÄCHEN</div>
   </section>
@@ -710,7 +710,7 @@ body{background:var(--bg)}
     radiusCircle:null,centerMarker:null,challengeMarker:null,ownMarker:null,map:null,pickMode:'',
     areaGeometry:null,areaKey:'',areaLayer:null,areaLayerKey:'',areaPromise:null,areaSearchBusy:false,
     gpsHeading:null,compassHeading:null,compassEnabled:false,
-    gpsWatch:null,myLocation:null,gpsWanted:false,geoErrorShown:false,runnerMarkers:new Map(),
+    gpsRequest:null,gpsGeneration:0,myLocation:null,gpsWanted:false,geoErrorShown:false,runnerMarkers:new Map(),
     hunterMarkers:new Map(),anonTokens:new Map(),hunterTokens:new Map(),lastRunnerById:new Map(),lastHunterById:new Map(),aliases:{},lastPingSlot:0,lastScanSlot:0,
     camo:new Map(),scanSamples:new Map(),scanVisibleUntil:0,
      soundEnabled:true,audio:null,timer:null,joining:false,lastLocationSend:0,claimedEvent:false,
@@ -1388,11 +1388,7 @@ body{background:var(--bg)}
     const left=Math.max(0,S.revealUntil-now());
     $('revealSeconds').textContent=Math.ceil(left/1000)+'s';
     $('revealProgress').style.width=Math.min(100,left/REVEAL_MS*100)+'%';
-    // Pull fresh GPS during the 10-second reveal, not during normal gameplay.
-    if(S.gpsWanted&&S.phase==='playing'&&!document.hidden&&Date.now()-S.lastRevealRefresh>2500){
-      S.lastRevealRefresh=Date.now();emitRevealPosition();
-      if(!S.myLocation||Date.now()-S.myLocation.at>2500)void getFresh();
-    }
+    // No repeated GPS requests during the reveal: one fresh fix per capture.
   }
   function launchCaptureParticles(){
     const parent=$('captureParty');parent.replaceChildren();
@@ -1425,7 +1421,6 @@ body{background:var(--bg)}
     S.captureSplashTimer=setTimeout(()=>$('captureScreen').classList.remove('visible'),2400);
     S.revealEndTimer=setTimeout(()=>{if(S.revealId===id)endReveal()},Math.max(0,until-now()));
     launchCaptureParticles();playCaptureAnnouncement();
-    emitRevealPosition(true);
     if(S.gpsWanted)void getFresh();
   }
   function showReaction(emoji){
@@ -1498,16 +1493,6 @@ body{background:var(--bg)}
     if(previous&&t-previous.received<1000)return;
     proximity.samples.set(id,{...pos,received:t});
   }
-  function proximitySend(){
-    const t=Date.now(),p=S.myLocation;
-    if(!S.approved||!S.gpsWanted||!$('privacyConsent').checked||S.phase!=='playing'||me()?.disqualified||!['hunter','runner'].includes(myRole()))return;
-    if(!document.hidden&&(!p||t-p.at>7000)&&!proximity.refreshing&&t-proximity.refreshAt>8000){
-      proximity.refreshAt=t;proximity.refreshing=true;
-      getFresh().finally(()=>{proximity.refreshing=false});
-    }
-    if(!p||Math.abs(t-p.at)>PROX_FRESH_MS||p.accuracy>150||t-proximity.lastSent<PROX_SEND_MS)return;
-    if(hostSend({t:'proximity-location',pos:p}))proximity.lastSent=t;
-  }
   function proximityHost(){
     if(!S.host)return;
     if(S.phase!=='playing'){proximity.samples.clear();return}
@@ -1523,7 +1508,7 @@ body{background:var(--bg)}
   }
   function onHostData(conn,data){if(!S.host||!data||typeof data!=='object')return;const id=conn.peer;if(!S.players.some(p=>p.id===id))return;const role=roleOf(id),player=S.players.find(p=>p.id===id);
 
-    if(data.t==='proximity-location'){proximityAccept(id,player,data);return}
+    if(data.t==='proximity-location'){return} // No continuous location exchange.
     // Nur registrierte, GPS-aktive Teilnehmer; keine dauerhafte Speicherung der Koordinaten.
     if(data.t==='reveal-location'){
       if(S.phase!=='playing'||!S.revealId||data.eventId!==S.revealId||Date.now()>=S.revealUntil)return;
@@ -2048,22 +2033,51 @@ body{background:var(--bg)}
     {label:'Speichern',kind:'primary',fn:()=>{S.aliases[tag]=clean(input.value,24);refreshMarkerLabels();try{localStorage.setItem('nightshift-aliases-'+S.roomCode,JSON.stringify(S.aliases))}catch{}}},{label:'Abbrechen'}],input)}
   function refreshMarkerLabels(){for(const [tag,v] of S.runnerMarkers){const a=S.aliases[tag];const content=`<div style="color:#161b24"><b>${esc(a||'Unbekannter Runner')} · ${esc(tag)}</b><div>Ping ${esc(relative(v.at))}</div><small>Letzte freigegebene Position, nicht live</small><br><button type="button" data-alias="${esc(tag)}" style="margin-top:5px;cursor:pointer">Namen zuordnen</button></div>`;v.marker.bindPopup(content,{closeButton:false})}}
   function showHunterScan(data){clearHunterScan();const until=Number(data.until)||0;if(now()>=until)return;S.scanVisibleUntil=until;for(const raw of data.samples||[]){const loc=toLatLng(raw);if(!loc)continue;const tag=clean(raw.tag,8);const m=L.marker([loc.lat,loc.lng],{icon:markerIcon('hunter')}).addTo(S.map);m.bindPopup(`<div style="color:#161b24"><b>Hunter-Signal ${esc(tag)}</b><div>Snapshot ${esc(relative(raw.at))}</div><small>Nur 60 Sekunden freigegeben</small></div>`);m.on('click',()=>zoomToPing(loc,m));S.hunterMarkers.set(tag,{marker:m,at:raw.at})}notify('Radar-Snapshot',`${S.hunterMarkers.size} Hunter-Punkte für max. 60 Sekunden sichtbar.`,true)}
-  async function getFresh(){if(!S.gpsWanted||!navigator.geolocation)return null;return new Promise(resolve=>{navigator.geolocation.getCurrentPosition(p=>{onPosition(p);resolve(S.myLocation) },()=>resolve(S.myLocation&&Date.now()-S.myLocation.at<45000?S.myLocation:null),{enableHighAccuracy:true,timeout:12000,maximumAge:0})})}
-  async function sendMyRunnerPosition(slot){if(!S.gpsWanted)return;const pos=await getFresh();if(!pos||S.phase!=='playing')return;hostSend({t:'runner-location',slot,pos})}
+  async function getFresh(){if(!S.gpsWanted||!navigator.geolocation)return null;
+    if(S.gpsRequest)return S.gpsRequest;
+    const generation=S.gpsGeneration;
+    const current=()=>generation===S.gpsGeneration&&S.gpsWanted;
+    const request=new Promise(resolve=>{
+      try{navigator.geolocation.getCurrentPosition(p=>{
+        if(!current()||Date.now()-p.timestamp>30000){resolve(null);return}
+        onPosition(p);resolve(current()?S.myLocation:null);
+      },e=>{
+        if(current()){if(!S.geoErrorShown){S.geoErrorShown=true;notify('GPS-Fehler',e.code===1?'Standort wurde nicht freigegeben.':'Standort konnte nicht bestimmt werden.')}if(e.code===1)stopGPS()}
+        resolve(null);
+      },{enableHighAccuracy:true,timeout:12000,maximumAge:0})}catch(e){if(current())notify('GPS nicht verfügbar',e.message||String(e));resolve(null)}
+    });
+    S.gpsRequest=request;renderGPS();
+    try{return await request}finally{if(S.gpsRequest===request){S.gpsRequest=null;renderGPS()}}}
+  async function sendMyRunnerPosition(slot){
+    const eligible=()=>S.gpsWanted&&S.approved&&myRole()==='runner'&&!me()?.disqualified&&S.phase==='playing'&&Math.floor((now()-S.chaseAt)/PING_MS)===slot;
+    if(!eligible())return;
+    // One scheduled fix every five minutes; retry once only if the fix failed.
+    for(let attempt=0;attempt<2&&eligible();attempt++){
+      const pos=await getFresh();
+      if(!eligible())return;
+      if(pos&&pos.accuracy<=150&&insidePlayArea(pos)&&hostSend({t:'runner-location',slot,pos}))return;
+      if(now()-(S.chaseAt+slot*PING_MS)>30000)break;
+    }
+  }
   async function sendMyHunterPosition(slot){if(!S.gpsWanted)return;const pos=await getFresh();if(!pos||S.phase!=='playing')return;hostSend({t:'hunter-location',slot,pos})}
-  function onPosition(p){if(!S.gpsWanted)return;S.geoErrorShown=false;S.myLocation={lat:p.coords.latitude,lng:p.coords.longitude,accuracy:p.coords.accuracy,at:p.timestamp};if(S.approved&&Date.now()-p.timestamp<40000&&Date.now()-S.lastGPSHeartbeat>12000){S.lastGPSHeartbeat=Date.now();hostSend({t:'gps-status',on:true})}S.gpsHeading=Number.isFinite(p.coords.heading)&&p.coords.speed>0.5?p.coords.heading:null;if(!S.map)initMap();if(S.ownMarker){S.ownMarker.setLatLng([S.myLocation.lat,S.myLocation.lng])}else if(S.map){S.ownMarker=L.marker([S.myLocation.lat,S.myLocation.lng],{icon:L.divIcon({html:'<div class="position-beacon"><span class="direction-arrow"></span><span class="position-center"></span></div>',className:'',iconSize:[32,32],iconAnchor:[16,16]}),zIndexOffset:1000}).addTo(S.map).bindTooltip('Mein GPS',{direction:'top'});if(!S.settings.center)S.map.setView([S.myLocation.lat,S.myLocation.lng],14)}
+  function onPosition(p){if(!S.gpsWanted)return;S.geoErrorShown=false;S.myLocation={lat:p.coords.latitude,lng:p.coords.longitude,accuracy:p.coords.accuracy,at:p.timestamp};if(S.approved&&Date.now()-p.timestamp<40000&&Date.now()-S.lastGPSHeartbeat>12000){S.lastGPSHeartbeat=Date.now();hostSend({t:'gps-status',on:true})}S.gpsHeading=Number.isFinite(p.coords.heading)&&p.coords.speed>0.5?p.coords.heading:null;if(!S.map)initMap();if(S.ownMarker){S.ownMarker.setLatLng([S.myLocation.lat,S.myLocation.lng])}else if(S.map){S.ownMarker=L.marker([S.myLocation.lat,S.myLocation.lng],{icon:L.divIcon({html:'<div class="position-beacon"><span class="direction-arrow"></span><span class="position-center"></span></div>',className:'',iconSize:[32,32],iconAnchor:[16,16]}),zIndexOffset:1000}).addTo(S.map).bindTooltip('Meine letzte GPS-Messung',{direction:'top'});if(!S.settings.center)S.map.setView([S.myLocation.lat,S.myLocation.lng],14)}
     updateHeading();if(S.host&&S.phase==='lobby'&&!isAreaMode()&&!S.settings.center){S.settings.center={lat:S.myLocation.lat,lng:S.myLocation.lng};sync();checkStart();updateMapDecor();zoomToArea()}
     if(S.settings.center&&S.phase!=='ended'&&(!isAreaMode()||S.areaGeometry)&&!insidePlayArea(S.myLocation)&&(!S.lastOutsideNotify||Date.now()-S.lastOutsideNotify>60000)){S.lastOutsideNotify=Date.now();notify('Spielgebiet verlassen','Du befindest dich außerhalb des gewählten Spielgebiets.',true)}
     if(myRole()==='runner'&&!me()?.disqualified&&S.challengeOpen&&!S.challengeWinner&&!S.claimedEvent&&S.challengePoint&&S.phase==='playing'&&p.coords.accuracy<=90&&dist(S.challengePoint,S.myLocation)<=Math.max(55,p.coords.accuracy)){
       S.claimedEvent=true;hostSend({t:'claim',pos:S.myLocation});setTimeout(()=>{S.claimedEvent=false},12000)
     }
-    renderGPS();emitRevealPosition();proximitySend();
+    renderGPS();emitRevealPosition();
   }
-  function startGPS(){if(S.gpsWanted){stopGPS();return}if(!$('privacyConsent').checked){ask('GPS freiwillig freigeben?','Bei aktivem GPS erhält der Host aktuelle Punkte für die Nähe-Warnung. Runner teilen regelmäßige Pings, Hunter freiwillige Radar-Punkte. Nach bestätigtem Fang können GPS-aktive Spieler zehn Sekunden sichtbar sein. Du kannst GPS jederzeit stoppen; Runner scheiden dann aus, Hunter nicht.',[{label:'GPS freigeben',kind:'primary',fn:()=>{$('privacyConsent').checked=true;startGPS()}},{label:'Ohne GPS bleiben'}]);return}
+  function startGPS(){if(S.gpsWanted){stopGPS();return}if(!$('privacyConsent').checked){ask('GPS freiwillig freigeben?','Runner teilen alle fünf Minuten einen aktuellen GPS-Punkt, Hunter freiwillige Radar-Punkte. GPS wird nur kurz für einzelne Messungen genutzt. Keine Live-Nähe-Warnung. Nach bestätigtem Fang können GPS-aktive Spieler zehn Sekunden sichtbar sein. Du kannst GPS jederzeit stoppen; Runner scheiden dann aus, Hunter nicht.',[{label:'GPS freigeben',kind:'primary',fn:()=>{$('privacyConsent').checked=true;startGPS()}},{label:'Ohne GPS bleiben'}]);return}
     if(!navigator.geolocation){notify('GPS nicht verfügbar','HTTPS und ein GPS-fähiges Smartphone sind erforderlich.');return}
-    S.gpsWanted=true;try{S.gpsWatch=navigator.geolocation.watchPosition(onPosition,e=>{if(!S.geoErrorShown){S.geoErrorShown=true;notify('GPS-Fehler',e.code===1?'Standort wurde nicht freigegeben.':'Standort konnte nicht bestimmt werden.')}if(e.code===1)stopGPS()},{enableHighAccuracy:true,maximumAge:5000,timeout:20000});notify('GPS aktiviert','Dein Live-Punkt erscheint normalerweise nur auf deiner Karte. Während der Jagd berechnet der Host die Nähe-Warnung; Mitspieler erhalten keine zusätzlichen Kartenpunkte.');renderGPS()}catch(e){S.gpsWanted=false;notify('GPS nicht verfügbar',e.message||String(e))}}
-  function stopGPS(){proximityClear();S.compassEnabled=false;S.compassHeading=null;S.gpsHeading=null;window.removeEventListener('deviceorientation',onOrientation);window.removeEventListener('deviceorientationabsolute',onOrientation);$('enableCompass').textContent='➤ Richtung';if(S.gpsWanted&&S.approved)hostSend({t:'gps-status',on:false});S.gpsWanted=false;S.lastGPSRefresh=0;if(S.gpsWatch!==null){navigator.geolocation?.clearWatch(S.gpsWatch);S.gpsWatch=null}S.myLocation=null;if(S.ownMarker){S.map?.removeLayer(S.ownMarker);S.ownMarker=null}renderGPS()}
-  function renderGPS(){$('gpsBtnLobby').textContent=S.gpsWanted?'⊘ GPS-Freigabe stoppen':'◎ Eigenen Standort aktivieren';$('gpsBtnGame').textContent=S.gpsWanted?'⊘ GPS stoppen':'◎ GPS aktivieren';$('geoState').textContent=S.gpsWanted?(S.myLocation?'AN':'SUCHE'):'AUS';$('geoState').style.color=S.gpsWanted?'#9af2bb':'#ff9d89'}
+    S.gpsWanted=true;S.gpsGeneration++;const generation=S.gpsGeneration;renderGPS();
+    void getFresh().then(pos=>{
+      if(generation!==S.gpsGeneration||!S.gpsWanted)return;
+      if(!pos){stopGPS();notify('GPS nicht bereit','Bitte GPS erneut aktivieren.');return}
+      notify('GPS bereit','Akkusparmodus: einzelne Standortmessungen statt Dauerortung.');
+    })}
+  function stopGPS(){proximityClear();S.compassEnabled=false;S.compassHeading=null;S.gpsHeading=null;window.removeEventListener('deviceorientation',onOrientation);window.removeEventListener('deviceorientationabsolute',onOrientation);$('enableCompass').textContent='➤ Richtung';if(S.gpsWanted&&S.approved)hostSend({t:'gps-status',on:false});S.gpsWanted=false;S.gpsGeneration++;S.gpsRequest=null;S.lastGPSHeartbeat=0;S.myLocation=null;if(S.ownMarker){S.map?.removeLayer(S.ownMarker);S.ownMarker=null}renderGPS()}
+  function renderGPS(){$('gpsBtnLobby').textContent=S.gpsWanted?'⊘ GPS-Freigabe stoppen':'◎ Eigenen Standort aktivieren';$('gpsBtnGame').textContent=S.gpsWanted?'⊘ GPS stoppen':'◎ GPS aktivieren';$('geoState').textContent=S.gpsWanted?(S.gpsRequest||!S.myLocation?'SUCHE':'SPAR'):'AUS';$('geoState').style.color=S.gpsWanted?'#9af2bb':'#ff9d89'}
   function renderGame(){if(!['headstart','playing','ended'].includes(S.phase))return;const r=myRole();$('playRole').textContent=me()?.disqualified?'● AUSGESCHIEDEN':r==='hunter'?'● HUNTER':r==='runner'?'● RUNNER':'● ZUSCHAUER';$('playRole').className='role-pill '+r;
     $('phaseTitle').textContent=S.phase==='headstart'?'VORSPRUNG':S.phase==='playing'?'DIE JAGD LÄUFT':'SPIELENDE';const t=now();const remaining=S.phase==='ended'?0:S.phase==='headstart'?S.chaseAt-t:S.endAt-t;$('timeLeft').textContent=fmt(remaining);$('timeCaption').textContent=S.phase==='headstart'?'BIS JAGDBEGINN':S.phase==='ended'?'ZEIT ABGELAUFEN':'SPIELZEIT ÜBRIG';
     $('progressLine').style.width=S.phase==='ended'?'100%':S.phase==='headstart'?'0%':Math.max(0,Math.min(100,(t-S.chaseAt)/(S.endAt-S.chaseAt)*100))+'%';
@@ -2074,17 +2088,17 @@ body{background:var(--bg)}
     $('pingFloat').classList.toggle('hidden',S.phase==='ended');
     $('pingFloatTime').textContent=$('nextPing').textContent;
     renderCatchAndVehicle();
-    $('roleHelp').textContent=r==='hunter'?'Dein GPS ist optional. Runner-Punkte erscheinen alle 5 Minuten auch ohne dein GPS. Antippen zoomt zum letzten Ping.':r==='runner'?'GPS-Pings alle 5 Minuten. Hunter ohne GPS erscheinen nicht im Radar und lösen keine Nähe-Warnung aus. Mock-Sound ist freiwillig.':'Du erhältst keine fremden GPS-Signale.';
+    $('roleHelp').textContent=r==='hunter'?'Dein GPS ist optional. Runner-Punkte erscheinen alle 5 Minuten auch ohne dein GPS. Antippen zoomt zum letzten Ping.':r==='runner'?'GPS-Pings alle 5 Minuten im Akkusparmodus. Keine Live-Nähe-Warnung. Hunter-Radar bleibt freiwillig.':'Du erhältst keine fremden GPS-Signale.';
     if(me()?.disqualified)$('roleHelp').textContent='Ausgeschieden: '+(me().eliminationReason||'Diese Runde ist beendet.');
     const state=S.phase==='ended'?'Spiel beendet. Keine weiteren Standort-Pings.':S.phase==='headstart'?'Vorsprung läuft. Bis Jagdbeginn werden keine Runner-Pings verteilt.':r==='runner'?`Hunter-Radar alle 12 Minuten. ${S.scanVisibleUntil>t?'Aktive Radarzeit: '+fmt(S.scanVisibleUntil-t):'Nächstes Signal im Countdown oben.'}`:'Nur zeitversetzte Runner-Punkte. Keine Namen oder Live-Verfolgung.';
     $('gameInfo').textContent=S.revealUntil>t?'LIVE-REVEAL: Alle GPS-aktiven Spieler werden zehn Sekunden lang auf der Karte angezeigt.':state;
-    const showEvent=S.challengeOpen||!!S.challengeWinner;$('challengeBanner').classList.toggle('hidden',!showEvent);if(showEvent){
-      $('challengeHeadline').textContent=S.challengeWinner?'BONUS VERGEBEN':'BONUSZIEL AKTIV';$('challengeInfo').textContent=S.challengeWinner?(S.challengeWinner===S.myId?'Du hast zwei Tarn-Pings gewonnen.':'Ein Runner hat das Ziel erreicht und zwei Tarn-Pings gewonnen.'):(r==='runner'?'Erreiche den markierten Punkt zuerst. Genauigkeit und GPS entscheiden.':'Ein temporäres Bonusziel ist aktiv. Die Zielkoordinaten werden nur Runnern angezeigt.');
+    $('claimBonusGPS').classList.toggle('hidden',!(r==='runner'&&S.challengeOpen&&!S.challengeWinner&&!me()?.disqualified&&S.phase==='playing'));$('claimBonusGPS').disabled=!S.gpsWanted||!!S.gpsRequest;const showEvent=S.challengeOpen||!!S.challengeWinner;$('challengeBanner').classList.toggle('hidden',!showEvent);if(showEvent){
+      $('challengeHeadline').textContent=S.challengeWinner?'BONUS VERGEBEN':'BONUSZIEL AKTIV';$('challengeInfo').textContent=S.challengeWinner?(S.challengeWinner===S.myId?'Du hast zwei Tarn-Pings gewonnen.':'Ein Runner hat das Ziel erreicht und zwei Tarn-Pings gewonnen.'):(r==='runner'?'Erreiche den markierten Punkt und tippe auf GPS prüfen. Genauigkeit und GPS entscheiden.':'Ein temporäres Bonusziel ist aktiv. Die Zielkoordinaten werden nur Runnern angezeigt.');
       $('challengeMeta').replaceChildren();const el=document.createElement('span');el.textContent=S.challengeWinner?'Tarnung: 2 Pings':`Noch ${fmt(S.challengeUntil-t)} · Zielkreis 55 m`;$('challengeMeta').append(el)
     }
     if(S.scanVisibleUntil&&t>=S.scanVisibleUntil)clearHunterScan();for(const [tag,item] of S.mockMarkers){if(now()>=item.until){clearTimeout(item.timer);S.map?.removeLayer(item.marker);S.mockMarkers.delete(tag)}}refreshMarkerLabels();renderGPS();renderMockControl();
   }
-  function tick(){if(lab.active){labTick();return}countdownFx();proximitySend();if(S.host){hostTick();proximityHost()}proximityRender();if(['headstart','playing','ended'].includes(S.phase))renderGame();if(S.revealUntil>now())updateRevealHud();else if(S.revealUntil)endReveal()}
+  function tick(){if(lab.active){labTick();return}countdownFx();if(S.host)hostTick();proximityRender();if(['headstart','playing','ended'].includes(S.phase))renderGame();if(S.revealUntil>now())updateRevealHud();else if(S.revealUntil)endReveal()}
   function reset(){if(lab.active)closeLab();proximityClear(true);stopVoices();endReveal();closeWheel();stopGPS();clearRemoteMarkers();try{S.conn?.close()}catch{}for(const c of S.clients.values())try{c.close()}catch{}for(const x of S.pending.values())try{x.conn.close()}catch{}try{S.peer?.destroy()}catch{}
     S.peer=null;S.conn=null;S.clients.clear();S.pending.clear();S.host=false;S.approved=false;S.myId='';S.players=[];S.phase='lobby';S.clockOffset=0;S.roomName='';S.gpsStatus.clear();S.reactionRate.clear();S.mockRate.clear();S.lastGPSHeartbeat=0;S.mockPending=false;S.lastMockAttempt=0;S.localMockNext=0;S.captureRequests.clear();S.captureRate.clear();S.captureSelectKey='';S.activityEvents=[];closeAnnouncement();$('pingFloat').classList.add('hidden');S.roomCode='';S.challengePoint=null;S.challengeOpen=false;S.challengeWinner=null;S.challengeTriggered=false;S.scanVisibleUntil=0;S.pickMode='';S.settings={radiusKm:10,durationMin:60,headstartMin:5,center:null,mode:'radius',area:null};S.areaTab='radius';clearAreaBoundary();S.startAt=0;S.chaseAt=0;S.endAt=0;S.anonTokens.clear();S.hunterTokens.clear();S.lastRunnerById.clear();S.lastHunterById.clear();S.camo.clear();S.runnerMarkers.clear();S.aliases={};connection('OFFLINE');updateMapDecor();setScreen('homeScreen')}
   const labLabels={'headstart':'Runner-Vorsprung','start':'Jagdbeginn','hunter-release':'Hunter-Freigabe','ping':'GPS-Ping','radar':'Hunter-Radar','bonus':'Halbzeit / Bonusziel','reward':'Bonus gesichert','stealth':'Tarnung','capture':'Fang bestätigt','end':'Spielende','warning':'Regelwarnung','preview':'Intro','countdown':'Countdown','join':'Spieler verbunden','wheel-win':'Glücksrad-Gewinner','tap':'Tastenton','pending':'Beitrittsanfrage','wheel-tick':'Glücksrad-Tick','reaction':'Reaktion','gps':'GPS-Signal','mock':'Mock-Signal','reveal-end':'Live-Reveal endet'};
@@ -2188,7 +2202,7 @@ body{background:var(--bg)}
   $('pickChallenge').onclick=()=>{if(isAreaMode()&&!S.areaGeometry){notify('Stadtgrenze fehlt','Bitte zuerst Stadt oder Stadtteil auswählen.');return}S.pickMode='challenge';updateMapDecor();notify('Bonuspunkt setzen','Wähle einen öffentlichen, gefahrlos erreichbaren Punkt innerhalb des Kreises.')};
   $('gpsBtnLobby').onclick=toggleGPSControl;$('gpsBtnGame').onclick=toggleGPSControl;$('enableCompass').onclick=enableCompass;
   $('map').addEventListener('click',e=>{const btn=e.target.closest?.('[data-alias]');if(btn&&myRole()==='hunter')openAlias(clean(btn.dataset.alias,10))});$('centerOnMe').onclick=()=>{if(S.myLocation)S.map?.setView([S.myLocation.lat,S.myLocation.lng],15);else notify('Kein GPS','Bitte zuerst den Standort aktivieren.')};
-  $('startGame').onclick=()=>ask('Jagd starten?',`Vorsprung ${S.settings.headstartMin} min · Jagd ${S.settings.durationMin} min · Gebiet: ${isAreaMode()?S.settings.area?.name:S.settings.radiusKm+' km Umkreis'}. Hunter-GPS ist optional; Radar und Nähe-Warnung können dadurch unvollständig sein. Sind alle bereit?`,[{label:'Jetzt starten',kind:'orange',fn:start},{label:'Zurück'}]);
+  $('startGame').onclick=()=>ask('Jagd starten?',`Vorsprung ${S.settings.headstartMin} min · Jagd ${S.settings.durationMin} min · Gebiet: ${isAreaMode()?S.settings.area?.name:S.settings.radiusKm+' km Umkreis'}. GPS-Akkusparmodus: Runner-Pings alle 5 Minuten, Hunter-Radar freiwillig, keine Live-Nähe-Warnung. Sind alle bereit?`,[{label:'Jetzt starten',kind:'orange',fn:start},{label:'Zurück'}]);
   $('endGame').onclick=()=>ask('Spiel beenden?','Damit wird die Jagd für alle Spieler beendet. Standort-Pings stoppen.',[{label:'Für alle beenden',kind:'danger',fn:finish},{label:'Abbrechen'}]);
   $('leaveLobby').onclick=confirmExit;$('exitGame').onclick=confirmExit;
   $('soundBtn').onclick=()=>{S.soundEnabled=!S.soundEnabled;proximityRender();if(!S.soundEnabled)stopVoices();saveFxPrefs();syncFxControls();if(S.soundEnabled)cue('join',{force:true})};
@@ -2212,7 +2226,10 @@ body{background:var(--bg)}
   // iOS: AudioContext bei einer echten Nutzerberührung freischalten, damit spätere Ereignistöne hörbar sein können.
   document.addEventListener('pointerdown',()=>{if(!S.soundEnabled)return;try{if(!S.audio)S.audio=new(window.AudioContext||window.webkitAudioContext)();if(S.audio.state==='suspended')S.audio.resume()}catch(e){}},{once:true});
   $('mockBtn').onclick=sendMockSound;
-  S.timer=setInterval(()=>{if(S.gpsWanted&&S.approved&&!document.hidden&&Date.now()-(S.lastGPSRefresh||0)>35000&&(!S.myLocation||Date.now()-S.myLocation.at>30000)){S.lastGPSRefresh=Date.now();getFresh()}if(S.gpsWanted&&S.myLocation&&Date.now()-S.myLocation.at<40000&&S.approved&&Date.now()-S.lastGPSHeartbeat>20000){S.lastGPSHeartbeat=Date.now();hostSend({t:'gps-status',on:true})}tick()},1000);
+  $('claimBonusGPS').onclick=async()=>{if(myRole()!=='runner'||!S.challengeOpen||S.challengeWinner||!S.gpsWanted||me()?.disqualified)return;const pos=await getFresh();if(!pos||!S.challengePoint||pos.accuracy>65||dist(S.challengePoint,pos)>55)notify('Bonusziel noch nicht erreicht','Für den Bonus muss ein genauer GPS-Punkt innerhalb von 55 Metern vorliegen.');};
+  // Readiness heartbeat carries no coordinates and does not wake GPS.
+  // Fresh positions are requested by scheduled pulses or explicit game events only.
+  S.timer=setInterval(()=>{if(S.gpsWanted&&S.myLocation&&S.approved&&Date.now()-S.lastGPSHeartbeat>30000){if(hostSend({t:'gps-status',on:true}))S.lastGPSHeartbeat=Date.now()}tick()},1000);
   if(!window.isSecureContext)notify('Hinweis: HTTPS nötig','Für GPS auf Smartphones die Datei über eine HTTPS-Seite öffnen.');
 })();
 </script>
