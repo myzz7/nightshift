@@ -935,7 +935,7 @@ html.proximity-full .ambient{background:#33050d}
   function proximityStopSound(){
     if(proximity.beatTimer!==null){clearTimeout(proximity.beatTimer);proximity.beatTimer=null}
     const pad=proximity.pad;proximity.pad=null;
-    if(pad){try{const t=pad.c.currentTime;pad.gain.gain.cancelScheduledValues(t);pad.gain.gain.setTargetAtTime(0,t,.035);pad.source.stop(t+.18)}catch(e){}}
+    if(pad){const t=pad.c.currentTime;try{pad.gain.gain.cancelScheduledValues(t);pad.gain.gain.setTargetAtTime(0,t,.035)}catch(e){}for(const source of pad.sources){try{source.stop(t+.18)}catch(e){}}}
   }
   function proximityClear(all=false){
     proximity.distance=null;proximity.receivedAt=0;proximity.lastSent=0;proximity.refreshAt=0;
@@ -943,9 +943,11 @@ html.proximity-full .ambient{background:#33050d}
     proximityRender();
   }
   function proximityCanSound(){return proximity.active&&S.soundEnabled&&FX.volume>0&&!document.hidden}
-  // User-supplied ambient recording. Load once, then loop at its original pitch.
-  const PAD_FILES=['./audio/horrorcore-pad-ambient.mp3?v=full-tail-2','./audio/horrorcore-pad-ambient.wav'];
-  const padAsset={buffer:null,pending:null,lastFailure:0};
+  // Restart the pad at the beginning of the reverb tail without cutting off the decay.
+  const PAD_FILES=['./audio/horrorcore-pad-ambient.mp3?v=reverb-overlap-3','./audio/horrorcore-pad-ambient.wav'];
+  const PAD_REVERB_START=12.9;
+  const PAD_OVERLAP_MAX=3;
+  const padAsset={buffer:null,pending:null,lastFailure:0,loop:null};
   function padStatus(message){const status=$('labPadStatus');if(status)status.textContent=message}
   async function loadProximityPad(c){
     if(padAsset.buffer)return padAsset.buffer;
@@ -954,13 +956,29 @@ html.proximity-full .ambient{background:#33050d}
     padStatus('Pad-Sound wird geladen …');
     padAsset.pending=(async()=>{
       for(const path of PAD_FILES){try{
-        const res=await fetch(path);if(!res.ok)continue;
+        const res=await fetch(path,{cache:'no-cache'});if(!res.ok)continue;
         const decoded=await c.decodeAudioData(await res.arrayBuffer());
         padAsset.buffer=decoded;padStatus('Original-Pad geladen · bereit');return decoded;
       }catch(e){}}
       padAsset.lastFailure=Date.now();padStatus('Original-Pad fehlt: Audiodatei im Ordner audio/ erforderlich. Herzschlag funktioniert weiterhin.');return null;
     })();
     try{return await padAsset.pending}finally{padAsset.pending=null}
+  }
+  function preparePadLoop(c,buffer){
+    if(padAsset.loop?.original===buffer)return padAsset.loop;
+    // For the supplied ~15.05 s recording the tail starts around 12.9 s.
+    // For unrelated or legacy short assets, retain their ordinary full-length loop.
+    const tail=buffer.duration-PAD_REVERB_START;
+    if(tail<=.1||tail>PAD_OVERLAP_MAX)return {original:buffer,buffer,period:buffer.duration,overlap:false};
+    const frames=Math.round(PAD_REVERB_START*buffer.sampleRate);
+    const mixed=c.createBuffer(buffer.numberOfChannels,frames,buffer.sampleRate);
+    for(let ch=0;ch<buffer.numberOfChannels;ch++){
+      const original=buffer.getChannelData(ch),out=mixed.getChannelData(ch);
+      out.set(original.subarray(0,frames));
+      // Fold the existing reverb tail over the next entrance, sample-accurately.
+      for(let i=0;i<Math.min(frames,original.length-frames);i++)out[i]+=original[frames+i];
+    }
+    return padAsset.loop={original:buffer,buffer:mixed,period:frames/buffer.sampleRate,overlap:true};
   }
   function proximityPad(){
     const c=audioContext();if(!c||c.state!=='running')return;
@@ -971,11 +989,16 @@ html.proximity-full .ambient{background:#33050d}
     const intensity=1-proximity.distance/500;
     if(!proximity.pad){
       try{
-        const source=c.createBufferSource(),gain=c.createGain();source.buffer=padAsset.buffer;
-        // Loop at the precise decoded end, including the complete reverb tail. No crossfade or early restart.
-        source.loop=true;source.loopStart=0;source.loopEnd=source.buffer.duration;
-        gain.gain.value=0;source.connect(gain);gain.connect(fxOutput(c));source.onended=()=>{source.disconnect();gain.disconnect()};
-        source.start();proximity.pad={c,gain,source};
+        const loop=preparePadLoop(c,padAsset.buffer),gain=c.createGain(),sources=new Set(),t=c.currentTime+.02;
+        gain.gain.value=0;gain.connect(fxOutput(c));
+        const makeSource=(buffer)=>{const source=c.createBufferSource();source.buffer=buffer;source.connect(gain);sources.add(source);source.onended=()=>{sources.delete(source);source.disconnect();if(!sources.size)gain.disconnect()};return source};
+        const repeating=makeSource(loop.buffer);repeating.loop=true;repeating.loopStart=0;repeating.loopEnd=loop.period;
+        if(loop.overlap){
+          // The first pass has no previous tail. Later passes blend the original tail into the next beginning.
+          const intro=makeSource(padAsset.buffer);intro.start(t,0,loop.period);repeating.start(t+loop.period);
+        }else repeating.start(t);
+        proximity.pad={c,gain,sources};
+        padStatus(loop.overlap?'Original-Pad · Hallüberlappung ab '+loop.period.toFixed(2)+' s':'Pad geladen · vollständiger Loop (abweichende Aufnahme)');
       }catch(e){return}
     }
     const pad=proximity.pad;
