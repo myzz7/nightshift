@@ -453,7 +453,7 @@ body{background:var(--bg)}
 .fx-signal-layer[data-kind=warning],.fx-signal-layer[data-kind=capture]{--fx-ink:#ff335248;--fx-stroke:#ff6389d1}
 .fx-signal-layer[data-kind=bonus],.fx-signal-layer[data-kind=reward]{--fx-ink:#ffc35a44;--fx-stroke:#ffdb86dc}
 .fx-signal-layer[data-kind=radar],.fx-signal-layer[data-kind=ping]{--fx-ink:#40bfff3f;--fx-stroke:#79d8ffcf}
-.fx-signal-layer[data-kind=start]{--fx-ink:#6e73ff54;--fx-stroke:#ac9affd8}
+.fx-signal-layer[data-kind=start]{--fx-ink:#6e73ff54;--fx-stroke:#ac9affd8}.fx-signal-layer[data-kind=start] .fx-cue-label,.fx-signal-layer[data-kind=end] .fx-cue-label{padding:18px 8px;background:linear-gradient(90deg,transparent,#080813a8,transparent);border-block:1px solid #ffffff24}.fx-signal-layer[data-kind=start] .fx-cue-label strong,.fx-signal-layer[data-kind=end] .fx-cue-label strong{letter-spacing:.08em;font-weight:950}
 .fx-signal-layer[data-kind=end]{--fx-ink:#9b9da748;--fx-stroke:#aab0c8b0}
 .fx-cue-label{position:absolute;top:44%;left:50%;width:min(94vw,500px);transform:translate(-50%,-50%);text-align:center;text-shadow:0 4px 22px #0b0b20b3;color:#fff;animation:fxCueAppear 1.4s ease-out both}
 .fx-cue-label span{display:block;font-size:10px;letter-spacing:.28em;font-weight:900;margin-bottom:7px}
@@ -472,17 +472,17 @@ body{background:var(--bg)}
 
   </style>
 <style>
-.proximity-alert{position:fixed;inset:0;z-index:1400;display:none;place-items:center;pointer-events:none;text-align:center;color:#fff;isolation:isolate;overflow:hidden;background:rgba(20,0,5,.78);--danger:.25;--pulse:1.6s;min-width:100%;min-height:100%}
+.proximity-alert{position:fixed;inset:0;z-index:1400;display:none;align-items:start;justify-items:center;pointer-events:none;text-align:center;color:#fff;isolation:isolate;overflow:hidden;background:transparent;--danger:.25;--pulse:1.6s;min-width:100%;min-height:100%}
 html.proximity-full,html.proximity-full body{background-color:#33050d}
 html.proximity-full .ambient{background:#33050d}
 .proximity-alert.active{display:grid}
-.proximity-alert::before{content:"";position:absolute;inset:0;z-index:-1;background:radial-gradient(ellipse at 50% 50%,rgba(100,0,12,.15) 4%,rgba(175,0,24,.38) 52%,rgba(255,0,35,var(--danger)) 100%);box-shadow:inset 0 0 110px 35px rgba(255,10,35,var(--danger))}
+.proximity-alert::before{content:"";position:absolute;inset:0;z-index:-1;background:radial-gradient(ellipse at 50% 48%,transparent 47%,rgba(105,0,18,.14) 72%,rgba(185,5,25,var(--danger)) 100%);box-shadow:inset 0 0 65px 8px rgba(140,8,25,var(--danger))}
 .proximity-alert.pulsing::before{animation:proximityGlow var(--pulse) ease-in-out infinite alternate}
-.proximity-copy{width:min(100%,680px);padding:calc(20px + env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) calc(20px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));background:none;border:0;box-shadow:none}
-.proximity-copy strong{display:block;font-size:clamp(28px,7vw,52px);font-weight:950;letter-spacing:.035em;line-height:1.1;color:#fff;text-shadow:0 3px 12px #000,0 0 26px #ff284a}
-.proximity-copy span{display:block;margin-top:18px;color:#fff;font-size:clamp(32px,8vw,60px);font-weight:900;font-variant-numeric:tabular-nums;text-shadow:0 2px 12px #000,0 0 20px #ff405d}
+.proximity-copy{width:min(92%,540px);margin-top:calc(72px + env(safe-area-inset-top));padding:12px 16px;background:linear-gradient(135deg,#250b15f5,#100b12eb);border:1px solid #e34c646b;border-left:3px solid #ff5570;border-radius:13px;box-shadow:0 10px 38px #0005,0 0 25px #b20b3333}
+.proximity-copy strong{display:block;font-size:clamp(15px,4.1vw,23px);font-weight:950;letter-spacing:.08em;line-height:1.1;color:#fff;text-shadow:0 3px 12px #000,0 0 26px #ff284a}
+.proximity-copy span{display:block;margin-top:5px;color:#fff;font-size:clamp(23px,5.5vw,34px);font-weight:900;font-variant-numeric:tabular-nums;text-shadow:0 2px 12px #000,0 0 20px #ff405d}
 .proximity-alert.no-effects{background:transparent}.proximity-alert.no-effects::before{display:none}.proximity-alert.no-effects .proximity-copy{background:#18040be8;border-radius:12px;max-width:94%;padding:20px}
-@keyframes proximityGlow{from{opacity:.55}to{opacity:1}}
+@keyframes proximityGlow{from{opacity:.75}to{opacity:1}}
 @media(prefers-reduced-motion:reduce){.proximity-alert.pulsing::before{animation:none}}
 </style>
 <style>
@@ -704,7 +704,7 @@ html.proximity-full .ambient{background:#33050d}
     return LOCAL_TEST_CODE.startsWith(value)?value:value.replace(/[^A-HJ-NP-Z2-9]/g,'').slice(0,4);
   }
   const proximity={samples:new Map(),lastSent:0,refreshAt:0,refreshing:false,distance:null,receivedAt:0,beatTimer:null,pad:null,active:false};
-  const proximityBpm=meters=>Math.max(100,Math.min(500,600-meters));
+  const proximityBpm=meters=>Math.round(100+76*Math.pow(Math.max(0,Math.min(1,1-meters/PROX_LIMIT)),.8));
   const S={peer:null,conn:null,clients:new Map(),pending:new Map(),host:false,approved:false,
     roomCode:'',roomName:'',myName:'',preferredRole:'hunter',myId:'',players:[],
     phase:'lobby',settings:{radiusKm:10,durationMin:60,headstartMin:5,center:null,mode:'radius',area:null},
@@ -902,6 +902,12 @@ html.proximity-full .ambient{background:#33050d}
     if(!S.soundEnabled||FX.volume===0||document.hidden)return null;
     try{if(!S.audio)S.audio=new(window.AudioContext||window.webkitAudioContext)();if(S.audio.state==='suspended')void S.audio.resume().catch(()=>{});return S.audio}catch(e){return null}
   }
+  // Shared dynamics bus keeps layered cinematic audio below clipping.
+  let cinematicBus=null;
+  function fxOutput(c){
+    if(cinematicBus?.c===c)return cinematicBus.node;
+    const node=c.createDynamicsCompressor();node.threshold.value=-12;node.knee.value=18;node.ratio.value=5;node.attack.value=.004;node.release.value=.18;node.connect(c.destination);cinematicBus={c,node};return node;
+  }
   function fxOsc(c,from,to,start,duration,{type='sine',gain=.07,attack=.012,filter=null}={}){
     try{
       const osc=c.createOscillator(),env=c.createGain(),t=Math.max(c.currentTime,start),end=t+Math.max(.025,duration);
@@ -909,7 +915,7 @@ html.proximity-full .ambient{background:#33050d}
       if(to&&to!==from)osc.frequency.exponentialRampToValueAtTime(Math.max(30,to),end);
       env.gain.setValueAtTime(.0001,t);env.gain.exponentialRampToValueAtTime(Math.max(.0002,gain*FX.volume),t+Math.min(attack,duration/3));env.gain.exponentialRampToValueAtTime(.0001,end);
       if(filter){const bi=c.createBiquadFilter();bi.type='lowpass';bi.frequency.value=filter;osc.connect(bi);bi.connect(env)}else osc.connect(env);
-      env.connect(c.destination);osc.start(t);osc.stop(end+.01);
+      env.connect(fxOutput(c));osc.start(t);osc.stop(end+.01);
     }catch(e){}
   }
   let noiseBuffer=null,noiseBufferRate=0;
@@ -923,7 +929,7 @@ html.proximity-full .ambient{background:#33050d}
       const t=Math.max(c.currentTime,start),d=Math.min(.88,Math.max(.04,duration)),src=c.createBufferSource(),bi=c.createBiquadFilter(),env=c.createGain();
       src.buffer=noiseBuffer;bi.type=type;bi.Q.value=.65;bi.frequency.setValueAtTime(from,t);bi.frequency.exponentialRampToValueAtTime(Math.max(60,to),t+d);
       env.gain.setValueAtTime(.0001,t);env.gain.exponentialRampToValueAtTime(gain*FX.volume,t+.035);env.gain.exponentialRampToValueAtTime(.0001,t+d);
-      src.connect(bi);bi.connect(env);env.connect(c.destination);src.start(t);src.stop(t+d+.01);
+      src.connect(bi);bi.connect(env);env.connect(fxOutput(c));src.start(t);src.stop(t+d+.01);
     }catch(e){}
   }
   function proximityStopSound(){
@@ -938,7 +944,7 @@ html.proximity-full .ambient{background:#33050d}
   }
   function proximityCanSound(){return proximity.active&&S.soundEnabled&&FX.volume>0&&!document.hidden}
   // User-supplied ambient recording. Load once, then loop at its original pitch.
-  const PAD_FILES=['./audio/horrorcore-pad-ambient.mp3','./audio/horrorcore-pad-ambient.wav'];
+  const PAD_FILES=['./audio/horrorcore-pad-ambient.mp3?v=full-tail-2','./audio/horrorcore-pad-ambient.wav'];
   const padAsset={buffer:null,pending:null,lastFailure:0};
   function padStatus(message){const status=$('labPadStatus');if(status)status.textContent=message}
   async function loadProximityPad(c){
@@ -965,13 +971,16 @@ html.proximity-full .ambient{background:#33050d}
     const intensity=1-proximity.distance/500;
     if(!proximity.pad){
       try{
-        const source=c.createBufferSource(),gain=c.createGain();source.buffer=padAsset.buffer;source.loop=true;
-        gain.gain.value=0;source.connect(gain);gain.connect(c.destination);source.onended=()=>{source.disconnect();gain.disconnect()};
+        const source=c.createBufferSource(),gain=c.createGain();source.buffer=padAsset.buffer;
+        // Loop at the precise decoded end, including the complete reverb tail. No crossfade or early restart.
+        source.loop=true;source.loopStart=0;source.loopEnd=source.buffer.duration;
+        gain.gain.value=0;source.connect(gain);gain.connect(fxOutput(c));source.onended=()=>{source.disconnect();gain.disconnect()};
         source.start();proximity.pad={c,gain,source};
       }catch(e){return}
     }
     const pad=proximity.pad;
-    pad.gain.gain.setTargetAtTime((.14+.32*intensity)*FX.volume,c.currentTime,.25);
+    const voice=FX.voiceObject;const duck=voice&&!voice.paused&&!voice.ended?.55:1;
+    pad.gain.gain.setTargetAtTime((.20+.30*intensity)*FX.volume*duck,c.currentTime,.16);
   }
   function proximityBeat(){
     proximity.beatTimer=null;
@@ -979,8 +988,13 @@ html.proximity-full .ambient{background:#33050d}
     const c=audioContext(),period=60/proximityBpm(proximity.distance);
     if(c&&c.state==='running'){
       const t=c.currentTime+.008,intensity=1-proximity.distance/500;
-      fxOsc(c,115,48,t,Math.min(.125,period*.49),{gain:.12+.11*intensity,attack:.009});
-      fxOsc(c,83,39,t+period*.34,Math.min(.1,period*.53),{gain:.08+.09*intensity,attack:.008});
+      const pressure=Math.pow(Math.max(0,Math.min(1,intensity)),1.45);
+      const voice=FX.voiceObject,duck=voice&&!voice.paused&&!voice.ended?.68:1;
+      // Two distinct heart sounds; harmonics remain audible on small phone speakers.
+      fxOsc(c,125,52,t,Math.min(.17,period*.44),{gain:(.14+.36*pressure)*duck,attack:.009});
+      fxOsc(c,205,92,t,Math.min(.105,period*.3),{gain:(.055+.14*pressure)*duck,type:'triangle',filter:290,attack:.006});
+      fxOsc(c,95,43,t+period*.36,Math.min(.14,period*.44),{gain:(.095+.25*pressure)*duck,attack:.008});
+      fxOsc(c,170,78,t+period*.36,Math.min(.085,period*.25),{gain:(.035+.10*pressure)*duck,type:'triangle',filter:250,attack:.006});
       proximityPad();
     }
     proximity.beatTimer=setTimeout(proximityBeat,period*1000);
@@ -999,8 +1013,8 @@ html.proximity-full .ambient{background:#33050d}
     if(!active){proximityStopSound();return}
     $('proximityMeters').textContent=d+' Meter';
     const intensity=1-d/500;
-    el.style.setProperty('--danger',String(.22+.66*intensity));
-    el.style.setProperty('--pulse',Math.max(.55,60/proximityBpm(d)*2.6)+'s');
+    el.style.setProperty('--danger',String(.22+.50*intensity));
+    el.style.setProperty('--pulse',Math.max(1.1,60/proximityBpm(d)*3.5)+'s');
     el.classList.toggle('pulsing',FX.visual&&d<=400);
     el.classList.toggle('no-effects',!FX.visual);
     if(!proximityCanSound()){proximityStopSound();return}
@@ -1015,8 +1029,8 @@ html.proximity-full .ambient{background:#33050d}
       case 'tap':note(880,580,0,.064,{gain:.027,type:'triangle'});break;
       case 'join':note(440,660,0,.15,{gain:.06});note(660,990,.13,.19,{gain:.075});break;
       case 'pending':note(530,740,0,.14,{gain:.04});note(660,900,.2,.17,{gain:.045});break;
-      case 'headstart':note(220,330,0,.3,{gain:.09,type:'triangle'});note(330,480,.23,.28,{gain:.06});note(440,680,.52,.32,{gain:.064});break;
-      case 'start':note(60,105,0,.66,{gain:.16,type:'sawtooth',filter:160});fxNoise(c,t+.01,.52,{gain:.14,from:1800,to:170});[392,494,587,784].forEach((f,i)=>note(f,f*1.02,.25+i*.14,.4,{gain:.085,type:'triangle'}));break;
+      case 'headstart':note(75,45,0,.75,{gain:.12,type:'triangle'});fxNoise(c,t,.48,{gain:.045,from:350,to:2100});note(220,330,0,.3,{gain:.09,type:'triangle'});note(330,480,.23,.28,{gain:.06});note(440,680,.52,.32,{gain:.064});break;
+      case 'start':note(105,42,0,.95,{gain:.16,type:'triangle'});note(60,105,0,.66,{gain:.16,type:'sawtooth',filter:160});fxNoise(c,t+.01,.52,{gain:.14,from:1800,to:170});[392,494,587,784].forEach((f,i)=>note(f,f*1.02,.25+i*.14,.4,{gain:.085,type:'triangle'}));break;
       case 'ping':note(1100,490,0,.35,{gain:.082});note(870,380,.19,.47,{gain:.032});note(510,340,.45,.28,{gain:.016});break;
       case 'radar':fxNoise(c,t,.47,{gain:.065,from:280,to:4800});[280,420,630,945].forEach((f,i)=>note(f,f*1.32,i*.11,.23,{gain:.055,type:'sine'}));break;
       case 'warning':note(550,475,0,.22,{gain:.092,type:'triangle'});note(550,475,.3,.22,{gain:.08,type:'triangle'});break;
@@ -1024,7 +1038,7 @@ html.proximity-full .ambient{background:#33050d}
       case 'bonus':case 'reward':note(523,523,0,.19,{gain:.07});note(659,659,.13,.2,{gain:.07});note(784,784,.26,.3,{gain:.09});note(1047,1047,.4,.4,{gain:.055});break;
       case 'capture':fxNoise(c,t,.48,{gain:.20,from:5700,to:120});note(90,43,0,.78,{gain:.20,type:'sawtooth',filter:190});note(970,460,.04,.44,{gain:.12,type:'sawtooth',filter:2300});note(640,330,.48,.3,{gain:.064,type:'triangle'});break;
       case 'reveal-end':note(680,240,0,.38,{gain:.055,type:'sine'});break;
-      case 'end':note(587,587,0,.25,{gain:.06});note(440,440,.2,.28,{gain:.06});note(330,330,.44,.32,{gain:.085});note(165,135,.67,.7,{gain:.1,type:'triangle'});break;
+      case 'end':note(100,42,0,1.1,{gain:.12,type:'triangle'});fxNoise(c,t,.7,{gain:.045,from:1800,to:150});note(587,587,0,.25,{gain:.06});note(440,440,.2,.28,{gain:.06});note(330,330,.44,.32,{gain:.085});note(165,135,.67,.7,{gain:.1,type:'triangle'});break;
       case 'countdown':note(extra.last?990:670,extra.last?1260:610,0,extra.last?.17:.11,{gain:extra.last?.095:.045,type:extra.last?'triangle':'sine'});break;
       case 'wheel-tick':note(430,250,0,.035,{gain:.022,type:'triangle'});break;
       case 'wheel-win':note(523,523,0,.19,{gain:.077});note(659,659,.17,.21,{gain:.072});note(784,784,.34,.25,{gain:.074});note(1047,1047,.5,.5,{gain:.08});break;
@@ -1034,7 +1048,7 @@ html.proximity-full .ambient{background:#33050d}
       default:note(670,920,0,.12,{gain:.04});break;
     }
   }
-  const visualCueNames={start:'DIE JAGD BEGINNT',headstart:'RUNNER, LOS!',radar:'RADAR AKTIV',ping:'NEUES SIGNAL',bonus:'BONUSZIEL FREI',reward:'BONUS GESICHERT',stealth:'TARNUNG AKTIV',warning:'ACHTUNG!',end:'MISSION BEENDET'};
+  const visualCueNames={capture:'FANG BESTÄTIGT',start:'DIE JAGD BEGINNT',headstart:'RUNNER, LOS!',radar:'RADAR AKTIV',ping:'NEUES SIGNAL',bonus:'BONUSZIEL FREI',reward:'BONUS GESICHERT',stealth:'TARNUNG AKTIV',warning:'ACHTUNG!',end:'MISSION BEENDET'};
   function visualCue(kind){
     if(!FX.visual||document.hidden||window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
     const label=visualCueNames[kind];if(!label)return;
