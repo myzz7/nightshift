@@ -613,7 +613,7 @@ html.proximity-full .ambient{background:#33050d}
       <label class="label" for="labRange">Simulierte Entfernung</label><input class="range" type="range" id="labRange" min="0" max="700" step="1" value="600">
       <div class="lab-grid mt" id="labDistances">
         <button class="btn" data-lab-distance="600">600 m · aus</button><button class="btn" data-lab-distance="500">500 m</button><button class="btn" data-lab-distance="400">400 m</button><button class="btn" data-lab-distance="300">300 m</button><button class="btn" data-lab-distance="200">200 m</button><button class="btn" data-lab-distance="100">100 m</button><button class="btn" data-lab-distance="0">0 m</button>
-      </div><div class="two mt"><button class="btn orange" id="labApproach">Hunter nähert sich</button><button class="btn" id="labStop">Alarm stoppen</button></div><p class="micro mt">Automatische Annäherung von 600 auf 0 Meter in 30 Sekunden. Der Alarm verwendet den distanzabhängigen Herzschlag ohne Hintergrund-Pad.</p>
+      </div><div class="two mt"><button class="btn orange" id="labApproach">Hunter nähert sich</button><button class="btn" id="labStop">Alarm stoppen</button></div><p class="micro mt">Automatische Annäherung von 600 auf 0 Meter in 30 Sekunden. Der Alarm verwendet den aufgenommenen, distanzabhängigen Herzschlag und ein leises Hintergrund-Pad.</p>
     </div>
     <div class="panel mt"><div class="panel-title">Spielereignisse</div><div id="labEvents" class="lab-grid mt"></div><p class="sub mt" id="labEventStatus" role="status">Bereit zum Testen.</p></div>
     <div class="panel mt"><div class="panel-title">Aktionen</div><div class="lab-grid mt" id="labActions">
@@ -703,7 +703,7 @@ html.proximity-full .ambient{background:#33050d}
     const value=String(raw).toUpperCase().replace(/\s/g,'');
     return LOCAL_TEST_CODE.startsWith(value)?value:value.replace(/[^A-HJ-NP-Z2-9]/g,'').slice(0,4);
   }
-  const proximity={samples:new Map(),lastSent:0,refreshAt:0,refreshing:false,distance:null,receivedAt:0,beatTimer:null,active:false};
+  const proximity={samples:new Map(),lastSent:0,refreshAt:0,refreshing:false,distance:null,receivedAt:0,beatTimer:null,pad:null,active:false};
   const proximityBpm=meters=>Math.round(100+76*Math.pow(Math.max(0,Math.min(1,1-meters/PROX_LIMIT)),.8));
   const S={peer:null,conn:null,clients:new Map(),pending:new Map(),host:false,approved:false,
     roomCode:'',roomName:'',myName:'',preferredRole:'hunter',myId:'',players:[],
@@ -934,6 +934,9 @@ html.proximity-full .ambient{background:#33050d}
   }
   function proximityStopSound(){
     if(proximity.beatTimer!==null){clearTimeout(proximity.beatTimer);proximity.beatTimer=null}
+    for(const source of heartbeatSources){try{source.stop()}catch(e){}}
+    const pad=proximity.pad;proximity.pad=null;
+    if(pad){const t=pad.c.currentTime;try{pad.gain.gain.cancelScheduledValues(t);pad.gain.gain.setTargetAtTime(0,t,.035)}catch(e){}for(const source of pad.sources){try{source.stop(t+.18)}catch(e){}}}
   }
   function proximityClear(all=false){
     proximity.distance=null;proximity.receivedAt=0;proximity.lastSent=0;proximity.refreshAt=0;
@@ -941,6 +944,101 @@ html.proximity-full .ambient{background:#33050d}
     proximityRender();
   }
   function proximityCanSound(){return proximity.active&&S.soundEnabled&&FX.volume>0&&!document.hidden}
+  // Restart the pad at the beginning of the reverb tail without cutting off the decay.
+  const PAD_FILES=['./audio/horrorcore-pad-ambient.mp3?v=quiet-pad-4','./audio/horrorcore-pad-ambient.wav'];
+  const PAD_REVERB_START=12.9;
+  const PAD_OVERLAP_MAX=3;
+  const padAsset={buffer:null,pending:null,lastFailure:0,loop:null};
+  function padStatus(message){const status=$('labPadStatus');if(status)status.textContent=message}
+  async function loadProximityPad(c){
+    if(padAsset.buffer)return padAsset.buffer;
+    if(padAsset.pending)return padAsset.pending;
+    if(Date.now()-padAsset.lastFailure<30000)return null;
+    padStatus('Pad-Sound wird geladen …');
+    padAsset.pending=(async()=>{
+      for(const path of PAD_FILES){try{
+        const res=await fetch(path,{cache:'no-cache'});if(!res.ok)continue;
+        const decoded=await c.decodeAudioData(await res.arrayBuffer());
+        padAsset.buffer=decoded;padStatus('Original-Pad geladen · bereit');return decoded;
+      }catch(e){}}
+      padAsset.lastFailure=Date.now();padStatus('Original-Pad fehlt: Audiodatei im Ordner audio/ erforderlich. Herzschlag funktioniert weiterhin.');return null;
+    })();
+    try{return await padAsset.pending}finally{padAsset.pending=null}
+  }
+  function preparePadLoop(c,buffer){
+    if(padAsset.loop?.original===buffer)return padAsset.loop;
+    // For the supplied ~15.05 s recording the tail starts around 12.9 s.
+    // For unrelated or legacy short assets, retain their ordinary full-length loop.
+    const tail=buffer.duration-PAD_REVERB_START;
+    if(tail<=.1||tail>PAD_OVERLAP_MAX)return {original:buffer,buffer,period:buffer.duration,overlap:false};
+    const frames=Math.round(PAD_REVERB_START*buffer.sampleRate);
+    const mixed=c.createBuffer(buffer.numberOfChannels,frames,buffer.sampleRate);
+    for(let ch=0;ch<buffer.numberOfChannels;ch++){
+      const original=buffer.getChannelData(ch),out=mixed.getChannelData(ch);
+      out.set(original.subarray(0,frames));
+      // Fold the existing reverb tail over the next entrance, sample-accurately.
+      for(let i=0;i<Math.min(frames,original.length-frames);i++)out[i]+=original[frames+i];
+    }
+    return padAsset.loop={original:buffer,buffer:mixed,period:frames/buffer.sampleRate,overlap:true};
+  }
+  function proximityPad(){
+    const c=audioContext();if(!c||c.state!=='running')return;
+    if(!padAsset.buffer){
+      if(!padAsset.pending&&Date.now()-padAsset.lastFailure>=30000)void loadProximityPad(c).then(buffer=>{if(buffer&&proximityCanSound())proximityPad()});
+      return;
+    }
+    const intensity=1-proximity.distance/500;
+    if(!proximity.pad){
+      try{
+        const loop=preparePadLoop(c,padAsset.buffer),gain=c.createGain(),sources=new Set(),t=c.currentTime+.02;
+        gain.gain.value=0;gain.connect(fxOutput(c));
+        const makeSource=(buffer)=>{const source=c.createBufferSource();source.buffer=buffer;source.connect(gain);sources.add(source);source.onended=()=>{sources.delete(source);source.disconnect();if(!sources.size)gain.disconnect()};return source};
+        const repeating=makeSource(loop.buffer);repeating.loop=true;repeating.loopStart=0;repeating.loopEnd=loop.period;
+        if(loop.overlap){
+          // The first pass has no previous tail. Later passes blend the original tail into the next beginning.
+          const intro=makeSource(padAsset.buffer);intro.start(t,0,loop.period);repeating.start(t+loop.period);
+        }else repeating.start(t);
+        proximity.pad={c,gain,sources};
+        padStatus(loop.overlap?'Original-Pad · Hallüberlappung ab '+loop.period.toFixed(2)+' s':'Pad geladen · vollständiger Loop (abweichende Aufnahme)');
+      }catch(e){return}
+    }
+    const pad=proximity.pad;
+    const voice=FX.voiceObject;const duck=voice&&!voice.paused&&!voice.ended?.55:1;
+    pad.gain.gain.setTargetAtTime((.05+.075*intensity)*FX.volume*duck,c.currentTime,.16);
+  }
+  // One natural lub-dub from the supplied recording, triggered per current BPM.
+  const heartbeatSources=new Set();
+  const heartbeatAsset={buffer:null,pending:null,lastFailure:0};
+  async function loadHeartbeat(c){
+    if(heartbeatAsset.buffer)return heartbeatAsset.buffer;
+    if(heartbeatAsset.pending)return heartbeatAsset.pending;
+    if(Date.now()-heartbeatAsset.lastFailure<10000)return null;
+    heartbeatAsset.pending=(async()=>{
+      try{
+        const res=await fetch('./audio/heartbeat-single.mp3?v=1',{cache:'no-cache'});
+        if(!res.ok)throw Error('heartbeat file missing');
+        const buffer=await c.decodeAudioData(await res.arrayBuffer());
+        heartbeatAsset.buffer=buffer;return buffer;
+      }catch(e){heartbeatAsset.lastFailure=Date.now();return null}
+    })();
+    try{return await heartbeatAsset.pending}finally{heartbeatAsset.pending=null}
+  }
+  function playHeartbeat(c,t,period,gain){
+    const buffer=heartbeatAsset.buffer;
+    if(!buffer){void loadHeartbeat(c);return false}
+    try{
+      const source=c.createBufferSource(),env=c.createGain(),presence=c.createBiquadFilter();
+      source.buffer=buffer;
+      // Fit a whole cardiac cycle into the beat interval without overlapping the next.
+      source.playbackRate.value=Math.max(1,buffer.duration/(period*.96));
+      presence.type='peaking';presence.frequency.value=180;presence.Q.value=.8;presence.gain.value=3;
+      env.gain.value=gain*FX.volume;
+      source.connect(presence);presence.connect(env);env.connect(fxOutput(c));
+      heartbeatSources.add(source);
+      source.onended=()=>{heartbeatSources.delete(source);source.disconnect();presence.disconnect();env.disconnect()};
+      source.start(t);return true;
+    }catch(e){return false}
+  }
   function proximityBeat(){
     proximity.beatTimer=null;
     if(!proximityCanSound())return;
@@ -949,11 +1047,12 @@ html.proximity-full .ambient{background:#33050d}
       const t=c.currentTime+.008,intensity=1-proximity.distance/500;
       const pressure=Math.pow(Math.max(0,Math.min(1,intensity)),1.45);
       const voice=FX.voiceObject,duck=voice&&!voice.paused&&!voice.ended?.68:1;
-      // Two distinct heart sounds; harmonics remain audible on small phone speakers.
-      fxOsc(c,125,52,t,Math.min(.17,period*.44),{gain:(.18+.45*pressure)*duck,attack:.009});
-      fxOsc(c,205,92,t,Math.min(.105,period*.3),{gain:(.07+.175*pressure)*duck,type:'triangle',filter:290,attack:.006});
-      fxOsc(c,95,43,t+period*.36,Math.min(.14,period*.44),{gain:(.12+.31*pressure)*duck,attack:.008});
-      fxOsc(c,170,78,t+period*.36,Math.min(.085,period*.25),{gain:(.045+.125*pressure)*duck,type:'triangle',filter:250,attack:.006});
+      if(!playHeartbeat(c,t,period,(.42+.63*pressure)*duck)&&heartbeatAsset.lastFailure){
+        // Keep the warning audible if the recording cannot be decoded.
+        fxOsc(c,125,52,t,Math.min(.17,period*.44),{gain:(.18+.45*pressure)*duck,attack:.009});
+        fxOsc(c,95,43,t+period*.36,Math.min(.14,period*.44),{gain:(.12+.31*pressure)*duck,attack:.008});
+      }
+      proximityPad();
     }
     proximity.beatTimer=setTimeout(proximityBeat,period*1000);
   }
@@ -977,6 +1076,7 @@ html.proximity-full .ambient{background:#33050d}
     el.classList.toggle('no-effects',!FX.visual);
     if(!proximityCanSound()){proximityStopSound();return}
     if(proximity.beatTimer===null)proximityBeat();
+    else proximityPad();
   }
   function soundEffect(kind,extra={}){
     const c=audioContext();if(!c)return;
