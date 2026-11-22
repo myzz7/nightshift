@@ -554,7 +554,7 @@ body{background:var(--bg)}
       <label class="label" for="durationRange">Spieldauer</label><div class="number-row"><span class="sub">Ab Beginn der Jagd</span><span class="number" id="durationValue">60 min</span></div><input id="durationRange" class="range" type="range" min="20" max="180" step="10" value="60">
       <label class="label" for="leadRange">Runner-Vorsprung</label><div class="number-row"><span class="sub">Vor dem ersten Hunter-Start</span><span class="number" id="leadValue">5 min</span></div><input id="leadRange" class="range" type="range" min="0" max="15" step="1" value="5">
       <p class="micro">Bei einem bestätigten Fang werden die aktuellen Standorte aller GPS-aktiven Spieler für exakt zehn Sekunden für alle Mitspieler sichtbar. Danach werden die temporären Marker gelöscht.</p>
-      <p class="micro">Fangen: Hunter stellt eine Anfrage; der Runner bestätigt persönlich auf seinem Gerät. Nur Runner dürfen Fahrzeuge insgesamt höchstens 10 Minuten je Runde nutzen (Fahrzeugmodus manuell starten/stoppen). Runner, die GPS freiwillig ausschalten, scheiden sofort aus. Hunter können GPS jederzeit ohne Ausscheiden stoppen. Aus Sicherheitsgründen niemanden anfassen, bedrängen oder über Straßen verfolgen.</p><p class="micro">Runner → Hunter: GPS alle 5 Minuten. Hunter → Runner: 12-Minuten-Snapshot für 60 Sekunden, nur bei freiwillig aktivem Hunter-GPS. Ohne Hunter-GPS gibt es für diesen Hunter kein Radar-Signal. GPS wird nicht dauerhaft abgefragt; keine Live-Nähe-Warnung. Sonderaktionen lösen bei Bedarf eine einzelne Messung aus. Nach einem Drittel der Jagdzeit: Bonusziel für 2 unterdrückte Runner-Pings. Nur Runner benötigen GPS. Freiwilliges GPS-Abschalten während der Runde führt bei Runnern zum Ausscheiden; bei GPS-Ausfall gilt eine kurze Frist. Fällige Runner-Pings müssen innerhalb von 65 Sekunden eintreffen. Hunter-Radar ist freiwillig. Standortfreigabe ist jederzeit stoppbar.</p>
+      <p class="micro">Fangen: Hunter stellt eine Anfrage; der Runner bestätigt persönlich auf seinem Gerät. Nur Runner dürfen Fahrzeuge insgesamt höchstens 10 Minuten je Runde nutzen (Fahrzeugmodus manuell starten/stoppen). Runner, die GPS freiwillig ausschalten, scheiden sofort aus. Hunter können GPS jederzeit ohne Ausscheiden stoppen. Aus Sicherheitsgründen niemanden anfassen, bedrängen oder über Straßen verfolgen.</p><p class="micro">Runner → Hunter: GPS alle 5 Minuten. Hunter → Runner: 12-Minuten-Snapshot für 60 Sekunden, nur bei freiwillig aktivem Hunter-GPS. Ohne Hunter-GPS gibt es für diesen Hunter kein Radar-Signal. GPS wird nicht dauerhaft abgefragt; keine Live-Nähe-Warnung. Sonderaktionen lösen bei Bedarf eine einzelne Messung aus. Nach einem Drittel der Jagdzeit: Bonusziel für 2 unterdrückte Runner-Pings. Nur Runner benötigen GPS. Freiwilliges GPS-Abschalten während der Runde führt bei Runnern zum Ausscheiden; bei Verbindungsabbruch sind fünf Minuten für den Wiederbeitritt vorgesehen. Ein verspäteter Runner-Ping wird nach 65 Sekunden angemahnt und kann bis zum nächsten regulären Ping nachgereicht werden. Hunter-Radar ist freiwillig. Standortfreigabe ist jederzeit stoppbar.</p>
     </div>
     <div class="panel mt" id="teamPanel">
       <div class="row-between"><div><div class="panel-title">Teamboard</div><div class="sub" id="teamHint">Spieler verschieben oder antippen.</div></div><span class="pill" id="hostBadge">HOST</span></div>
@@ -692,7 +692,7 @@ body{background:var(--bg)}
   const VEHICLE_LIMIT_MS=10*60*1000, CAPTURE_EXPIRE_MS=60*1000, REVEAL_MS=10*1000;
   const REACTIONS=['❤️','😂','🔥','👏','😱','👀'],MOCK_SOUNDS=['whistle','steps','beacon','horror-horn'];
   const ROOM_PREFIX='nightshift-';
-  const RECONNECT_MS=120000, RESUME_KEY='nightshift-resume-v1', PENDING_PING_KEY='nightshift-pending-ping-v1';
+  const RECONNECT_MS=5*60*1000, RESUME_KEY='nightshift-resume-v1', PENDING_PING_KEY='nightshift-pending-ping-v1';
   const VOICE_CHUNK=12000, VOICE_MAX=240000, VOICE_MS=8000;
   const randomToken=()=>Array.from(crypto.getRandomValues(new Uint8Array(24)),x=>x.toString(16).padStart(2,'0')).join('');
   const validToken=t=>typeof t==='string'&&/^[a-f0-9]{48}$/.test(t);
@@ -719,7 +719,7 @@ body{background:var(--bg)}
     camo:new Map(),scanSamples:new Map(),scanVisibleUntil:0,
      soundEnabled:true,audio:null,timer:null,joining:false,lastLocationSend:0,claimedEvent:false,
     gpsStatus:new Map(),reactionRate:new Map(),mockRate:new Map(),mockMarkers:new Map(),
-    rejoinKeys:new Map(),offlineSince:new Map(),publicPings:new Map(),token:'',reconnectAt:0,reconnectBusy:false,leaving:false,
+    rejoinKeys:new Map(),offlineSince:new Map(),lastClientSeen:new Map(),pingWarnings:new Map(),publicPings:new Map(),token:'',reconnectAt:0,reconnectBusy:false,leaving:false,
     pendingPing:null,pingBusy:false,pingAck:-1,pingAckRound:0,offlineSampleKey:'',lastLinkPong:0,lastLinkPing:0,lastLinkTick:0,lastPeerRetry:0,voiceIncoming:new Map(),voiceRate:new Map(),voiceURLs:[],recorder:null,recordStream:null,recordTimer:null,recordRequest:false,voiceEpoch:0,
     lastGPSHeartbeat:0,lastReactionAttempt:0,lastMockAttempt:0,localMockNext:0,mockPending:false,
     captureRequests:new Map(),captureRate:new Map(),captureSelectKey:'',activityEvents:[],announcementTimer:null,
@@ -1278,7 +1278,7 @@ body{background:var(--bg)}
   function saveResume(){if(S.host||!S.approved||!validToken(S.token)||!S.roomCode||S.phase==='ended'||S.leaving)return;try{localStorage.setItem(RESUME_KEY,JSON.stringify({token:S.token,code:S.roomCode,name:S.myName,preference:S.preferredRole,gps:S.gpsWanted&&S.gpsVerified,expires:Math.max(Date.now()+RECONNECT_MS,(S.endAt||Date.now()+3600000)+RECONNECT_MS)}))}catch{}}
   function forgetResume(){try{localStorage.removeItem(RESUME_KEY);sessionStorage.removeItem(PENDING_PING_KEY)}catch{}renderResume()}
   function storePending(){try{if(S.pendingPing)sessionStorage.setItem(PENDING_PING_KEY,JSON.stringify(S.pendingPing));else sessionStorage.removeItem(PENDING_PING_KEY)}catch{}}
-  function readPending(){try{const x=JSON.parse(sessionStorage.getItem(PENDING_PING_KEY)||'null');return x&&x.code===S.roomCode&&x.token===S.token&&Date.now()-x.pos?.at<65000?x:null}catch{return null}}
+  function readPending(){try{const x=JSON.parse(sessionStorage.getItem(PENDING_PING_KEY)||'null');return x&&x.code===S.roomCode&&x.token===S.token&&Date.now()-x.pos?.at<RECONNECT_MS?x:null}catch{return null}}
   function acknowledgePing(slot,round){if(round!==S.chaseAt||!Number.isInteger(slot))return;S.pingAckRound=round;S.pingAck=Math.max(S.pingAck,slot);if(S.pendingPing?.round===round&&S.pendingPing.slot<=slot){S.pendingPing=null;storePending()}}
   function scheduleReconnect(){if(S.host||S.leaving||!S.roomCode||!S.approved||S.phase==='ended')return;S.reconnectAt=Date.now()+2500;connection('RECONNECT');}
   function reconnectTick(){if(!S.reconnectAt||S.reconnectAt>Date.now()||S.reconnectBusy||S.host||S.leaving)return;if(S.conn){S.reconnectAt=0;return}S.reconnectAt=0;S.reconnectBusy=true;(async()=>{try{if(!S.peer||S.peer.destroyed)await initPeer();if(S.peer.disconnected){S.peer.reconnect();scheduleReconnect();return}connectHost(true)}catch{scheduleReconnect()}finally{S.reconnectBusy=false}})()}
@@ -1314,18 +1314,18 @@ body{background:var(--bg)}
       notify(resuming?'Verbindung wieder da':'Beitrittsanfrage gesendet',resuming?'Spielstand wird wiederhergestellt.':'Warte auf den Host.');
     });
     c.on('data',data=>{if(S.conn===c){S.lastLinkPong=Date.now();receiveHostMessage(data)}});
-    const fail=()=>{clearTimeout(timeout);if(S.conn!==c)return;S.conn=null;try{c.close()}catch{}connection('HOST OFFLINE');if(!S.leaving&&S.phase!=='ended'){scheduleReconnect();notify('Verbindung getrennt','Automatischer Wiederbeitritt; bestätigte Pings bleiben erhalten.')}};
+    const fail=()=>{clearTimeout(timeout);if(S.conn!==c)return;S.conn=null;try{c.close()}catch{}connection('HOST OFFLINE');if(!S.leaving&&S.phase!=='ended'){scheduleReconnect();notify('Verbindung getrennt','Automatischer Wiederbeitritt bis zu fünf Minuten; bestätigte Pings bleiben erhalten.')}};
     c.on('close',fail);c.on('error',fail);
   }
   function restoreClient(id,c){
-    const old=S.clients.get(id);S.clients.set(id,c);S.offlineSince.delete(id);if(old&&old!==c)try{old.close()}catch{}
+    const old=S.clients.get(id);S.clients.set(id,c);S.offlineSince.delete(id);S.lastClientSeen.set(id,Date.now());if(old&&old!==c)try{old.close()}catch{}
     safeSend(c,{t:'resumed'});sync();
     const p=S.players.find(x=>x.id===id);if(!p||p.disqualified||S.phase!=='playing')return;
     if(p.role==='hunter')for(const ping of S.publicPings.values())sendTo(id,ping);
     if(p.role==='runner'){
       if(S.scanVisibleUntil>Date.now())sendTo(id,{t:'hunter-scan',samples:[...S.scanSamples.values()],until:S.scanVisibleUntil});
       if(S.lastPingSlot>0&&S.lastRunnerById.get(id)===S.lastPingSlot)sendTo(id,{t:'ping-ack',slot:S.lastPingSlot,round:S.chaseAt});
-      else if(S.lastPingSlot>0&&Date.now()-(S.chaseAt+S.lastPingSlot*PING_MS)<=65000)sendTo(id,{t:'pulse-runner',slot:S.lastPingSlot});
+      else if(S.lastPingSlot>0&&Date.now()-(S.chaseAt+S.lastPingSlot*PING_MS)<PING_MS)sendTo(id,{t:'pulse-runner',slot:S.lastPingSlot});
     }
   }
   function attachIncoming(c){
@@ -1340,7 +1340,7 @@ body{background:var(--bg)}
         if(data.t==='resume'){
           id=[...S.rejoinKeys].find(([,key])=>key===data.token)?.[0]||null;
           if(!id||!S.players.some(p=>p.id===id)||S.phase==='ended'){deny('Keine wiederherstellbare Sitzung.');return}
-          restoreClient(id,c);return;
+          const last=S.offlineSince.get(id)??S.lastClientSeen.get(id);if(last!==undefined&&Date.now()-last>=RECONNECT_MS){if(['headstart','playing'].includes(S.phase))eliminatePlayer(id,'Verbindung länger als fünf Minuten getrennt.');deny('Die fünfminütige Wiederverbindungsfrist ist abgelaufen.');return}restoreClient(id,c);return;
         }
         if(S.phase!=='lobby'){deny('Das Spiel läuft bereits.');return}
         if(S.players.length+S.pending.size>=24){deny('Raum ist voll.');return}
@@ -1348,15 +1348,15 @@ body{background:var(--bg)}
         id=c.peer;const name=clean(data.name,20);if(!name){deny('Kein Name angegeben.');return}
         S.pending.set(id,{id,name,preference:data.preference==='runner'?'runner':'hunter',token:data.token,conn:c});safeSend(c,{t:'waiting'});renderPending();notify('Neue Beitrittsanfrage',name+' möchte in den Raum.',true);return;
       }
-      if(id&&S.clients.get(id)===c)onHostData({peer:id},data);
+      if(id&&S.clients.get(id)===c){S.lastClientSeen.set(id,Date.now());onHostData({peer:id},data)}
     });
     const disconnected=()=>{clearTimeout(timer);if(!id)return;if(S.pending.get(id)?.conn===c)S.pending.delete(id);
-      if(S.clients.get(id)===c){S.clients.delete(id);S.offlineSince.set(id,Date.now());S.voiceIncoming.delete('host:'+id);sync();notify('Spieler getrennt','Wiederbeitritt derselben Sitzung ist möglich.')}
+      if(S.clients.get(id)===c){S.clients.delete(id);S.offlineSince.set(id,S.lastClientSeen.get(id)??Date.now());S.voiceIncoming.delete('host:'+id);sync();notify('Spieler getrennt','Wiederbeitritt derselben Sitzung ist möglich.')}
       renderPending();
     };
     c.on('close',disconnected);c.on('error',disconnected);
   }
-  function approve(id,ok){const item=S.pending.get(id);if(!item)return;S.pending.delete(id);if(ok&&item.conn.open){S.clients.set(id,item.conn);S.rejoinKeys.set(id,item.token);S.players.push({id,name:item.name,role:'none',preference:item.preference,host:false});safeSend(item.conn,{t:'approved'});sync();notify('Spieler aufgenommen',item.name);cue('join',{voice:true})}else{safeSend(item.conn,{t:'denied',reason:'Der Host hat die Anfrage abgelehnt.'});setTimeout(()=>item.conn.close(),180)}renderPending();renderTeams();checkStart()}
+  function approve(id,ok){const item=S.pending.get(id);if(!item)return;S.pending.delete(id);if(ok&&item.conn.open){S.clients.set(id,item.conn);S.lastClientSeen.set(id,Date.now());S.rejoinKeys.set(id,item.token);S.players.push({id,name:item.name,role:'none',preference:item.preference,host:false});safeSend(item.conn,{t:'approved'});sync();notify('Spieler aufgenommen',item.name);cue('join',{voice:true})}else{safeSend(item.conn,{t:'denied',reason:'Der Host hat die Anfrage abgelehnt.'});setTimeout(()=>item.conn.close(),180)}renderPending();renderTeams();checkStart()}
   function receiveHostMessage(data){if(!data||typeof data!=='object'||!['snapshot','waiting','denied','approved','ping','runner-hide','hunter-scan','radar-stop','camo','event','pulse-runner','pulse-hunter','stop','reaction','mock-signal','mock-accepted','mock-denied','capture-prompt','capture-result','announcement','capture-event','reveal-coordinate','reveal-hide','proximity-alert','resumed','ping-ack','voice-part','link-pong'].includes(data.t))return;
     if(data.t==='link-pong')return;
     if(data.t==='waiting'){$('waitApproval').classList.remove('hidden');return}
@@ -1618,7 +1618,7 @@ body{background:var(--bg)}
   }
   function onHostData(conn,data){if(!S.host||!data||typeof data!=='object')return;const id=conn.peer;if(!S.players.some(p=>p.id===id))return;const role=roleOf(id),player=S.players.find(p=>p.id===id);
 
-    if(data.t==='link-ping'){sendTo(id,{t:'link-pong'});return}
+    if(data.t==='link-ping'){sendTo(id,{t:'link-pong'});if(data.resume===true&&role==='runner'&&!player.disqualified&&S.phase==='playing'&&S.lastPingSlot>0&&Date.now()-(S.chaseAt+S.lastPingSlot*PING_MS)<PING_MS){if(S.lastRunnerById.get(id)===S.lastPingSlot)sendTo(id,{t:'ping-ack',slot:S.lastPingSlot,round:S.chaseAt});else sendTo(id,{t:'pulse-runner',slot:S.lastPingSlot})}return}
     if(data.t==='voice-part'){hostVoicePart(id,player,data);return}
     if(data.t==='proximity-location'){return} // No continuous location exchange.
     // Nur registrierte, GPS-aktive Teilnehmer; keine dauerhafte Speicherung der Koordinaten.
@@ -1706,10 +1706,10 @@ body{background:var(--bg)}
       const slot=Number(data.slot),current=Math.floor((now()-S.chaseAt)/PING_MS),due=S.chaseAt+slot*PING_MS,t=Date.now();
       if(!Number.isInteger(slot)||slot<1||data.round!==S.chaseAt||player?.disqualified||slot!==current||slot!==S.lastPingSlot)return;
       if(S.lastRunnerById.get(id)===slot){sendTo(id,{t:'ping-ack',slot,round:S.chaseAt});return}
-      if(!S.gpsStatus.get(id)?.on||t-due>65000)return;
-      const pos=validPoint(data.pos);if(!pos||pos.at<due-10000||pos.at>t+5000||!insidePlayArea(pos))return;
+      if(!S.gpsStatus.get(id)?.on||t-due>=PING_MS)return;
+      const raw=data.pos,loc=toLatLng(raw),accuracy=Number(raw?.accuracy),at=Number(raw?.at);const pos=loc&&Number.isFinite(accuracy)&&accuracy>=0&&accuracy<=150&&Number.isFinite(at)?{...loc,accuracy,at}:null;if(!pos||pos.at<due-10000||pos.at>t+5000||!insidePlayArea(pos))return;
       const tag=S.anonTokens.get(id);if(!tag)return;
-      S.lastRunnerById.set(id,slot);const ping={t:'ping',tag,lat:pos.lat,lng:pos.lng,at:pos.at,slot};
+      S.lastRunnerById.set(id,slot);S.pingWarnings.delete(id);const ping={t:'ping',tag,lat:pos.lat,lng:pos.lng,at:pos.at,slot};
       S.publicPings.set(id,ping);sendTo(id,{t:'ping-ack',slot,round:S.chaseAt});sendAll(ping,'hunter');return;
     }
     if(data.t==='hunter-location'&&role==='hunter'&&S.phase==='playing'){
@@ -1725,15 +1725,15 @@ body{background:var(--bg)}
     }
   }
   function broadcastScan(){if(S.phase!=='playing')return;const samples=[...S.scanSamples.values()];sendAll({t:'hunter-scan',samples,until:S.scanVisibleUntil},'runner')}
-  function start(){if(!S.host||S.phase!=='lobby')return;proximityClear(true);endReveal();checkStart();if($('startGame').disabled)return;const t=Date.now();S.startAt=t;S.chaseAt=t+S.settings.headstartMin*60000;S.endAt=S.chaseAt+S.settings.durationMin*60000;S.phase=S.settings.headstartMin>0?'headstart':'playing';S.challengeWinner=null;S.challengeOpen=false;S.challengeUntil=0;S.challengeTriggered=false;S.lastPingSlot=0;S.lastScanSlot=0;S.publicPings.clear();S.pendingPing=null;S.pingAck=-1;S.pingAckRound=S.chaseAt;storePending();S.camo.clear();S.scanSamples.clear();S.mockRate.clear();S.reactionRate.clear();S.localMockNext=0;S.mockPending=false;S.lastMockAttempt=0;S.anonTokens.clear();S.hunterTokens.clear();S.lastRunnerById.clear();S.lastHunterById.clear();S.claimedEvent=false;S.captureRequests.clear();S.captureRate.clear();S.activityEvents=[];S.captureSelectKey='';$('catchFeed').innerHTML='<p>Noch keine Meldungen.</p>';
+  function start(){if(!S.host||S.phase!=='lobby')return;proximityClear(true);endReveal();checkStart();if($('startGame').disabled)return;const t=Date.now();S.startAt=t;S.chaseAt=t+S.settings.headstartMin*60000;S.endAt=S.chaseAt+S.settings.durationMin*60000;S.phase=S.settings.headstartMin>0?'headstart':'playing';S.challengeWinner=null;S.challengeOpen=false;S.challengeUntil=0;S.challengeTriggered=false;S.lastPingSlot=0;S.lastScanSlot=0;S.pingWarnings.clear();S.publicPings.clear();S.pendingPing=null;S.pingAck=-1;S.pingAckRound=S.chaseAt;storePending();S.camo.clear();S.scanSamples.clear();S.mockRate.clear();S.reactionRate.clear();S.localMockNext=0;S.mockPending=false;S.lastMockAttempt=0;S.anonTokens.clear();S.hunterTokens.clear();S.lastRunnerById.clear();S.lastHunterById.clear();S.claimedEvent=false;S.captureRequests.clear();S.captureRate.clear();S.activityEvents=[];S.captureSelectKey='';$('catchFeed').innerHTML='<p>Noch keine Meldungen.</p>';
     for(const p of S.players){p.vehicleSince=0;p.vehicleUsedMs=0;p.eliminationReason='';p.caughtBy=null;p.disqualified=false;const used=p.role==='runner'?S.anonTokens:S.hunterTokens;const prefix=p.role==='runner'?'R-':'H-';let token;do{token=prefix+Math.floor(100+Math.random()*899)}while([...used.values()].includes(token));used.set(p.id,token)}
     sync();showGame();notify('Spiel gestartet',S.phase==='headstart'?'Runner haben jetzt Vorsprung!':'Die Jagd läuft!',true);tick()}
-  function hostTick(){if(!S.host)return;const t=Date.now();for(const [id,since] of S.offlineSince){if(t-since<RECONNECT_MS)continue;if(S.phase==='lobby'){S.offlineSince.delete(id);S.rejoinKeys.delete(id);S.gpsStatus.delete(id);S.players=S.players.filter(p=>p.id!==id);sync()}else if(['headstart','playing'].includes(S.phase)){eliminatePlayer(id,'Verbindung länger als zwei Minuten getrennt.');S.offlineSince.delete(id);sync()}}if(['headstart','playing'].includes(S.phase)){let changed=false;for(const p of S.players.filter(p=>p.role==='runner'&&!p.disqualified)){const gps=S.gpsStatus.get(p.id);if(!S.offlineSince.has(p.id)&&(!gps||!gps.on||(t-gps.at>180000))){eliminatePlayer(p.id,'GPS-Verbindung länger unterbrochen.');changed=true;continue}if(p.role==='runner'&&p.vehicleSince&&(p.vehicleUsedMs||0)+t-p.vehicleSince>=VEHICLE_LIMIT_MS){p.vehicleUsedMs=VEHICLE_LIMIT_MS;p.vehicleSince=0;eliminatePlayer(p.id,'10 Minuten Fahrzeugzeit erreicht.');changed=true}}}
+  function hostTick(){if(!S.host)return;const t=Date.now();for(const [id,conn] of S.clients){const seen=S.lastClientSeen.get(id)??t;if(t-seen>45000){S.clients.delete(id);S.offlineSince.set(id,seen);try{conn.close()}catch{}S.voiceIncoming.delete('host:'+id);sync()}}for(const [id,since] of S.offlineSince){if(t-since<RECONNECT_MS)continue;if(S.phase==='lobby'){S.offlineSince.delete(id);S.lastClientSeen.delete(id);S.pingWarnings.delete(id);S.rejoinKeys.delete(id);S.gpsStatus.delete(id);S.players=S.players.filter(p=>p.id!==id);sync()}else if(['headstart','playing'].includes(S.phase)){eliminatePlayer(id,'Verbindung länger als fünf Minuten getrennt.');S.offlineSince.delete(id);sync()}}if(['headstart','playing'].includes(S.phase)){let changed=false;for(const p of S.players.filter(p=>p.role==='runner'&&!p.disqualified)){const gps=S.gpsStatus.get(p.id);if(!S.offlineSince.has(p.id)&&(!gps||!gps.on||(t-gps.at>=RECONNECT_MS))){eliminatePlayer(p.id,'GPS-Verbindung länger unterbrochen.');changed=true;continue}if(p.role==='runner'&&p.vehicleSince&&(p.vehicleUsedMs||0)+t-p.vehicleSince>=VEHICLE_LIMIT_MS){p.vehicleUsedMs=VEHICLE_LIMIT_MS;p.vehicleSince=0;eliminatePlayer(p.id,'10 Minuten Fahrzeugzeit erreicht.');changed=true}}}
     for(const [key,req] of S.captureRequests){if(t>req.expiresAt){S.captureRequests.delete(key);sendTo(req.hunter,{t:'capture-result',message:'Die Fanganfrage ist ohne Bestätigung abgelaufen.'})}}
     if(S.phase==='headstart'&&t>=S.chaseAt){S.phase='playing';sync();sendAll({t:'event',heading:'Die Jagd beginnt!',message:'Hunter dürfen los. Die Runner-Pings beginnen jetzt.'});notify('Vorsprung vorbei','Hunter starten jetzt.',true)}
     if(S.phase!=='playing')return;if(t>=S.endAt){finish();return}
-    const pingSlot=Math.floor((t-S.chaseAt)/PING_MS);if(pingSlot>S.lastPingSlot){S.lastPingSlot=pingSlot;for(const p of S.players.filter(x=>x.role==='runner')){
-       if(p.disqualified)continue;const cam=S.camo.get(p.id)||0;if(cam>0){S.camo.set(p.id,cam-1);S.lastRunnerById.set(p.id,pingSlot);sendTo(p.id,{t:'ping-ack',slot:pingSlot,round:S.chaseAt});sendTo(p.id,{t:'camo',credits:cam-1});continue}
+    const pingSlot=Math.floor((t-S.chaseAt)/PING_MS);if(pingSlot>S.lastPingSlot){const previous=S.lastPingSlot;if(previous>0){for(const p of S.players.filter(x=>x.role==='runner'&&!x.disqualified)){if(S.lastRunnerById.get(p.id)!==previous&&!S.offlineSince.has(p.id))eliminatePlayer(p.id,'Pflicht-Ping bis zur nächsten Runde nicht nachgereicht.')}}S.lastPingSlot=pingSlot;for(const p of S.players.filter(x=>x.role==='runner')){
+       if(p.disqualified)continue;const cam=S.camo.get(p.id)||0;if(cam>0){S.camo.set(p.id,cam-1);S.lastRunnerById.set(p.id,pingSlot);S.pingWarnings.delete(p.id);sendTo(p.id,{t:'ping-ack',slot:pingSlot,round:S.chaseAt});sendTo(p.id,{t:'camo',credits:cam-1});continue}
        sendTo(p.id,{t:'pulse-runner',slot:pingSlot})}
        if(pingSlot>0)notify('GPS-Ping',`Runde ${pingSlot+1}: Runner-Punkte aktualisiert.`,true)
     }
@@ -1742,9 +1742,7 @@ body{background:var(--bg)}
     // Nur Runner-Pings sind verbindlich; Hunter-GPS und Hunter-Radar sind optional.
     if(S.lastPingSlot>0&&t-(S.chaseAt+S.lastPingSlot*PING_MS)>65000){
       for(const p of S.players.filter(x=>x.role==='runner'&&!x.disqualified)){
-        if(S.lastRunnerById.get(p.id)!==S.lastPingSlot){
-          eliminatePlayer(p.id,'Pflicht-Ping verpasst.');
-        }
+        if(S.lastRunnerById.get(p.id)!==S.lastPingSlot&&S.pingWarnings.get(p.id)!==S.lastPingSlot){S.pingWarnings.set(p.id,S.lastPingSlot);sendTo(p.id,{t:'event',heading:'GPS-Ping verspätet',message:'Öffne die App wieder. Der aktuelle Pflicht-Ping kann bis zum nächsten Ping nachgereicht werden.'});if(!S.offlineSince.has(p.id))sendTo(p.id,{t:'pulse-runner',slot:S.lastPingSlot});}
       }
     }
     if(S.scanVisibleUntil&&t>=S.scanVisibleUntil){S.scanVisibleUntil=0;S.scanSamples.clear();sendAll({t:'radar-stop'},'runner')}
@@ -2167,14 +2165,14 @@ body{background:var(--bg)}
     try{return await request}finally{if(S.gpsRequest===request){S.gpsRequest=null;renderGPS()}}}
   function resendPendingPing(){
     const p=S.pendingPing;if(!p)return;if(!S.chaseAt&&!S.host)return; // Wait for the authoritative snapshot after reload.
-    if(p.round!==S.chaseAt||p.slot!==Math.floor((now()-S.chaseAt)/PING_MS)||now()-(S.chaseAt+p.slot*PING_MS)>65000||me()?.disqualified||!S.gpsWanted){S.pendingPing=null;storePending();return}
+    if(p.round!==S.chaseAt||p.slot!==Math.floor((now()-S.chaseAt)/PING_MS)||now()-(S.chaseAt+p.slot*PING_MS)>=PING_MS||me()?.disqualified||!S.gpsWanted){S.pendingPing=null;storePending();return}
     if(!S.host&&(!S.conn?.open||!me()))return;
     if(Date.now()-(p.sentAt||0)<5000)return;p.sentAt=Date.now();storePending();
     hostSend({t:'runner-location',slot:p.slot,round:p.round,pos:{...p.pos,at:p.pos.at+S.clockOffset}});
   }
   async function sendMyRunnerPosition(slot){
     const round=S.chaseAt;
-    const eligible=()=>S.gpsWanted&&S.approved&&myRole()==='runner'&&!me()?.disqualified&&S.phase==='playing'&&S.chaseAt===round&&Math.floor((now()-round)/PING_MS)===slot&&now()-(round+slot*PING_MS)<=65000;
+    const eligible=()=>S.gpsWanted&&S.approved&&myRole()==='runner'&&!me()?.disqualified&&S.phase==='playing'&&S.chaseAt===round&&Math.floor((now()-round)/PING_MS)===slot&&now()-(round+slot*PING_MS)<PING_MS;
     if(!eligible()||(S.pingAckRound===round&&S.pingAck>=slot)||S.pingBusy)return;
     if(S.pendingPing?.round===round&&S.pendingPing.slot===slot){resendPendingPing();return}
     S.pingBusy=true;try{
@@ -2184,7 +2182,7 @@ body{background:var(--bg)}
           if(S.pingAckRound===round&&S.pingAck>=slot)return;
           S.pendingPing={round,slot,pos,code:S.roomCode,token:S.token,sentAt:0};storePending();resendPendingPing();return;
         }
-        if(now()-(round+slot*PING_MS)>45000)break;
+        if(now()-(round+slot*PING_MS)>PING_MS-15000)break;
       }
     }finally{S.pingBusy=false}
   }
@@ -2227,10 +2225,10 @@ body{background:var(--bg)}
     }
     if(S.scanVisibleUntil&&t>=S.scanVisibleUntil)clearHunterScan();for(const [tag,item] of S.mockMarkers){if(now()>=item.until){clearTimeout(item.timer);S.map?.removeLayer(item.marker);S.mockMarkers.delete(tag)}}refreshMarkerLabels();renderGPS();renderMockControl();
   }
-  function offlinePingTick(){if(S.host||S.conn?.open||!S.approved||S.phase!=='playing'||myRole()!=='runner'||!S.gpsWanted||me()?.disqualified)return;const slot=Math.floor((now()-S.chaseAt)/PING_MS),key=S.chaseAt+':'+slot;if(slot<1||now()-(S.chaseAt+slot*PING_MS)>65000||S.offlineSampleKey===key)return;S.offlineSampleKey=key;void sendMyRunnerPosition(slot)}
-  function linkTick(){const t=Date.now(),sleep=t-S.lastLinkTick>15000;S.lastLinkTick=t;if(S.peer?.disconnected&&!S.peer.destroyed&&t-S.lastPeerRetry>5000){S.lastPeerRetry=t;try{S.peer.reconnect()}catch{}}if(S.host||!S.approved||!S.conn?.open)return;if(sleep)S.lastLinkPong=t;if(t-S.lastLinkPong>25000){const old=S.conn;S.conn=null;try{old.close()}catch{}scheduleReconnect();return}if(t-S.lastLinkPing>8000){S.lastLinkPing=t;hostSend({t:'link-ping'})}}
+  function offlinePingTick(){if(S.host||S.conn?.open||!S.approved||S.phase!=='playing'||myRole()!=='runner'||!S.gpsWanted||me()?.disqualified)return;const slot=Math.floor((now()-S.chaseAt)/PING_MS),key=S.chaseAt+':'+slot;if(slot<1||now()-(S.chaseAt+slot*PING_MS)>=PING_MS||S.offlineSampleKey===key)return;S.offlineSampleKey=key;void sendMyRunnerPosition(slot)}
+  function linkTick(){const t=Date.now(),sleep=t-S.lastLinkTick>15000;S.lastLinkTick=t;if(S.peer?.disconnected&&!S.peer.destroyed&&t-S.lastPeerRetry>5000){S.lastPeerRetry=t;try{S.peer.reconnect()}catch{}}if(S.host||!S.approved||!S.conn?.open)return;if(sleep)S.lastLinkPong=t;if(t-S.lastLinkPong>25000){const old=S.conn;S.conn=null;try{old.close()}catch{}scheduleReconnect();return}if(t-S.lastLinkPing>8000){S.lastLinkPing=t;hostSend({t:'link-ping',resume:sleep})}}
   function tick(){if(lab.active){labTick();return}countdownFx();if(S.host)hostTick();proximityRender();if(['headstart','playing','ended'].includes(S.phase))renderGame();if(S.revealUntil>now())updateRevealHud();else if(S.revealUntil)endReveal()}
-  function reset(){S.leaving=true;S.reconnectAt=0;forgetResume();clearVoice();S.rejoinKeys.clear();S.offlineSince.clear();S.publicPings.clear();S.token='';S.pingAck=-1;S.pingAckRound=0;S.pendingPing=null;S.offlineSampleKey='';S.lastLinkPong=0;S.lastLinkPing=0;if(lab.active)closeLab();proximityClear(true);stopVoices();endReveal();closeWheel();stopGPS();clearRemoteMarkers();try{S.conn?.close()}catch{}for(const c of S.clients.values())try{c.close()}catch{}for(const x of S.pending.values())try{x.conn.close()}catch{}try{S.peer?.destroy()}catch{}
+  function reset(){S.leaving=true;S.reconnectAt=0;forgetResume();clearVoice();S.rejoinKeys.clear();S.offlineSince.clear();S.lastClientSeen.clear();S.pingWarnings.clear();S.publicPings.clear();S.token='';S.pingAck=-1;S.pingAckRound=0;S.pendingPing=null;S.offlineSampleKey='';S.lastLinkPong=0;S.lastLinkPing=0;if(lab.active)closeLab();proximityClear(true);stopVoices();endReveal();closeWheel();stopGPS();clearRemoteMarkers();try{S.conn?.close()}catch{}for(const c of S.clients.values())try{c.close()}catch{}for(const x of S.pending.values())try{x.conn.close()}catch{}try{S.peer?.destroy()}catch{}
     S.peer=null;S.conn=null;S.leaving=false;S.clients.clear();S.pending.clear();S.host=false;S.approved=false;S.myId='';S.players=[];S.phase='lobby';S.clockOffset=0;S.roomName='';S.gpsStatus.clear();S.reactionRate.clear();S.mockRate.clear();S.lastGPSHeartbeat=0;S.mockPending=false;S.lastMockAttempt=0;S.localMockNext=0;S.captureRequests.clear();S.captureRate.clear();S.captureSelectKey='';S.activityEvents=[];closeAnnouncement();$('pingFloat').classList.add('hidden');S.roomCode='';S.challengePoint=null;S.challengeOpen=false;S.challengeWinner=null;S.challengeTriggered=false;S.scanVisibleUntil=0;S.pickMode='';S.settings={radiusKm:10,durationMin:60,headstartMin:5,center:null,mode:'radius',area:null};S.areaTab='radius';clearAreaBoundary();S.startAt=0;S.chaseAt=0;S.endAt=0;S.anonTokens.clear();S.hunterTokens.clear();S.lastRunnerById.clear();S.lastHunterById.clear();S.camo.clear();S.runnerMarkers.clear();S.aliases={};connection('OFFLINE');updateMapDecor();setScreen('homeScreen')}
   const labLabels={'headstart':'Runner-Vorsprung','start':'Jagdbeginn','hunter-release':'Hunter-Freigabe','ping':'GPS-Ping','radar':'Hunter-Radar','bonus':'Bonusziel nach einem Drittel','reward':'Bonus gesichert','stealth':'Tarnung','capture':'Fang bestätigt','end':'Spielende','warning':'Regelwarnung','preview':'Intro','countdown':'Countdown','join':'Spieler verbunden','wheel-win':'Glücksrad-Gewinner','tap':'Tastenton','pending':'Beitrittsanfrage','wheel-tick':'Glücksrad-Tick','reaction':'Reaktion','gps':'GPS-Signal','mock':'Mock-Signal','reveal-end':'Live-Reveal endet'};
   function labButtons(id,kinds,action){
@@ -2338,7 +2336,7 @@ body{background:var(--bg)}
   $('leaveLobby').onclick=confirmExit;$('exitGame').onclick=confirmExit;
   $('soundBtn').onclick=()=>{S.soundEnabled=!S.soundEnabled;proximityRender();if(!S.soundEnabled)stopVoices();saveFxPrefs();syncFxControls();if(S.soundEnabled)cue('join',{force:true})};
   $('modal').addEventListener('click',e=>{if(e.target===$('modal'))closeModal()});
-  document.addEventListener('visibilitychange',()=>{if(!document.hidden&&S.approved&&!S.host&&!S.conn?.open){S.reconnectAt=Date.now();reconnectTick()}proximityRender();if(!document.hidden&&S.approved){S.map?.invalidateSize();if(S.phase==='playing'&&S.host)hostTick();notify('Willkommen zurück','Prüfe GPS-Verbindung und Timer. Hintergrundbetrieb ist nicht garantiert.')}});
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden&&S.approved&&!S.host){if(!S.conn?.open){S.reconnectAt=Date.now();reconnectTick()}else hostSend({t:'link-ping',resume:true})}proximityRender();if(!document.hidden&&S.approved){S.map?.invalidateSize();if(S.phase==='playing'&&S.host)hostTick();notify('Willkommen zurück','Prüfe GPS-Verbindung und Timer. Hintergrundbetrieb ist nicht garantiert.')}});
   document.querySelectorAll('[data-react]').forEach(b=>b.addEventListener('click',()=>{if(!S.approved||!['headstart','playing'].includes(S.phase)||!['hunter','runner'].includes(myRole()))return;if(Date.now()-S.lastReactionAttempt<1100)return;S.lastReactionAttempt=Date.now();hostSend({t:'reaction',emoji:b.dataset.react})}));
   // Safari/iOS: die bereitgestellte Durchsage vor dem ersten Fang per Nutzeraktion freischalten.
   document.addEventListener('pointerdown',()=>{
