@@ -714,13 +714,13 @@ body{background:var(--bg)}
     radiusCircle:null,centerMarker:null,challengeMarker:null,ownMarker:null,map:null,pickMode:'',
     areaGeometry:null,areaKey:'',areaLayer:null,areaLayerKey:'',areaPromise:null,areaSearchBusy:false,
     gpsHeading:null,compassHeading:null,compassEnabled:false,
-    gpsRequest:null,gpsGeneration:0,myLocation:null,gpsWanted:false,geoErrorShown:false,runnerMarkers:new Map(),
+    gpsRequest:null,gpsGeneration:0,myLocation:null,gpsWanted:false,gpsVerified:false,geoErrorShown:false,runnerMarkers:new Map(),
     hunterMarkers:new Map(),anonTokens:new Map(),hunterTokens:new Map(),lastRunnerById:new Map(),lastHunterById:new Map(),aliases:{},lastPingSlot:0,lastScanSlot:0,
     camo:new Map(),scanSamples:new Map(),scanVisibleUntil:0,
      soundEnabled:true,audio:null,timer:null,joining:false,lastLocationSend:0,claimedEvent:false,
     gpsStatus:new Map(),reactionRate:new Map(),mockRate:new Map(),mockMarkers:new Map(),
     rejoinKeys:new Map(),offlineSince:new Map(),publicPings:new Map(),token:'',reconnectAt:0,reconnectBusy:false,leaving:false,
-    pendingPing:null,pingBusy:false,pingAck:-1,pingAckRound:0,voiceIncoming:new Map(),voiceRate:new Map(),voiceURLs:[],recorder:null,recordStream:null,recordTimer:null,recordRequest:false,voiceEpoch:0,
+    pendingPing:null,pingBusy:false,pingAck:-1,pingAckRound:0,offlineSampleKey:'',lastLinkPong:0,lastLinkPing:0,lastLinkTick:0,lastPeerRetry:0,voiceIncoming:new Map(),voiceRate:new Map(),voiceURLs:[],recorder:null,recordStream:null,recordTimer:null,recordRequest:false,voiceEpoch:0,
     lastGPSHeartbeat:0,lastReactionAttempt:0,lastMockAttempt:0,localMockNext:0,mockPending:false,
     captureRequests:new Map(),captureRate:new Map(),captureSelectKey:'',activityEvents:[],announcementTimer:null,
     revealUntil:0,revealId:'',revealMarkers:new Map(),lastRevealSend:0,lastRevealRefresh:0,revealSequence:0,revealEndTimer:0,captureSplashTimer:0,revealSendRate:new Map()};
@@ -1216,7 +1216,7 @@ body{background:var(--bg)}
     else if(h.includes('vorsprung läuft'))kind='headstart';
     else if(h.includes('jagd gestartet')||h.includes('jagd beginnt')||h.includes('vorsprung vorbei'))kind='start';
     else if(h.includes('spiel beendet')||h.includes('zeit abgelaufen'))kind='end';
-    else if(h.includes('halbzeit')||h.includes('bonusziel aktiv'))kind='bonus';
+    else if(h.includes('bonus: signal')||h.includes('halbzeit')||h.includes('bonusziel aktiv'))kind='bonus';
     else if(h.includes('bonusziel erreicht'))kind='reward';
     else if(h.includes('tarnung aktiv'))kind='stealth';
     else if(h.includes('hunter-radar')||h.includes('hunter-scan')||h.includes('radar-snapshot'))kind='radar';
@@ -1275,14 +1275,14 @@ body{background:var(--bg)}
   const sendAll=(obj,role=null)=>{for(const p of S.players){if(role&&p.role!==role)continue;if(p.disqualified&&['ping','hunter-scan','mock-signal','pulse-runner','pulse-hunter'].includes(obj.t))continue;sendTo(p.id,obj)}};
   function readResume(){try{const x=JSON.parse(localStorage.getItem(RESUME_KEY)||'null');return x&&validToken(x.token)&&/^[A-HJ-NP-Z2-9]{4}$/.test(x.code)&&Date.now()<x.expires?x:null}catch{return null}}
   function renderResume(){const x=readResume();$('resumeBtn').classList.toggle('hidden',!x);if(x)$('resumeBtn').textContent='Wieder verbinden · '+x.code}
-  function saveResume(){if(S.host||!S.approved||!validToken(S.token)||!S.roomCode||S.phase==='ended'||S.leaving)return;try{localStorage.setItem(RESUME_KEY,JSON.stringify({token:S.token,code:S.roomCode,name:S.myName,preference:S.preferredRole,gps:S.gpsWanted,expires:Math.max(Date.now()+RECONNECT_MS,(S.endAt||Date.now()+3600000)+RECONNECT_MS)}))}catch{}}
+  function saveResume(){if(S.host||!S.approved||!validToken(S.token)||!S.roomCode||S.phase==='ended'||S.leaving)return;try{localStorage.setItem(RESUME_KEY,JSON.stringify({token:S.token,code:S.roomCode,name:S.myName,preference:S.preferredRole,gps:S.gpsWanted&&S.gpsVerified,expires:Math.max(Date.now()+RECONNECT_MS,(S.endAt||Date.now()+3600000)+RECONNECT_MS)}))}catch{}}
   function forgetResume(){try{localStorage.removeItem(RESUME_KEY);sessionStorage.removeItem(PENDING_PING_KEY)}catch{}renderResume()}
   function storePending(){try{if(S.pendingPing)sessionStorage.setItem(PENDING_PING_KEY,JSON.stringify(S.pendingPing));else sessionStorage.removeItem(PENDING_PING_KEY)}catch{}}
   function readPending(){try{const x=JSON.parse(sessionStorage.getItem(PENDING_PING_KEY)||'null');return x&&x.code===S.roomCode&&x.token===S.token&&Date.now()-x.pos?.at<65000?x:null}catch{return null}}
   function acknowledgePing(slot,round){if(round!==S.chaseAt||!Number.isInteger(slot))return;S.pingAckRound=round;S.pingAck=Math.max(S.pingAck,slot);if(S.pendingPing?.round===round&&S.pendingPing.slot<=slot){S.pendingPing=null;storePending()}}
   function scheduleReconnect(){if(S.host||S.leaving||!S.roomCode||!S.approved||S.phase==='ended')return;S.reconnectAt=Date.now()+2500;connection('RECONNECT');}
-  function reconnectTick(){if(!S.reconnectAt||S.reconnectAt>Date.now()||S.reconnectBusy||S.host||S.leaving)return;if(S.conn?.open){S.reconnectAt=0;return}S.reconnectAt=0;S.reconnectBusy=true;(async()=>{try{if(!S.peer||S.peer.destroyed)await initPeer();if(S.peer.disconnected){S.peer.reconnect();scheduleReconnect();return}connectHost(true)}catch{scheduleReconnect()}finally{S.reconnectBusy=false}})()}
-  async function resumeRoom(){const x=readResume();if(!x||S.joining||S.peer||lab.active)return;S.joining=true;S.host=false;S.leaving=false;S.roomCode=x.code;S.myName=x.name;S.preferredRole=x.preference;S.token=x.token;S.gpsWanted=!!x.gps;$('privacyConsent').checked=!!x.gps;S.approved=true;S.pendingPing=readPending();$('myName').value=x.name;$('joinCode').value=x.code;try{S.myId=await initPeer();connectHost(true);showRoom()}catch{scheduleReconnect();showRoom()}finally{S.joining=false}}
+  function reconnectTick(){if(!S.reconnectAt||S.reconnectAt>Date.now()||S.reconnectBusy||S.host||S.leaving)return;if(S.conn){S.reconnectAt=0;return}S.reconnectAt=0;S.reconnectBusy=true;(async()=>{try{if(!S.peer||S.peer.destroyed)await initPeer();if(S.peer.disconnected){S.peer.reconnect();scheduleReconnect();return}connectHost(true)}catch{scheduleReconnect()}finally{S.reconnectBusy=false}})()}
+  async function resumeRoom(){const x=readResume();if(!x||S.joining||S.peer||lab.active)return;S.joining=true;S.host=false;S.leaving=false;S.roomCode=x.code;S.myName=x.name;S.preferredRole=x.preference;S.token=x.token;S.gpsWanted=!!x.gps;S.gpsVerified=!!x.gps;$('privacyConsent').checked=!!x.gps;S.approved=true;S.pendingPing=readPending();$('myName').value=x.name;$('joinCode').value=x.code;try{S.myId=await initPeer();connectHost(true);showRoom()}catch{scheduleReconnect();showRoom()}finally{S.joining=false}}
   const getSettingsPublic=()=>({...S.settings,center:S.settings.center?{...S.settings.center}:null,area:S.settings.area?{...S.settings.area}:null});
   const snapshotFor=id=>({t:'snapshot',clock:Date.now(),code:S.roomCode,roomName:S.roomName,players:S.players.map(p=>({...p,offline:S.offlineSince.has(p.id),gpsReady:!!S.gpsStatus.get(p.id)?.on&&Date.now()-S.gpsStatus.get(p.id).at<GPS_STALE_MS})),phase:S.phase,
     settings:getSettingsPublic(),startAt:S.startAt,chaseAt:S.chaseAt,endAt:S.endAt,
@@ -1309,11 +1309,11 @@ body{background:var(--bg)}
     const old=S.conn;S.conn=null;try{old?.close()}catch{}
     const c=S.peer.connect(ROOM_PREFIX+S.roomCode,{reliable:true,serialization:'json'});S.conn=c;
     const timeout=setTimeout(()=>{if(S.conn!==c||c.open)return;S.conn=null;try{c.close()}catch{}if(S.approved)scheduleReconnect();else notify('Raum nicht gefunden','Prüfe den Code und ob der Host verbunden ist.')},12000);
-    c.on('open',()=>{if(S.conn!==c){c.close();return}clearTimeout(timeout);S.reconnectAt=0;connection('VERBUNDEN',true);
+    c.on('open',()=>{if(S.conn!==c){c.close();return}clearTimeout(timeout);S.reconnectAt=0;S.lastLinkPong=Date.now();S.lastLinkPing=0;connection('VERBUNDEN',true);
       safeSend(c,resuming?{t:'resume',token:S.token}:{t:'join',name:S.myName,preference:S.preferredRole,token:S.token});
       notify(resuming?'Verbindung wieder da':'Beitrittsanfrage gesendet',resuming?'Spielstand wird wiederhergestellt.':'Warte auf den Host.');
     });
-    c.on('data',data=>{if(S.conn===c)receiveHostMessage(data)});
+    c.on('data',data=>{if(S.conn===c){S.lastLinkPong=Date.now();receiveHostMessage(data)}});
     const fail=()=>{clearTimeout(timeout);if(S.conn!==c)return;S.conn=null;try{c.close()}catch{}connection('HOST OFFLINE');if(!S.leaving&&S.phase!=='ended'){scheduleReconnect();notify('Verbindung getrennt','Automatischer Wiederbeitritt; bestätigte Pings bleiben erhalten.')}};
     c.on('close',fail);c.on('error',fail);
   }
@@ -1351,13 +1351,14 @@ body{background:var(--bg)}
       if(id&&S.clients.get(id)===c)onHostData({peer:id},data);
     });
     const disconnected=()=>{clearTimeout(timer);if(!id)return;if(S.pending.get(id)?.conn===c)S.pending.delete(id);
-      if(S.clients.get(id)===c){S.clients.delete(id);S.offlineSince.set(id,Date.now());S.voiceIncoming.delete(id);sync();notify('Spieler getrennt','Wiederbeitritt derselben Sitzung ist möglich.')}
+      if(S.clients.get(id)===c){S.clients.delete(id);S.offlineSince.set(id,Date.now());S.voiceIncoming.delete('host:'+id);sync();notify('Spieler getrennt','Wiederbeitritt derselben Sitzung ist möglich.')}
       renderPending();
     };
     c.on('close',disconnected);c.on('error',disconnected);
   }
   function approve(id,ok){const item=S.pending.get(id);if(!item)return;S.pending.delete(id);if(ok&&item.conn.open){S.clients.set(id,item.conn);S.rejoinKeys.set(id,item.token);S.players.push({id,name:item.name,role:'none',preference:item.preference,host:false});safeSend(item.conn,{t:'approved'});sync();notify('Spieler aufgenommen',item.name);cue('join',{voice:true})}else{safeSend(item.conn,{t:'denied',reason:'Der Host hat die Anfrage abgelehnt.'});setTimeout(()=>item.conn.close(),180)}renderPending();renderTeams();checkStart()}
-  function receiveHostMessage(data){if(!data||typeof data!=='object'||!['snapshot','waiting','denied','approved','ping','runner-hide','hunter-scan','radar-stop','camo','event','pulse-runner','pulse-hunter','stop','reaction','mock-signal','mock-accepted','mock-denied','capture-prompt','capture-result','announcement','capture-event','reveal-coordinate','reveal-hide','proximity-alert','resumed','ping-ack','voice-part'].includes(data.t))return;
+  function receiveHostMessage(data){if(!data||typeof data!=='object'||!['snapshot','waiting','denied','approved','ping','runner-hide','hunter-scan','radar-stop','camo','event','pulse-runner','pulse-hunter','stop','reaction','mock-signal','mock-accepted','mock-denied','capture-prompt','capture-result','announcement','capture-event','reveal-coordinate','reveal-hide','proximity-alert','resumed','ping-ack','voice-part','link-pong'].includes(data.t))return;
+    if(data.t==='link-pong')return;
     if(data.t==='waiting'){$('waitApproval').classList.remove('hidden');return}
     if(data.t==='denied'){notify('Anfrage abgelehnt',data.reason||'Kein Zutritt');reset();return}
     if(data.t==='resumed'){S.approved=true;S.reconnectAt=0;S.lastGPSHeartbeat=0;return}
@@ -1365,7 +1366,7 @@ body{background:var(--bg)}
     if(data.t==='snapshot'){
       S.approved=true;S.myId=data.myId||S.myId;S.clockOffset=Number(data.clock)-Date.now();S.roomCode=data.code;S.roomName=data.roomName;S.players=Array.isArray(data.players)?data.players:[];
       const oldPhase=S.phase,oldRound=S.chaseAt;S.phase=data.phase;S.settings={...data.settings,mode:data.settings?.mode==='area'?'area':'radius',area:data.settings?.area||null};ensureAreaBoundary();S.startAt=data.startAt;S.chaseAt=data.chaseAt;S.endAt=data.endAt;
-      if(S.pingAckRound!==S.chaseAt){S.pingAckRound=S.chaseAt;S.pingAck=-1}if(S.pendingPing&&S.pendingPing.round!==S.chaseAt){S.pendingPing=null;storePending()}if(me()?.disqualified||S.phase==='ended'){stopGPS();if(S.phase==='ended')forgetResume()}else{saveResume();if(!S.host&&S.conn?.open&&S.lastGPSHeartbeat===0){hostSend({t:'gps-status',on:S.gpsWanted});S.lastGPSHeartbeat=Date.now()}}S.challengeOpen=!!data.challengeOpen;S.challengeUntil=data.challengeUntil||0;S.challengeWinner=data.challengeWinner||null;S.challengePoint=toLatLng(data.challengePoint);
+      if(S.pingAckRound!==S.chaseAt){S.pingAckRound=S.chaseAt;S.pingAck=-1}if(S.pendingPing&&S.pendingPing.round!==S.chaseAt){S.pendingPing=null;storePending()}if(me()?.disqualified||S.phase==='ended'){stopGPS();if(S.phase==='ended')forgetResume()}else{saveResume();if(!S.host&&S.conn?.open&&S.lastGPSHeartbeat===0){hostSend({t:'gps-status',on:S.gpsWanted&&S.gpsVerified});S.lastGPSHeartbeat=Date.now()}}S.challengeOpen=!!data.challengeOpen;S.challengeUntil=data.challengeUntil||0;S.challengeWinner=data.challengeWinner||null;S.challengePoint=toLatLng(data.challengePoint);
       $('waitApproval').classList.add('hidden');if(oldPhase!==S.phase&&S.phase==='headstart')notify('Vorsprung läuft','Hunter warten, Runner bewegen sich zum Start.',true);
       if(oldPhase!==S.phase&&S.phase==='playing')notify('Jagd gestartet','Achte auf die GPS-Pings.',true);
       if(oldPhase!==S.phase&&S.phase==='ended'){clearVoice();notify('Spiel beendet','Die Standortübertragung wurde gestoppt.',true);stopGPS();clearRemoteMarkers()}
@@ -1617,6 +1618,7 @@ body{background:var(--bg)}
   }
   function onHostData(conn,data){if(!S.host||!data||typeof data!=='object')return;const id=conn.peer;if(!S.players.some(p=>p.id===id))return;const role=roleOf(id),player=S.players.find(p=>p.id===id);
 
+    if(data.t==='link-ping'){sendTo(id,{t:'link-pong'});return}
     if(data.t==='voice-part'){hostVoicePart(id,player,data);return}
     if(data.t==='proximity-location'){return} // No continuous location exchange.
     // Nur registrierte, GPS-aktive Teilnehmer; keine dauerhafte Speicherung der Koordinaten.
@@ -2164,11 +2166,11 @@ body{background:var(--bg)}
     S.gpsRequest=request;renderGPS();
     try{return await request}finally{if(S.gpsRequest===request){S.gpsRequest=null;renderGPS()}}}
   function resendPendingPing(){
-    const p=S.pendingPing;if(!p)return;
+    const p=S.pendingPing;if(!p)return;if(!S.chaseAt&&!S.host)return; // Wait for the authoritative snapshot after reload.
     if(p.round!==S.chaseAt||p.slot!==Math.floor((now()-S.chaseAt)/PING_MS)||now()-(S.chaseAt+p.slot*PING_MS)>65000||me()?.disqualified||!S.gpsWanted){S.pendingPing=null;storePending();return}
-    if(!S.host&&!S.conn?.open)return;
+    if(!S.host&&(!S.conn?.open||!me()))return;
     if(Date.now()-(p.sentAt||0)<5000)return;p.sentAt=Date.now();storePending();
-    hostSend({t:'runner-location',slot:p.slot,round:p.round,pos:p.pos});
+    hostSend({t:'runner-location',slot:p.slot,round:p.round,pos:{...p.pos,at:p.pos.at+S.clockOffset}});
   }
   async function sendMyRunnerPosition(slot){
     const round=S.chaseAt;
@@ -2178,7 +2180,7 @@ body{background:var(--bg)}
     S.pingBusy=true;try{
       for(let attempt=0;attempt<2&&eligible();attempt++){
         const pos=await getFresh();if(!eligible())return;
-        if(pos&&pos.accuracy<=150&&pos.at>=round+slot*PING_MS-10000&&insidePlayArea(pos)){
+        if(pos&&pos.accuracy<=150&&pos.at+S.clockOffset>=round+slot*PING_MS-10000&&((isAreaMode()&&!S.areaGeometry)||insidePlayArea(pos))){
           if(S.pingAckRound===round&&S.pingAck>=slot)return;
           S.pendingPing={round,slot,pos,code:S.roomCode,token:S.token,sentAt:0};storePending();resendPendingPing();return;
         }
@@ -2187,7 +2189,7 @@ body{background:var(--bg)}
     }finally{S.pingBusy=false}
   }
   async function sendMyHunterPosition(slot){if(!S.gpsWanted)return;const pos=await getFresh();if(!pos||S.phase!=='playing')return;hostSend({t:'hunter-location',slot,pos})}
-  function onPosition(p){if(!S.gpsWanted)return;S.geoErrorShown=false;S.myLocation={lat:p.coords.latitude,lng:p.coords.longitude,accuracy:p.coords.accuracy,at:p.timestamp};if(S.approved&&Date.now()-p.timestamp<40000&&Date.now()-S.lastGPSHeartbeat>12000){S.lastGPSHeartbeat=Date.now();hostSend({t:'gps-status',on:true})}S.gpsHeading=Number.isFinite(p.coords.heading)&&p.coords.speed>0.5?p.coords.heading:null;if(!S.map)initMap();if(S.ownMarker){S.ownMarker.setLatLng([S.myLocation.lat,S.myLocation.lng])}else if(S.map){S.ownMarker=L.marker([S.myLocation.lat,S.myLocation.lng],{icon:L.divIcon({html:'<div class="position-beacon"><span class="direction-arrow"></span><span class="position-center"></span></div>',className:'',iconSize:[32,32],iconAnchor:[16,16]}),zIndexOffset:1000}).addTo(S.map).bindTooltip('Meine letzte GPS-Messung',{direction:'top'});if(!S.settings.center)S.map.setView([S.myLocation.lat,S.myLocation.lng],14)}
+  function onPosition(p){if(!S.gpsWanted)return;S.gpsVerified=true;saveResume();S.geoErrorShown=false;S.myLocation={lat:p.coords.latitude,lng:p.coords.longitude,accuracy:p.coords.accuracy,at:p.timestamp};if(S.approved&&Date.now()-p.timestamp<40000&&Date.now()-S.lastGPSHeartbeat>12000){S.lastGPSHeartbeat=Date.now();hostSend({t:'gps-status',on:true})}S.gpsHeading=Number.isFinite(p.coords.heading)&&p.coords.speed>0.5?p.coords.heading:null;if(!S.map)initMap();if(S.ownMarker){S.ownMarker.setLatLng([S.myLocation.lat,S.myLocation.lng])}else if(S.map){S.ownMarker=L.marker([S.myLocation.lat,S.myLocation.lng],{icon:L.divIcon({html:'<div class="position-beacon"><span class="direction-arrow"></span><span class="position-center"></span></div>',className:'',iconSize:[32,32],iconAnchor:[16,16]}),zIndexOffset:1000}).addTo(S.map).bindTooltip('Meine letzte GPS-Messung',{direction:'top'});if(!S.settings.center)S.map.setView([S.myLocation.lat,S.myLocation.lng],14)}
     updateHeading();if(S.host&&S.phase==='lobby'&&!isAreaMode()&&!S.settings.center){S.settings.center={lat:S.myLocation.lat,lng:S.myLocation.lng};sync();checkStart();updateMapDecor();zoomToArea()}
     if(S.settings.center&&S.phase!=='ended'&&(!isAreaMode()||S.areaGeometry)&&!insidePlayArea(S.myLocation)&&(!S.lastOutsideNotify||Date.now()-S.lastOutsideNotify>60000)){S.lastOutsideNotify=Date.now();notify('Spielgebiet verlassen','Du befindest dich außerhalb des gewählten Spielgebiets.',true)}
     if(myRole()==='runner'&&!me()?.disqualified&&S.challengeOpen&&!S.challengeWinner&&!S.claimedEvent&&S.challengePoint&&S.phase==='playing'&&p.coords.accuracy<=90&&dist(S.challengePoint,S.myLocation)<=Math.max(55,p.coords.accuracy)){
@@ -2197,14 +2199,14 @@ body{background:var(--bg)}
   }
   function startGPS(){if(S.gpsWanted){stopGPS();return}if(!$('privacyConsent').checked){ask('GPS freiwillig freigeben?','Runner teilen alle fünf Minuten einen aktuellen GPS-Punkt, Hunter freiwillige Radar-Punkte. GPS wird nur kurz für einzelne Messungen genutzt. Keine Live-Nähe-Warnung. Nach bestätigtem Fang können GPS-aktive Spieler zehn Sekunden sichtbar sein. Du kannst GPS jederzeit stoppen; Runner scheiden dann aus, Hunter nicht.',[{label:'GPS freigeben',kind:'primary',fn:()=>{$('privacyConsent').checked=true;startGPS()}},{label:'Ohne GPS bleiben'}]);return}
     if(!navigator.geolocation){notify('GPS nicht verfügbar','HTTPS und ein GPS-fähiges Smartphone sind erforderlich.');return}
-    S.gpsWanted=true;saveResume();S.gpsGeneration++;const generation=S.gpsGeneration;renderGPS();
+    S.gpsWanted=true;S.gpsVerified=false;S.gpsGeneration++;const generation=S.gpsGeneration;renderGPS();
     void getFresh().then(pos=>{
       if(generation!==S.gpsGeneration||!S.gpsWanted)return;
       if(!pos){stopGPS();notify('GPS nicht bereit','Bitte GPS erneut aktivieren.');return}
       notify('GPS bereit','Akkusparmodus: einzelne Standortmessungen statt Dauerortung.');
     })}
-  function stopGPS(){proximityClear();S.compassEnabled=false;S.compassHeading=null;S.gpsHeading=null;window.removeEventListener('deviceorientation',onOrientation);window.removeEventListener('deviceorientationabsolute',onOrientation);$('enableCompass').textContent='➤ Richtung';if(S.gpsWanted&&S.approved)hostSend({t:'gps-status',on:false});S.gpsWanted=false;S.pendingPing=null;storePending();saveResume();S.gpsGeneration++;S.gpsRequest=null;S.lastGPSHeartbeat=0;S.myLocation=null;if(S.ownMarker){S.map?.removeLayer(S.ownMarker);S.ownMarker=null}renderGPS()}
-  function renderGPS(){$('gpsBtnLobby').textContent=S.gpsWanted?'⊘ GPS-Freigabe stoppen':'◎ Eigenen Standort aktivieren';$('gpsBtnGame').textContent=S.gpsWanted?'⊘ GPS stoppen':'◎ GPS aktivieren';$('geoState').textContent=S.gpsWanted?(S.gpsRequest||!S.myLocation?'SUCHE':'SPAR'):'AUS';$('geoState').style.color=S.gpsWanted?'#9af2bb':'#ff9d89'}
+  function stopGPS(){proximityClear();S.compassEnabled=false;S.compassHeading=null;S.gpsHeading=null;window.removeEventListener('deviceorientation',onOrientation);window.removeEventListener('deviceorientationabsolute',onOrientation);$('enableCompass').textContent='➤ Richtung';if(S.gpsWanted&&S.approved)hostSend({t:'gps-status',on:false});S.gpsWanted=false;S.gpsVerified=false;S.pendingPing=null;storePending();saveResume();S.gpsGeneration++;S.gpsRequest=null;S.lastGPSHeartbeat=0;S.myLocation=null;if(S.ownMarker){S.map?.removeLayer(S.ownMarker);S.ownMarker=null}renderGPS()}
+  function renderGPS(){$('gpsBtnLobby').textContent=S.gpsWanted?'⊘ GPS-Freigabe stoppen':'◎ Eigenen Standort aktivieren';$('gpsBtnGame').textContent=S.gpsWanted?'⊘ GPS stoppen':'◎ GPS aktivieren';$('geoState').textContent=S.gpsWanted?(S.gpsRequest||!S.gpsVerified?'SUCHE':'SPAR'):'AUS';$('geoState').style.color=S.gpsWanted?'#9af2bb':'#ff9d89'}
   function renderGame(){if(!['headstart','playing','ended'].includes(S.phase))return;const r=myRole();renderVoice();$('playRole').textContent=me()?.disqualified?'● AUSGESCHIEDEN':r==='hunter'?'● HUNTER':r==='runner'?'● RUNNER':'● ZUSCHAUER';$('playRole').className='role-pill '+r;
     $('phaseTitle').textContent=S.phase==='headstart'?'VORSPRUNG':S.phase==='playing'?'DIE JAGD LÄUFT':'SPIELENDE';const t=now();const remaining=S.phase==='ended'?0:S.phase==='headstart'?S.chaseAt-t:S.endAt-t;$('timeLeft').textContent=fmt(remaining);$('timeCaption').textContent=S.phase==='headstart'?'BIS JAGDBEGINN':S.phase==='ended'?'ZEIT ABGELAUFEN':'SPIELZEIT ÜBRIG';
     $('progressLine').style.width=S.phase==='ended'?'100%':S.phase==='headstart'?'0%':Math.max(0,Math.min(100,(t-S.chaseAt)/(S.endAt-S.chaseAt)*100))+'%';
@@ -2225,8 +2227,10 @@ body{background:var(--bg)}
     }
     if(S.scanVisibleUntil&&t>=S.scanVisibleUntil)clearHunterScan();for(const [tag,item] of S.mockMarkers){if(now()>=item.until){clearTimeout(item.timer);S.map?.removeLayer(item.marker);S.mockMarkers.delete(tag)}}refreshMarkerLabels();renderGPS();renderMockControl();
   }
+  function offlinePingTick(){if(S.host||S.conn?.open||!S.approved||S.phase!=='playing'||myRole()!=='runner'||!S.gpsWanted||me()?.disqualified)return;const slot=Math.floor((now()-S.chaseAt)/PING_MS),key=S.chaseAt+':'+slot;if(slot<1||now()-(S.chaseAt+slot*PING_MS)>65000||S.offlineSampleKey===key)return;S.offlineSampleKey=key;void sendMyRunnerPosition(slot)}
+  function linkTick(){const t=Date.now(),sleep=t-S.lastLinkTick>15000;S.lastLinkTick=t;if(S.peer?.disconnected&&!S.peer.destroyed&&t-S.lastPeerRetry>5000){S.lastPeerRetry=t;try{S.peer.reconnect()}catch{}}if(S.host||!S.approved||!S.conn?.open)return;if(sleep)S.lastLinkPong=t;if(t-S.lastLinkPong>25000){const old=S.conn;S.conn=null;try{old.close()}catch{}scheduleReconnect();return}if(t-S.lastLinkPing>8000){S.lastLinkPing=t;hostSend({t:'link-ping'})}}
   function tick(){if(lab.active){labTick();return}countdownFx();if(S.host)hostTick();proximityRender();if(['headstart','playing','ended'].includes(S.phase))renderGame();if(S.revealUntil>now())updateRevealHud();else if(S.revealUntil)endReveal()}
-  function reset(){S.leaving=true;S.reconnectAt=0;forgetResume();clearVoice();S.rejoinKeys.clear();S.offlineSince.clear();S.publicPings.clear();S.token='';S.pingAck=-1;S.pingAckRound=0;S.pendingPing=null;if(lab.active)closeLab();proximityClear(true);stopVoices();endReveal();closeWheel();stopGPS();clearRemoteMarkers();try{S.conn?.close()}catch{}for(const c of S.clients.values())try{c.close()}catch{}for(const x of S.pending.values())try{x.conn.close()}catch{}try{S.peer?.destroy()}catch{}
+  function reset(){S.leaving=true;S.reconnectAt=0;forgetResume();clearVoice();S.rejoinKeys.clear();S.offlineSince.clear();S.publicPings.clear();S.token='';S.pingAck=-1;S.pingAckRound=0;S.pendingPing=null;S.offlineSampleKey='';S.lastLinkPong=0;S.lastLinkPing=0;if(lab.active)closeLab();proximityClear(true);stopVoices();endReveal();closeWheel();stopGPS();clearRemoteMarkers();try{S.conn?.close()}catch{}for(const c of S.clients.values())try{c.close()}catch{}for(const x of S.pending.values())try{x.conn.close()}catch{}try{S.peer?.destroy()}catch{}
     S.peer=null;S.conn=null;S.leaving=false;S.clients.clear();S.pending.clear();S.host=false;S.approved=false;S.myId='';S.players=[];S.phase='lobby';S.clockOffset=0;S.roomName='';S.gpsStatus.clear();S.reactionRate.clear();S.mockRate.clear();S.lastGPSHeartbeat=0;S.mockPending=false;S.lastMockAttempt=0;S.localMockNext=0;S.captureRequests.clear();S.captureRate.clear();S.captureSelectKey='';S.activityEvents=[];closeAnnouncement();$('pingFloat').classList.add('hidden');S.roomCode='';S.challengePoint=null;S.challengeOpen=false;S.challengeWinner=null;S.challengeTriggered=false;S.scanVisibleUntil=0;S.pickMode='';S.settings={radiusKm:10,durationMin:60,headstartMin:5,center:null,mode:'radius',area:null};S.areaTab='radius';clearAreaBoundary();S.startAt=0;S.chaseAt=0;S.endAt=0;S.anonTokens.clear();S.hunterTokens.clear();S.lastRunnerById.clear();S.lastHunterById.clear();S.camo.clear();S.runnerMarkers.clear();S.aliases={};connection('OFFLINE');updateMapDecor();setScreen('homeScreen')}
   const labLabels={'headstart':'Runner-Vorsprung','start':'Jagdbeginn','hunter-release':'Hunter-Freigabe','ping':'GPS-Ping','radar':'Hunter-Radar','bonus':'Bonusziel nach einem Drittel','reward':'Bonus gesichert','stealth':'Tarnung','capture':'Fang bestätigt','end':'Spielende','warning':'Regelwarnung','preview':'Intro','countdown':'Countdown','join':'Spieler verbunden','wheel-win':'Glücksrad-Gewinner','tap':'Tastenton','pending':'Beitrittsanfrage','wheel-tick':'Glücksrad-Tick','reaction':'Reaktion','gps':'GPS-Signal','mock':'Mock-Signal','reveal-end':'Live-Reveal endet'};
   function labButtons(id,kinds,action){
@@ -2356,7 +2360,7 @@ body{background:var(--bg)}
   $('claimBonusGPS').onclick=async()=>{if(myRole()!=='runner'||!S.challengeOpen||S.challengeWinner||!S.gpsWanted||me()?.disqualified)return;const pos=await getFresh();if(!pos||!S.challengePoint||pos.accuracy>65||dist(S.challengePoint,pos)>55)notify('Bonusziel noch nicht erreicht','Für den Bonus muss ein genauer GPS-Punkt innerhalb von 55 Metern vorliegen.');};
   // Readiness heartbeat carries no coordinates and does not wake GPS.
   // Fresh positions are requested by scheduled pulses or explicit game events only.
-  S.timer=setInterval(()=>{if(S.gpsWanted&&S.approved&&(S.myLocation||S.token)&&Date.now()-S.lastGPSHeartbeat>30000){if(hostSend({t:'gps-status',on:true}))S.lastGPSHeartbeat=Date.now()}reconnectTick();resendPendingPing();for(const [key,v] of S.voiceIncoming)if(v.until<Date.now())S.voiceIncoming.delete(key);tick()},1000);
+  S.timer=setInterval(()=>{if(S.gpsWanted&&S.gpsVerified&&S.approved&&Date.now()-S.lastGPSHeartbeat>30000){if(hostSend({t:'gps-status',on:true}))S.lastGPSHeartbeat=Date.now()}linkTick();reconnectTick();offlinePingTick();resendPendingPing();for(const [key,v] of S.voiceIncoming)if(v.until<Date.now())S.voiceIncoming.delete(key);tick()},1000);
   if(!window.isSecureContext)notify('Hinweis: HTTPS nötig','Für GPS auf Smartphones die Datei über eine HTTPS-Seite öffnen.');
 })();
 </script>
