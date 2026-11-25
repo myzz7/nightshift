@@ -563,6 +563,8 @@ html.ns-fx-off .arc-wheel,html.ns-fx-off .arc-card{transition:none!important}htm
 .arc-deck{position:relative;width:112px;height:145px;display:grid;place-items:center}.arc-deck:before,.arc-deck:after{content:"";position:absolute;inset:4px 6px;border-radius:12px;border:2px solid #a3b5d4;background:#273b60;transform:translate(-5px,4px) rotate(-7deg);z-index:0}.arc-deck:after{transform:translate(5px,4px) rotate(7deg)}.arc-deck .arc-card{position:relative;z-index:1}
 .arc-answer-slots{display:flex;justify-content:center;gap:5px;flex-wrap:wrap;min-height:52px;padding:7px;border:1px solid var(--ns-edge);border-radius:12px;background:var(--soft);margin-bottom:8px}.arc-answer-slot{min-width:32px;min-height:36px;display:grid;place-items:center;border:1px dashed var(--ns-edge);border-radius:8px;font-weight:850;font-size:21px;padding:4px}.arc-answer-slot.filled{background:var(--surface);border:1px solid var(--ns-accent);animation:arc-key-in .18s ease both}.arc-drag-key{touch-action:none;user-select:none;cursor:grab}.arc-drop-hot{outline:2px solid var(--ns-accent)}.arc-drag-ghost{position:fixed;z-index:2000;pointer-events:none;padding:12px 16px;background:#163050;border:1px solid #a7c8ef;border-radius:10px;color:white;transform:translate(-50%,-50%);font-size:24px;font-weight:850;box-shadow:0 8px 20px #0007}.arc-safe{background:linear-gradient(145deg,#172b46,#111c2c);border:1px solid #6b87af70;border-radius:15px;padding:13px;color:#d9e9ff}.arc-safe .arc-answer-slots{background:#07111c;border-color:#466281}.arc-safe .arc-answer-slot{color:#c6e8ff;border-color:#6d90be66;background:#10253d}.arc-safe .btn{font-variant-numeric:tabular-nums}.arc-memory .arc-letters{grid-template-columns:repeat(2,1fr)}.arc-memory .arc-letters .btn{min-height:72px;font-size:30px}.arc-memory .arc-letters .btn:nth-child(1){background:#315fa0;color:white}.arc-memory .arc-letters .btn:nth-child(2){background:#a64655;color:white}.arc-memory .arc-letters .btn:nth-child(3){background:#3b805f;color:white}.arc-memory .arc-letters .btn:nth-child(4){background:#916b2c;color:white}.arc-calc .arc-input{font-variant-numeric:tabular-nums;justify-content:flex-end;padding-right:16px}.arc-calc .arc-keypad .btn{background:var(--surface);border-color:var(--ns-edge)}.arc-pick-controls{margin-top:9px;display:flex;gap:7px}.arc-pick-controls .btn{flex:1}.arc-choice-grid .arc-picked{outline:2px solid var(--ns-accent);outline-offset:1px;box-shadow:0 0 16px #6dafff22}.arc-choice-grid .arc-odd-btn.arc-picked{transform:rotate(-2deg)}.arc-pattern-drop{min-height:50px;display:grid;place-items:center;border:2px dashed var(--ns-edge);border-radius:12px;margin:0 0 10px;font-size:28px;font-weight:850;background:var(--soft)}.arc-pattern-drop.arc-drop-hot{border-color:var(--ns-accent)}
 @keyframes arc-key-in{from{opacity:.4;transform:scale(.87)}to{opacity:1;transform:scale(1)}}@media(prefers-reduced-motion:reduce){.arc-interact,.arc-lever-knob{transition:none!important}.arc-answer-slot{animation:none!important}}html.ns-fx-off .arc-answer-slot{animation:none!important}
+</style><style>
+.arc-dials{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:12px 0}.arc-dial{display:grid;gap:6px;justify-items:stretch;padding:6px;border:1px solid #7690b45e;border-radius:12px;background:#08131f}.arc-dial .btn{min-height:35px;padding:5px;color:#d6eaff;background:#19314c;border-color:#7194ba55;font-size:18px}.arc-dial-number{min-height:62px;display:grid;place-items:center;border:1px solid #9cb7de88;border-radius:9px;font-size:37px;line-height:1;font-weight:900;font-variant-numeric:tabular-nums;background:linear-gradient(#162d47,#263c56 48%,#11253c 50%,#1a304c);color:#f1f8ff}.arc-dial-number:active{color:#ffdb9c}.arc-dial-caption{text-align:center;color:#a7c4e7;font-size:10px;letter-spacing:.11em}.arc-odd-drop{font-size:15px!important;min-height:54px;text-align:center;color:var(--muted);padding:7px}.arc-memory .arc-answer-slot.filled{color:var(--ns-accent)}.arc-gesture-caption{font-size:11px;margin:9px 0;color:var(--muted);text-align:center}.arc-swipe-progress{font-size:11px;font-variant-numeric:tabular-nums}
 </style></head>
 <body>
 <div class="ambient"></div><div class="grain"></div>
@@ -1503,7 +1505,7 @@ html.ns-fx-off .arc-wheel,html.ns-fx-off .arc-card{transition:none!important}htm
     wrap.addEventListener('pointerup',e=>release(e));wrap.addEventListener('pointercancel',e=>release(e,true));wrap.addEventListener('lostpointercapture',e=>{if(pointerId===e.pointerId)release(e,true)});
     button.onclick=()=>spin(420);wrap.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();spin(420)}});
     if(result!==null){rouletteResults.set(prefix,{id,pending:true});caption.textContent='ERGEBNIS BEREIT';help.textContent='Zieh das Rad mit Schwung an oder tippe auf Rad andrehen';if(state.spun)spin(state.velocity);else if(!arcMotion()){render(rouletteTarget(state.angle,result,1,0));reveal()}else setTimeout(()=>{if(wrap.isConnected&&!busy&&!settled)spin(320)},8500)}
-    else{help.textContent='Rad kreisförmig ziehen · stärker wischen = schneller drehen';caption.textContent='WÄHLE DEINE FARBE';}
+    else{help.textContent='Farbe auswählen und bestätigen. Danach kreisförmig wischen · mehr Schwung = schneller.';caption.textContent='WÄHLE DEINE FARBE';}
   }
 
 
@@ -1588,7 +1590,7 @@ html.ns-fx-off .arc-wheel,html.ns-fx-off .arc-card{transition:none!important}htm
       else if(last)values=type==='memory'?last.solution.split(' '):[last.solution];
       else if(type==='words')values=r.stage||[];
       else if(type==='code')values=['⌗','⌗','⌗'];
-      else if(type==='mind')values=['+','×','−'];
+      else if(type==='mind')values=r.prompt.includes('folgt')?r.prompt.split('?')[1]?.trim().split(/\s*·\s*/).filter(Boolean)||['?']:r.prompt.replace('Wie viel ist ','').replace('?','').trim().split(/\s+/);
       else if(type==='symbols')values=r.stage||[];
       else values=['A','B','C','D'];
       values.forEach(v=>tiles.append(arcElement('div','arc-tile',v)));stack.append(tiles);
@@ -1597,10 +1599,26 @@ html.ns-fx-off .arc-wheel,html.ns-fx-off .arc-card{transition:none!important}htm
     }
     stack.append(caption);
   }
+
+  function arcCodeDials(prefix,r,options,disabled,draft,onAnswer){
+    options.classList.add('arc-custom','arc-safe');
+    if(!Array.isArray(draft.dials))draft.dials=[0,0,0];
+    const help=arcElement('div','arc-action-help','Wische über die drei Zahlenräder oder verwende die Pfeile.'),grid=arcElement('div','arc-dials'),displays=[];
+    for(let i=0;i<3;i++){
+      const col=arcElement('div','arc-dial'),up=arcElement('button','btn','▲'),down=arcElement('button','btn','▼'),display=arcElement('div','arc-dial-number',String(draft.dials[i])),label=arcElement('div','arc-dial-caption','RAD '+(i+1));up.type=down.type='button';up.disabled=down.disabled=disabled;up.setAttribute('aria-label','Ziffer '+(i+1)+' erhöhen');down.setAttribute('aria-label','Ziffer '+(i+1)+' verringern');displays.push(display);
+      const step=n=>{if(disabled)return;draft.dials[i]=(draft.dials[i]+n+100)%10;display.textContent=String(draft.dials[i])};up.onclick=()=>step(1);down.onclick=()=>step(-1);
+      let last=0;
+      arcGesture(display,'free',(dx,dy)=>{if(disabled)return;const n=Math.trunc(-dy/20);if(dy===0&&dx===0){last=0;return}if(n!==last){step(n-last);last=n}},()=>{last=0});
+      col.append(label,up,display,down);grid.append(col);
+    }
+    const submit=arcElement('button','btn primary block',r.vote!==null?'Code gespeichert':'Tresor öffnen');submit.type='button';submit.disabled=disabled;submit.onclick=()=>{if(!submit.disabled)onAnswer(r.id,draft.dials.join(''))};options.append(help,grid,submit);
+  }
+
   function arcControls(prefix,r,options,disabled,onAnswer){
     options.classList.remove('arc-custom','arc-safe','arc-memory','arc-calc');if(!r)return;
     const key=JSON.stringify([r.id,r.type,arcadeRole(prefix)]);let draft=arcadeDrafts.get(prefix);
     if(!draft||draft.key!==key){draft={key,values:[],used:[],pick:null};arcadeDrafts.set(prefix,draft)}
+    if(r.type==='code'){arcCodeDials(prefix,r,options,disabled,draft,onAnswer);return}
     if(ARCADE_INPUTS.has(r.type)){
       options.classList.add('arc-custom');
       const isWord=r.type==='words',isMemory=r.type==='memory',limit=isWord?(r.stage||[]).length:isMemory?5:r.type==='code'?3:6;
@@ -1609,12 +1627,12 @@ html.ns-fx-off .arc-wheel,html.ns-fx-off .arc-card{transition:none!important}htm
       const grid=arcElement('div',isWord||isMemory?'arc-letters':'arc-keypad');
       const chars=isWord?r.stage||[]:isMemory?['◆','●','▲','■']:['1','2','3','4','5','6','7','8','9','0'];
       const keys=chars.map((char,i)=>{const b=arcElement('button','btn',char);b.type='button';const pick=()=>{if(disabled||draft.values.length>=limit||isWord&&draft.used.includes(i))return;draft.values.push(char);draft.used.push(i);refresh()};b.onclick=pick;if(isWord||isMemory)arcDragButton(b,display,pick);grid.append(b);return b});
-      const actions=arcElement('div','arc-actions'),back=arcElement('button','btn','Löschen'),submit=arcElement('button','btn primary','Bestätigen');
+      const actions=arcElement('div','arc-actions'),back=arcElement('button','btn','Löschen'),submit=arcElement('button','btn primary',r.vote!==null?'Gespeichert':'Bestätigen');
       back.type=submit.type='button';back.onclick=()=>{draft.values.pop();draft.used.pop();refresh()};submit.onclick=()=>{if(!submit.disabled)onAnswer(r.id,value())};actions.append(back,submit);options.append(display,grid,actions);
       function refresh(){if(isWord||isMemory||r.type==='code'){display.replaceChildren();for(let i=0;i<limit;i++)display.append(arcElement('div','arc-answer-slot'+(draft.values[i]?' filled':''),draft.values[i]||'·'))}else display.textContent=value()||'0';const full=isWord||isMemory||r.type==='code'?draft.values.length===limit:draft.values.length>0;submit.disabled=disabled||!full;back.disabled=disabled||!draft.values.length;keys.forEach((b,i)=>b.disabled=disabled||draft.values.length>=limit||isWord&&draft.used.includes(i))}
       refresh();return;
     }
-    const grid=arcElement('div','arc-choice-grid'+(r.type==='dice'?' six':''));options.classList.add('arc-custom');const drop=r.type==='symbols'?arcElement('div','arc-pattern-drop','?'):null;if(drop)options.append(drop);options.append(grid);const pickButtons=[];const actions=arcElement('div','arc-pick-controls'),confirm=arcElement('button','btn primary','Auswahl bestätigen');confirm.type='button';actions.append(confirm);
+    const grid=arcElement('div','arc-choice-grid'+(r.type==='dice'?' six':''));options.classList.add('arc-custom');const drop=r.type==='symbols'?arcElement('div','arc-pattern-drop','?'):r.type==='odd'?arcElement('div','arc-pattern-drop arc-odd-drop','Unpassenden Begriff hier ablegen'):null;if(drop)options.append(drop);options.append(grid);const pickButtons=[];const actions=arcElement('div','arc-pick-controls'),confirm=arcElement('button','btn primary','Auswahl bestätigen');confirm.type='button';actions.append(confirm);
     r.choices.forEach((label,i)=>{
       let cls='btn'+(r.vote===i?' selected':'');let txt=label;
       if(r.type==='roulette')cls+=' arc-color-'+({Rot:'red',Schwarz:'black',Grün:'green'}[label]||'');
@@ -1624,7 +1642,7 @@ html.ns-fx-off .arc-wheel,html.ns-fx-off .arc-card{transition:none!important}htm
       const b=arcElement('button',cls,txt);b.type='button';b.disabled=disabled;b.setAttribute('aria-pressed',String(r.vote===i));b.setAttribute('aria-label',label);
       const pick=()=>{if(disabled)return;draft.pick=i;refreshPick()};b.onclick=pick;if(drop)arcDragButton(b,drop,pick);pickButtons.push(b);grid.append(b);
     });
-    function refreshPick(){const picked=r.vote!==null?r.vote:draft.pick;pickButtons.forEach((b,i)=>{b.classList.toggle('arc-picked',picked===i);b.setAttribute('aria-pressed',String(picked===i))});if(drop)drop.textContent=picked!==null?r.choices[picked]:'?';confirm.disabled=disabled||draft.pick===null;confirm.textContent=r.vote!==null?'Auswahl gespeichert':'Auswahl bestätigen'}confirm.onclick=()=>{if(!confirm.disabled)onAnswer(r.id,draft.pick)};options.append(actions);refreshPick();
+    function refreshPick(){const picked=r.vote!==null?r.vote:draft.pick;pickButtons.forEach((b,i)=>{b.classList.toggle('arc-picked',picked===i);b.setAttribute('aria-pressed',String(picked===i))});if(drop)drop.textContent=picked!==null?r.choices[picked]:r.type==='odd'?'Unpassenden Begriff hier ablegen':'?';confirm.disabled=disabled||draft.pick===null;confirm.textContent=r.vote!==null?'Auswahl gespeichert':'Auswahl bestätigen'}confirm.onclick=()=>{if(!confirm.disabled)onAnswer(r.id,draft.pick)};options.append(actions);refreshPick();
   }
 
   function duelRender(prefix,view,t,onAnswer,canPlay=true,playing=true){
@@ -1636,7 +1654,7 @@ html.ns-fx-off .arc-wheel,html.ns-fx-off .arc-card{transition:none!important}htm
     arcStage(prefix,r,view.last,memorizing);
     const revealKey=view.last&&chanceEvents.has(view.last.type)?view.last.id+':'+view.last.type:null;let revealState=arcadeResultAt.get(prefix);if(revealKey&&revealState?.key!==revealKey){revealState={key:revealKey,at:Date.now()};arcadeResultAt.set(prefix,revealState)}if(!revealKey)arcadeResultAt.delete(prefix);const revealing=!!revealKey&&(view.last.type==='roulette'?rouletteResults.get(prefix)?.pending===true:arcadeActionStates.get(prefix)?.pending===true);
     let question='',status='';
-    if(r){question=r.prompt;status=memorizing?'15 Sekunden Vorschau · danach erscheinen die Antworten.':!active?'Auswertung läuft …':r.vote!==null?'Antwort gespeichert. Auswertung folgt für beide Teams.':!canPlay||!r.eligible?'Du schaust dieses Event an.':chanceEvents.has(type)?'Kostenloser Zufallstipp · keine Einsätze, nur Teampunkte.':'Eine Antwort pro Spieler · Genauigkeit zählt, nicht Geschwindigkeit.'}
+    if(r){question=r.prompt;status=memorizing?'15 Sekunden Vorschau · danach kannst du die Symbole selbst eingeben.':!active?'Auswertung läuft …':r.vote!==null?'Antwort gespeichert. Auswertung folgt für beide Teams.':!canPlay||!r.eligible?'Du schaust dieses Event an.':chanceEvents.has(type)?'Kostenloser Zufallstipp · keine Einsätze, nur Teampunkte.':'Eine Antwort pro Spieler · Genauigkeit zählt, nicht Geschwindigkeit.'}
     else if(view.last){const x=view.last,h=x.stats.hunter,n=x.stats.runner;question=x.winner==='hunter'?'Hunter gewinnen!':x.winner==='runner'?'Runner gewinnen!':x.winner==='tie'?'Unentschieden!':'Keine Wertung';status='Ergebnis: '+x.solution+' · Hunter '+h.correct+'/'+h.total+' · Runner '+n.correct+'/'+n.total+' richtig. '+(x.winner==='none'?'Beide Teams müssen teilnehmen und mindestens eine Antwort muss richtig sein.':'')}
     else{question=playing?'Das nächste Event kommt automatisch.':'Night Arcade · separate Teamwertung';status='Zwei Punkte für das bessere Team, je ein Punkt bei Gleichstand. Keine Pflichtteilnahme.'}
     if(revealing){question=view.last?.type==='roulette'?'Roulette · Ergebnis aufdecken':'Das Ergebnis wird aufgedeckt …';status=view.last?.type==='roulette'?'Zieh das Rad an. Dein Schwung beeinflusst die Animation, nicht das gemeinsame Zufallsergebnis.':'Führe die Spielaktion aus oder nutze den Button. Das Zufallsergebnis ist für beide Teams gleich.'}
