@@ -1466,7 +1466,7 @@ html.ns-fx-off .arc-wheel,html.ns-fx-off .arc-card{transition:none!important}htm
         if(winner===role&&perk.win){state.score[role]+=perk.win;used.push({role,description:'Sieg-Bonus: +'+perk.win+' Punkte'});perk.win=0}
       }
       for(const role of winner==='tie'?['hunter','runner']:[winner])rewards.push(grantArcReward(state,role));
-    }
+    }else if(h.total&&n.total){for(const role of ['hunter','runner'])rewards.push(grantArcReward(state,role))}
     state.last={winner,stats,solution:r.choices[r.answer],id:r.id,type:r.type,reveal,rewards,used};state.round=null;return state.last;
   }
   function duelPublic(state,id,t=Date.now()){
@@ -1688,7 +1688,7 @@ html.ns-fx-off .arc-wheel,html.ns-fx-off .arc-card{transition:none!important}htm
     if(!key||arcPopupSeen.get(prefix)===key)return;
     arcPopupSeen.set(prefix,key);
     if(r&&active){
-      openArcPopup(prefix,'event','ZWISCHENEVENT',EVENT_NAMES[r.type]||'Night Arcade','Ein zufälliger Vorteil wartet auf das Gewinnerteam.\nNur im sicheren Stand teilnehmen.');
+      openArcPopup(prefix,'event','ZWISCHENEVENT',EVENT_NAMES[r.type]||'Night Arcade','Ein zufälliger Vorteil wartet auf das Gewinnerteam. Bei Gleichstand erhalten beide einen Vorteil.\nNur im sicheren Stand teilnehmen.');
       if(typeof FX!=='undefined')soundEffect('bonus');
     }else if(view.last?.rewards?.length){
       const detail=view.last.rewards.map(x=>arcTeamLabel(x.role)+': '+x.description).join('\n');
@@ -1714,7 +1714,7 @@ html.ns-fx-off .arc-wheel,html.ns-fx-off .arc-card{transition:none!important}htm
     const revealKey=view.last&&chanceEvents.has(view.last.type)?view.last.id+':'+view.last.type:null;let revealState=arcadeResultAt.get(prefix);if(revealKey&&revealState?.key!==revealKey){revealState={key:revealKey,at:Date.now()};arcadeResultAt.set(prefix,revealState)}if(!revealKey)arcadeResultAt.delete(prefix);const revealing=!!revealKey&&(view.last.type==='roulette'?rouletteResults.get(prefix)?.pending===true:arcadeActionStates.get(prefix)?.pending===true);
     let question='',status='';
     if(r){question=r.prompt;status=memorizing?'15 Sekunden Vorschau · danach kannst du die Symbole selbst eingeben.':!active?'Auswertung läuft …':r.vote!==null?'Antwort gespeichert. Auswertung folgt für beide Teams.':!canPlay||!r.eligible?'Du schaust dieses Event an.':chanceEvents.has(type)?'Kostenloser Zufallstipp · keine Einsätze, nur Teampunkte.':'Eine Antwort pro Spieler · Genauigkeit zählt, nicht Geschwindigkeit.'}
-    else if(view.last){const x=view.last,h=x.stats.hunter,n=x.stats.runner;question=x.winner==='hunter'?'Hunter gewinnen!':x.winner==='runner'?'Runner gewinnen!':x.winner==='tie'?'Unentschieden!':'Keine Wertung';status='Ergebnis: '+x.solution+' · Hunter '+h.correct+'/'+h.total+' · Runner '+n.correct+'/'+n.total+' richtig. '+(x.winner==='none'?'Beide Teams müssen teilnehmen und mindestens eine Antwort muss richtig sein.':'')}
+    else if(view.last){const x=view.last,h=x.stats.hunter,n=x.stats.runner;question=x.winner==='hunter'?'Hunter gewinnen!':x.winner==='runner'?'Runner gewinnen!':x.winner==='tie'?'Unentschieden!':'Keine Wertung';status='Ergebnis: '+x.solution+' · Hunter '+h.correct+'/'+h.total+' · Runner '+n.correct+'/'+n.total+' richtig. '+(x.winner==='none'?'Ohne richtige Antwort gibt es keine regulären Siegpunkte. Wenn beide Teams teilnehmen, erhalten beide einen Zufallsvorteil.':'')}
     else{question=playing?'Das nächste Event kommt automatisch.':'Night Arcade · separate Teamwertung';status='Zwei Punkte für das bessere Team, je ein Punkt bei Gleichstand. Keine Pflichtteilnahme. Das Gewinnerteam erhält außerdem einen zufälligen Vorteil.'}
     if(revealing){question=view.last?.type==='roulette'?'Roulette · Ergebnis aufdecken':'Das Ergebnis wird aufgedeckt …';status=view.last?.type==='roulette'?'Zieh das Rad an. Dein Schwung beeinflusst die Animation, nicht das gemeinsame Zufallsergebnis.':'Führe die Spielaktion aus oder nutze den Button. Das Zufallsergebnis ist für beide Teams gleich.'}
     if(prefix==='duel'&&S.phase==='ended'&&!revealing){const h=view.score.hunter,n=view.score.runner;question=h===n?'Night Arcade · Gleichstand':h>n?'Night Arcade · Hunter gewinnen':'Night Arcade · Runner gewinnen';status='Endstand der separaten Eventwertung. '+status}
