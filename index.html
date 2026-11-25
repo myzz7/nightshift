@@ -658,7 +658,7 @@ html.ns-fx-off .arc-wheel,html.ns-fx-off .arc-card{transition:none!important}htm
       <button class="btn orange block" type="button" id="captureBtn">Fangbestätigung anfragen</button>
       <div id="captureHint" class="micro mt"></div>
     </div>
-    <div id="gameMapDock"></div><div class="panel mt" id="missionPerkPanel"><div class="row-between"><div><div class="ns-kicker">NIGHTSHIFT / HAUPTRUNDE</div><div class="panel-title">Deine Vorteile</div></div><div class="stat"><b id="missionPoints">0</b><small>MISSIONSPUNKTE</small></div></div><p class="sub" id="missionPerkStatus"></p><button type="button" class="btn block mt" id="missionPauseBtn" disabled>Auszeit-Joker einsetzen</button><p class="sub mt" id="missionPauseList" role="status"></p><p class="micro">Missionspunkte zählen getrennt von Arcade: 3 für erfülltes Hauptziel (Hunter: mindestens ein bestätigter Fang, Runner: regulär im Spiel geblieben), 2 für regulären Rundenabschluss, plus persönliche Boni. Sicherheitsregeln gelten immer.</p></div><div class="panel mt ns-duel" id="duelPanel"><div class="ns-duel-head"><div><div class="ns-kicker">NIGHTSHIFT / SIDE QUEST</div><div class="panel-title" id="duelTitle">Night Arcade</div></div><span class="pill" id="duelClock">BEREIT</span></div><div class="ns-duel-score"><div><small>HUNTER</small><b id="duelHunter">0</b></div><span>VS</span><div><small>RUNNER</small><b id="duelRunner">0</b></div></div><p class="sub">Freiwilliges Minispiel. Nur im sicheren Stand spielen, niemals beim Laufen oder Fahren. Keine Einsätze, kein Echtgeld. Gewinne persönliche Zufallsvorteile für die Hauptrunde.</p><div class="ns-event-stage" id="duelStage" aria-label="Spielanzeige"></div><div class="ns-duel-question" id="duelQuestion"></div><div class="ns-duel-options" id="duelOptions"></div><p class="sub" id="duelStatus" role="status"></p><div id="duelBonus" class="arc-bonus-line" hidden></div></div>
+    <div id="gameMapDock"></div><div class="panel mt" id="missionPerkPanel"><div class="row-between"><div><div class="ns-kicker">NIGHTSHIFT / HAUPTRUNDE</div><div class="panel-title">Deine Vorteile</div></div><div class="stat"><b id="missionPoints">0</b><small>MISSIONSPUNKTE</small></div></div><p class="sub" id="missionPerkStatus"></p><button type="button" class="btn block mt" id="missionPauseBtn" disabled>Auszeit-Joker einsetzen</button><p class="sub mt" id="missionPauseList" role="status"></p><div id="missionRanking" class="arc-bonus-line" hidden></div><p class="micro">Missionspunkte zählen getrennt von Arcade: 3 für erfülltes Hauptziel (Hunter: mindestens ein bestätigter Fang, Runner: regulär im Spiel geblieben), 2 für regulären Rundenabschluss, plus persönliche Boni. Sicherheitsregeln gelten immer.</p></div><div class="panel mt ns-duel" id="duelPanel"><div class="ns-duel-head"><div><div class="ns-kicker">NIGHTSHIFT / SIDE QUEST</div><div class="panel-title" id="duelTitle">Night Arcade</div></div><span class="pill" id="duelClock">BEREIT</span></div><div class="ns-duel-score"><div><small>HUNTER</small><b id="duelHunter">0</b></div><span>VS</span><div><small>RUNNER</small><b id="duelRunner">0</b></div></div><p class="sub">Freiwilliges Minispiel. Nur im sicheren Stand spielen, niemals beim Laufen oder Fahren. Keine Einsätze, kein Echtgeld. Gewinne persönliche Zufallsvorteile für die Hauptrunde.</p><div class="ns-event-stage" id="duelStage" aria-label="Spielanzeige"></div><div class="ns-duel-question" id="duelQuestion"></div><div class="ns-duel-options" id="duelOptions"></div><p class="sub" id="duelStatus" role="status"></p><div id="duelBonus" class="arc-bonus-line" hidden></div></div>
     <div id="outStatus" class="event-box hidden" role="status"><span class="event-spark">RUNDE BEENDET</span><h3>Du bist ausgeschieden</h3><p id="outReason">Du kannst die Runde weiter verfolgen, aber nicht mehr mitspielen.</p></div>
     <div class="catch-panel hidden" id="vehiclePanel">
       <div class="panel-title">Fahrzeugregel · 10 Minuten gesamt</div>
@@ -1475,8 +1475,8 @@ html.ns-fx-off .arc-wheel,html.ns-fx-off .arc-card{transition:none!important}htm
     if(candidates.length){const id=candidates[Math.floor(Math.random()*candidates.length)];rewards.push(grantArcReward(state,id,r.eligible.get(id)))}
     state.last={winner,stats,solution:r.choices[r.answer],id:r.id,type:r.type,reveal,rewards,used};state.round=null;return state.last;
   }
-  function duelPublic(state,id,t=Date.now()){
-    const r=state.round;return {enabled:state.enabled,next:state.next,score:{...state.score},personal:{...(state.personal.get(id)||{shield:0,break:0,finish:0,objective:0,points:0,pauseUntil:0})},last:state.last?{...state.last,rewards:state.last.rewards.filter(x=>x.playerId===id),rewardAwarded:state.last.rewards.length>0}:null,round:r?{id:r.id,type:r.type,prompt:r.prompt,choices:t<r.readyAt||ARCADE_INPUTS.has(r.type)?[]:r.choices.slice(),stage:t<r.readyAt?r.preview:r.stage,readyAt:r.readyAt,until:r.until,eligible:r.eligible.has(id),vote:r.votes.has(id)?r.votes.get(id):null}:null};
+  function duelPublic(state,id,t=Date.now(),players=null){
+    const r=state.round;return {enabled:state.enabled,next:state.next,score:{...state.score},personal:{...(state.personal.get(id)||{shield:0,break:0,finish:0,objective:0,points:0,pauseUntil:0})},ranking:players?players.filter(p=>['hunter','runner'].includes(p.role)).map(p=>({name:p.name,role:p.role,score:missionMainScore(p,players,state.personal.get(p.id),true)})).sort((a,b)=>b.score-a.score):null,last:state.last?{...state.last,rewards:state.last.rewards.filter(x=>x.playerId===id),rewardAwarded:state.last.rewards.length>0}:null,round:r?{id:r.id,type:r.type,prompt:r.prompt,choices:t<r.readyAt||ARCADE_INPUTS.has(r.type)?[]:r.choices.slice(),stage:t<r.readyAt?r.preview:r.stage,readyAt:r.readyAt,until:r.until,eligible:r.eligible.has(id),vote:r.votes.has(id)?r.votes.get(id):null}:null};
   }
 
   const arcadeDrafts=new Map(),arcadeRevealTimers=new Map(),arcadeResultAt=new Map(),arcadeRole=prefix=>prefix==='duelLab'?(sim.role==='runner'?'runner':'hunter'):S.myId;
@@ -1694,7 +1694,7 @@ html.ns-fx-off .arc-wheel,html.ns-fx-off .arc-card{transition:none!important}htm
     if(!key||arcPopupSeen.get(prefix)===key)return;
     arcPopupSeen.set(prefix,key);
     if(r&&active){
-      openArcPopup(prefix,'event','ZWISCHENEVENT',EVENT_NAMES[r.type]||'Night Arcade','Ein persönlicher Zufallsvorteil für die Hauptrunde wird unter den richtigen Antworten verlost.\nNur im sicheren Stand teilnehmen.');
+      openArcPopup(prefix,'event','ZWISCHENEVENT',EVENT_NAMES[r.type]||'Night Arcade','Ein persönlicher Zufallsvorteil für die Hauptrunde wird unter den richtigen Antworten verlost. Ohne richtige Antwort nehmen alle Teilnehmenden an der Verlosung teil.\nNur im sicheren Stand teilnehmen.');
       if(typeof FX!=='undefined')soundEffect('bonus');
     }else if(view.last?.rewards?.length){
       const detail=view.last.rewards.map(x=>'Dein Vorteil: '+x.description).join('\n');
@@ -1737,7 +1737,8 @@ html.ns-fx-off .arc-wheel,html.ns-fx-off .arc-card{transition:none!important}htm
     $('missionPauseBtn').disabled=!active||!bonus.break||left>0;
     $('missionPauseBtn').textContent=left>0?'Auszeit aktiv · '+fmt(left):'Auszeit-Joker einsetzen';
     const paused=S.players.filter(x=>missionPauseActive(x)&&!x.disqualified).map(x=>x.name);
-    $('missionPauseList').textContent=paused.length?'Spielpause: '+paused.join(', ')+' · bitte nicht verfolgen.':'';
+    $('missionPauseList').textContent=paused.length&&!ended?'Spielpause: '+paused.join(', ')+' · bitte nicht verfolgen.':'';
+    const ranking=$('missionRanking'),data=ended&&Array.isArray(view?.ranking)?view.ranking:[],key=JSON.stringify(data);if(ranking.dataset.key!==key){ranking.dataset.key=key;ranking.replaceChildren();ranking.hidden=!data.length;if(data.length){ranking.append(arcElement('strong','','Persönliche Hauptrundenwertung'));for(const p of data)ranking.append(arcElement('div','',p.name+' · '+arcTeamLabel(p.role)+' · '+p.score+' Punkte'))}}
   }
   $('missionPauseBtn').onclick=()=>{if(S.phase==='playing'&&!me()?.disqualified)hostSend({t:'mission-pause'})};
 
@@ -1763,7 +1764,7 @@ html.ns-fx-off .arc-wheel,html.ns-fx-off .arc-card{transition:none!important}htm
   }
   function duelShow(){
     if(!S.approved)return;
-    const view=S.host?duelPublic(duelHost,S.myId):duelView;
+    const view=S.host?duelPublic(duelHost,S.myId,Date.now(),S.phase==='ended'?S.players:null):duelView;
     renderMissionPerks(view);duelRender('duel',view,now(),(id,choice)=>{if(!S.host){duelPending=id;if(!hostSend({t:'duel-answer',id,choice}))duelPending=null;duelShow();setTimeout(()=>{if(duelPending===id){duelPending=null;duelShow()}},4000)}else hostSend({t:'duel-answer',id,choice})},S.phase==='playing'&&!me()?.disqualified,S.phase==='playing');
   }
   function duelHostTick(t){
@@ -1787,7 +1788,7 @@ html.ns-fx-off .arc-wheel,html.ns-fx-off .arc-card{transition:none!important}htm
   $('duelLabReset').onclick=()=>{if(lab.active){arcPopupSeen.delete('duelLab');closeArcPopup();duelLab=newDuelState();duelRendered.delete('duelLab');eventStageRendered.delete('duelLab');arcadeDrafts.delete('duelLab');arcadeResultAt.delete('duelLab');rouletteGestures.delete('duelLab');rouletteResults.delete('duelLab');arcadeActionStates.delete('duelLab');duelLabShow()}};
 
   const snapshotFor=id=>({t:'snapshot',clock:Date.now(),code:S.roomCode,roomName:S.roomName,players:S.players.map(p=>({...p,offline:S.offlineSince.has(p.id),gpsReady:!!S.gpsStatus.get(p.id)?.on&&Date.now()-S.gpsStatus.get(p.id).at<GPS_STALE_MS})),phase:S.phase,
-    settings:getSettingsPublic(),startAt:S.startAt,chaseAt:S.chaseAt,endAt:S.endAt,duel:duelPublic(duelHost,id),
+    settings:getSettingsPublic(),startAt:S.startAt,chaseAt:S.chaseAt,endAt:S.endAt,duel:duelPublic(duelHost,id,Date.now(),S.phase==='ended'?S.players:null),
     challengeOpen:S.challengeOpen,challengeUntil:S.challengeUntil,challengeWinner:S.challengeWinner,
     challengePoint:(id===S.myId||(S.challengeOpen&&roleOf(id)==='runner'))?S.challengePoint:null,
     myId:id,hostId:S.players[0]?.id||S.myId});
