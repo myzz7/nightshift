@@ -1327,10 +1327,14 @@ html.ns-fx-off .toast,html.ns-fx-off .modal-sheet,html.ns-fx-off .fx-settings-sh
   const duelRendered=new Map();
   function duelQuestion(seq){
     const rand=n=>Math.floor(Math.random()*n);
-    const type=seq%4;let prompt,answer,wrong;
+    const type=seq%8;let prompt,answer,wrong;
     if(type===1){const a=2+rand(8),d=2+rand(5);prompt='Welche Zahl folgt? '+[a,a+d,a+2*d,a+3*d].join(' · ')+' · ?';answer=a+4*d;wrong=[answer-1,answer+1,answer+d]}
     else if(type===2){const a=3+rand(7),b=2+rand(6),c=1+rand(9);prompt='Wie viel ist '+a+' × '+b+' + '+c+'?';answer=a*b+c;wrong=[answer-2,answer+2,answer+b+2]}
     else if(type===3){const a=2+rand(4),b=2+rand(5);prompt='Welche Zahl fehlt? '+[a,a*b,a*b*b].join(' · ')+' · ?';answer=a*b*b*b;wrong=[answer-b,answer+b,answer+a*b+1]}
+    else if(type===4){const words=['SIGNAL','MISSION','NACHT','RADAR','TEAM'];const word=words[rand(words.length)],reverse=[...word].reverse().join('');prompt='Welches Wort steht rückwärts richtig? '+word;answer=reverse;const candidates=[word,reverse.slice(1)+reverse[0],reverse[0]+reverse.slice(2)+reverse[1],reverse.slice(0,-2)+reverse.at(-1)+reverse.at(-2)];wrong=[...new Set(candidates)].filter(x=>x!==answer).slice(0,3);while(wrong.length<3)wrong.push(reverse+'X'.repeat(wrong.length+1))}
+    else if(type===5){const symbols=['◆','●','▲','■'],i=rand(4),a=symbols[i],b=symbols[(i+1)%4],c=symbols[(i+2)%4];prompt='Welches Symbol folgt? '+[a,b,b,c,a,b,b,c,a,b].join(' ')+' ?';answer=b;wrong=symbols.filter(x=>x!==answer)}
+    else if(type===6){const groups=[['Apfel','Birne','Kirsche','Karotte'],['Montag','Freitag','Sonntag','Januar'],['Klavier','Geige','Flöte','Pinsel'],['Kupfer','Silber','Gold','Holz']];const g=groups[rand(groups.length)];prompt='Was gehört nicht zu den anderen?';answer=g[3];wrong=g.slice(0,3)}
+    else if(type===7){const symbols=['◆','●','▲','■'],target=symbols[rand(4)],items=Array.from({length:12},()=>symbols[rand(4)]);prompt='Wie oft siehst du '+target+'? '+items.join(' ');answer=items.filter(x=>x===target).length;wrong=[answer+1,answer+2,answer+3]}
     else{const a=10+rand(20),b=2+rand(8),c=2+rand(8);prompt='Wie viel ist '+a+' − '+b+' + '+c+'?';answer=a-b+c;wrong=[answer-1,answer+2,answer+4]}
     const choices=[answer,...wrong].map(String);for(let i=choices.length-1;i>0;i--){const j=rand(i+1);[choices[i],choices[j]]=[choices[j],choices[i]]}
     return {prompt,choices,answer:choices.indexOf(String(answer))};
@@ -1349,7 +1353,7 @@ html.ns-fx-off .toast,html.ns-fx-off .modal-sheet,html.ns-fx-off .fx-settings-sh
     const stats={hunter:{correct:0,total:0},runner:{correct:0,total:0}};
     for(const [id,choice] of r.votes){const role=r.eligible.get(id);if(!stats[role])continue;stats[role].total++;if(choice===r.answer)stats[role].correct++}
     const h=stats.hunter,n=stats.runner;let winner='none';
-    if(h.total&&n.total){const diff=h.correct*n.total-n.correct*h.total;winner=diff>0?'hunter':diff<0?'runner':'tie';if(winner==='tie'){state.score.hunter++;state.score.runner++}else state.score[winner]+=2}
+    if(h.total&&n.total&&(h.correct||n.correct)){const diff=h.correct*n.total-n.correct*h.total;winner=diff>0?'hunter':diff<0?'runner':'tie';if(winner==='tie'){state.score.hunter++;state.score.runner++}else state.score[winner]+=2}
     state.last={winner,stats,solution:r.choices[r.answer],id:r.id};state.round=null;return state.last;
   }
   function duelPublic(state,id){
@@ -1363,8 +1367,9 @@ html.ns-fx-off .toast,html.ns-fx-off .modal-sheet,html.ns-fx-off .fx-settings-sh
     $(prefix+'Clock').textContent=active?fmt(remaining):playing&&view.next>t?'NÄCHSTES '+fmt(view.next-t):'BEREIT';
     let question='',status='';
     if(r){question=r.prompt;status=!active?'Auswertung läuft …':r.vote!==null?'Antwort gespeichert. Die Auswertung folgt für beide Teams.':!canPlay||!r.eligible?'Du schaust dieses Duell an.':'Eine Antwort pro Spieler · Genauigkeit zählt, nicht Geschwindigkeit.'}
-    else if(view.last){const x=view.last,h=x.stats.hunter,n=x.stats.runner;question=x.winner==='hunter'?'Hunter gewinnen!':x.winner==='runner'?'Runner gewinnen!':x.winner==='tie'?'Unentschieden!':'Keine Wertung';status='Lösung: '+x.solution+' · Hunter '+h.correct+'/'+h.total+' · Runner '+n.correct+'/'+n.total+' richtig. '+(x.winner==='none'?'Beide Teams müssen teilnehmen.':'')}
+    else if(view.last){const x=view.last,h=x.stats.hunter,n=x.stats.runner;question=x.winner==='hunter'?'Hunter gewinnen!':x.winner==='runner'?'Runner gewinnen!':x.winner==='tie'?'Unentschieden!':'Keine Wertung';status='Lösung: '+x.solution+' · Hunter '+h.correct+'/'+h.total+' · Runner '+n.correct+'/'+n.total+' richtig. '+(x.winner==='none'?'Beide Teams müssen teilnehmen und mindestens eine Antwort muss richtig sein.':'')}
     else{question=playing?'Das nächste Duell kommt automatisch.':'Mind Clash · separate Teamwertung';status='Zwei Punkte für das bessere Team, je ein Punkt bei Gleichstand. Keine Pflichtteilnahme.'}
+    if(prefix==='duel'&&S.phase==='ended'){const h=view.score.hunter,n=view.score.runner;question=h===n?'Mind Clash · Gleichstand':h>n?'Mind Clash · Hunter gewinnen':'Mind Clash · Runner gewinnen';status='Endstand der separaten Rätselwertung. '+status}
     $(prefix+'Question').textContent=question;$(prefix+'Status').textContent=status;
     const pending=prefix==='duel'&&duelPending===r?.id;
     const key=JSON.stringify([r?.id,r?.prompt,r?.choices,r?.vote,active,canPlay,r?.eligible,pending]);if(duelRendered.get(prefix)===key)return;duelRendered.set(prefix,key);
