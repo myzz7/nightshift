@@ -491,7 +491,29 @@ body{background:var(--bg)}
 .lab-stop.active{display:block}
 .lab-vehicle{font-weight:850;font-size:27px;font-variant-numeric:tabular-nums}
 </style>
-</head>
+<style id="ns-premium">
+:root{--ns-accent:#006bdc;--ns-edge:#3866a327;--ns-halo:#2979df18}
+html[data-theme=dark]{--ns-accent:#9ac7ff;--ns-edge:#91baff30;--ns-halo:#4186eb20}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif}.app{max-width:960px}.header{position:relative;padding:11px 0;border-bottom:1px solid var(--ns-edge);margin-bottom:20px}
+.hero{isolation:isolate;position:relative;overflow:hidden;border:1px solid var(--ns-edge);border-radius:32px;padding:clamp(25px,6vw,65px);max-width:none;margin:0 0 20px;background:linear-gradient(135deg,var(--surface),var(--soft));box-shadow:var(--shade)}
+.hero:after{content:"";position:absolute;inset:-30% -20% -30% 38%;z-index:-1;pointer-events:none;background:repeating-radial-gradient(circle at 70% 45%,transparent 0 33px,var(--ns-edge) 34px 35px,transparent 36px 67px),radial-gradient(circle at 70% 45%,var(--ns-halo),transparent 65%);animation:ns-orbit 16s ease-in-out infinite alternate}
+.hero h1{font-size:clamp(39px,8vw,76px);line-height:1.02;letter-spacing:-.068em;max-width:680px}.hero h1 span{background:none;color:var(--ns-accent);-webkit-text-fill-color:currentColor}
+.panel,.catch-panel{border:1px solid var(--ns-edge);border-radius:25px;box-shadow:0 2px 8px #11182708,0 16px 40px #1118270b;transition:border-color .22s,box-shadow .22s}
+html[data-theme=dark] .panel,html[data-theme=dark] .catch-panel{box-shadow:0 12px 35px #0004}
+.panel-title{font-weight:780;letter-spacing:-.035em}.btn{position:relative;overflow:hidden;isolation:isolate;min-height:46px;transition:transform .18s cubic-bezier(.2,.8,.2,1),box-shadow .2s,background .2s,border-color .2s}.btn.primary,.btn.orange,.btn.blue{box-shadow:0 6px 16px #15274a20}.btn:active{transform:scale(.96)}
+.btn .ns-ripple{position:absolute;width:12px;height:12px;border-radius:50%;pointer-events:none;background:currentColor;opacity:.16;transform:translate(-50%,-50%);animation:ns-ripple .55s ease-out forwards}
+.stat{border:1px solid var(--ns-edge);transition:background .2s,transform .2s}.stat b,.big-timer{font-variant-numeric:tabular-nums}.screen.active{animation:ns-screen .42s cubic-bezier(.22,.8,.2,1) both}.screen.active .panel,.screen.active .catch-panel{animation:ns-card .48s cubic-bezier(.22,.8,.2,1) both;animation-delay:var(--ns-delay,0ms)}
+.timeline{height:7px}.timeline>div{border-radius:10px;box-shadow:0 0 12px #5e9fff55}.live-dot.on{animation:ns-status 2.5s ease-out infinite}.player-card,.teamzone{transition:background .2s,box-shadow .2s,transform .2s,border-color .2s}.mapwrap{border-radius:25px;box-shadow:0 14px 36px #0b173022}.toast{animation:ns-toast .34s cubic-bezier(.2,.9,.25,1.2) both}.modal-sheet,.fx-settings-sheet{animation:ns-sheet .35s cubic-bezier(.22,.8,.2,1) both}
+.ns-lab-head{background:linear-gradient(145deg,#101d35,#183a68);color:#f4f8ff;border:none}.ns-lab-head .sub,.ns-lab-head .eyebrow{color:#c3d9f8}.ns-lab-head h2{font-size:clamp(29px,7vw,46px);letter-spacing:-.055em;margin:10px 0}.ns-lab-head .btn{color:white;background:#ffffff15;border-color:#ffffff35}
+.ns-kicker{font-size:10px;letter-spacing:.13em;font-weight:800;color:var(--ns-accent)}.ns-tabs{display:flex;gap:7px;overflow-x:auto;padding:5px 0 10px}.ns-tabs .btn{flex:0 0 auto;min-height:38px;padding:8px 12px}.ns-tabs .selected{border-color:var(--ns-accent);color:var(--ns-accent)}.ns-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin:12px 0}.ns-metrics .stat b{font-size:clamp(15px,4vw,22px)}
+.ns-map{position:relative;overflow:hidden;isolation:isolate;border-radius:19px;height:230px;background:#101d30;border:1px solid #50698b;color:white;margin:14px 0}.ns-map svg{position:absolute;inset:0;width:100%;height:100%}.ns-map-label{position:absolute;top:10px;left:10px;background:#091626df;border:1px solid #6d91bf55;color:#d1e5ff;border-radius:9px;padding:7px 9px;font-size:10px;letter-spacing:.07em}.ns-sweep{transform-origin:200px 116px;animation:ns-sweep 3.2s linear infinite;opacity:0}.ns-map[data-effect=radar] .ns-sweep{opacity:.8}.ns-marker{transition:opacity .35s}.ns-signal{animation:ns-pulse 1.6s ease-out infinite;transform-box:fill-box;transform-origin:center}.ns-bonus{opacity:.25;transition:opacity .3s}.ns-map[data-effect=bonus] .ns-bonus{opacity:1}
+.ns-roster{display:grid;gap:7px;margin-top:10px}.ns-person{display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;background:var(--soft);border:1px solid var(--ns-edge);border-radius:13px;padding:9px 11px}.ns-person select{width:auto;max-width:135px;padding:7px 9px;min-height:35px}.ns-log{max-height:180px;overflow:auto;display:grid;gap:5px;margin-top:10px}.ns-log div{display:flex;gap:9px;padding:8px;border-bottom:1px solid var(--ns-edge);font-size:12px;line-height:1.45}.ns-log time{color:var(--muted);font-variant-numeric:tabular-nums;flex-shrink:0}.ns-search{margin:10px 0}
+@keyframes ns-orbit{to{transform:scale(1.13) rotate(8deg)}}@keyframes ns-screen{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}@keyframes ns-card{from{opacity:0;translate:0 10px}to{opacity:1;translate:0 0}}@keyframes ns-ripple{to{opacity:0;transform:translate(-50%,-50%) scale(26)}}@keyframes ns-status{0%{box-shadow:0 0 0 0 #35c88455}70%,100%{box-shadow:0 0 0 7px #35c88400}}@keyframes ns-toast{from{opacity:0;transform:translateY(-12px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}@keyframes ns-sheet{from{opacity:0;transform:translateY(25px)}to{opacity:1;transform:translateY(0)}}@keyframes ns-sweep{to{transform:rotate(360deg)}}@keyframes ns-pulse{0%{transform:scale(.8);opacity:.9}100%{transform:scale(2.5);opacity:0}}
+@media(hover:hover){.btn:not(:disabled):hover{box-shadow:0 5px 18px #17284419}.player-card:hover{box-shadow:0 6px 16px #152b4720}}
+@media(max-width:420px){.hero{padding:25px 20px;border-radius:25px}.hero h1{font-size:39px}.ns-metrics .stat{padding:10px 6px}.ns-metrics small{font-size:9px}}
+@media(prefers-reduced-motion:reduce){.hero:after,.ns-sweep,.ns-signal,.live-dot.on,.screen.active,.screen.active .panel,.screen.active .catch-panel,.btn .ns-ripple{animation:none!important;translate:none!important}.btn,.panel,.ns-marker{transition:none!important}}
+html.ns-fx-off .toast,html.ns-fx-off .modal-sheet,html.ns-fx-off .fx-settings-sheet,html.ns-fx-off .hero:after,html.ns-fx-off .ns-sweep,html.ns-fx-off .ns-signal,html.ns-fx-off .live-dot.on,html.ns-fx-off .ns-ripple,html.ns-fx-off .screen.active,html.ns-fx-off .screen.active .panel,html.ns-fx-off .screen.active .catch-panel{animation:none!important;translate:none!important}
+</style></head>
 <body>
 <div class="ambient"></div><div class="grain"></div>
 <div class="app">
@@ -605,8 +627,15 @@ body{background:var(--bg)}
     <div class="footerline">BLEIB AUF ÖFFENTLICHEN WEGEN · KEIN BETRETEN PRIVATER FLÄCHEN</div>
   </section>
   <section class="screen" id="labScreen">
-    <div class="panel"><div class="eyebrow">NIGHTSHIFT / LOKALE SIMULATION</div><h2>TESTRAUM</h2><p class="sub">Alle Tests laufen nur auf diesem Gerät. Keine echte Lobby, kein GPS, keine Nachrichten an Mitspieler.</p><div class="two mt"><button type="button" class="btn" id="labAudio">Audio &amp; Effekte</button><button type="button" class="btn danger" id="labExit">Testraum verlassen</button></div></div>
-    <div class="panel mt"><div class="panel-title">Hunter-Näherungsalarm</div><div class="lab-status"><div id="labMeters" class="lab-distance">AUS</div><strong id="labBpm">0 BPM</strong></div>
+    <div class="panel ns-lab-head"><div class="eyebrow">NIGHTSHIFT / LOCAL LAB</div><h2>Mission Control</h2><p class="sub">Alle Tests laufen nur auf diesem Gerät. Keine echte Lobby, kein GPS, keine Nachrichten an Mitspieler.</p><div class="two mt"><button type="button" class="btn" id="labAudio">Audio &amp; Effekte</button><button type="button" class="btn danger" id="labExit">Testraum verlassen</button></div></div>
+    <div class="panel mt" id="nsScenario"><div class="ns-kicker">01 / SPIELSIMULATION</div><div class="panel-title">Eine vollständige Testrunde</div><p class="sub">Fiktive Spieler und schematische Karte. Kein echtes GPS, kein Mikrofon, keine Verbindung zu Mitspielern.</p>
+<div class="ns-tabs" id="nsRole"><button class="btn selected" data-role="host">Host</button><button class="btn" data-role="hunter">Hunter</button><button class="btn" data-role="runner">Runner</button></div>
+<p class="sub" id="nsPerspective"></p><div class="ns-metrics"><div class="stat"><b id="nsPhase">Lobby</b><small>PHASE</small></div><div class="stat"><b id="nsTime">60:00</b><small>RESTZEIT</small></div><div class="stat"><b id="nsGps">AUS</b><small>TEST-GPS</small></div></div>
+<div class="row-between"><span class="pill" id="nsConnection">LOKAL · VERBUNDEN</span><span class="pill" id="nsCamo">TARNUNG · 0</span></div><div class="ns-map" id="nsMap" data-effect="" role="img" aria-label="Schematische Testkarte ohne echte Standorte"><svg viewBox="0 0 400 232" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><pattern id="nsGrid" width="28" height="28" patternUnits="userSpaceOnUse"><path d="M28 0H0V28" fill="none" stroke="#395370" stroke-width=".65"/></pattern></defs><rect width="400" height="232" fill="url(#nsGrid)"/><g fill="none" stroke="#3f5873" stroke-width="7" opacity=".8"><path d="M-10 55L110 95L230 30L410 80M-10 192L95 154L230 180L410 125M90 -10L125 232M305 -10L275 232"/></g><circle id="nsBoundary" cx="200" cy="116" r="87" fill="#347bc41a" stroke="#76abf0" stroke-dasharray="5 4"/><g class="ns-sweep"><path d="M200 116L200 24A92 92 0 0 1 265 51Z" fill="#8ecbff55"/></g><g id="nsOwn" opacity="0"><circle cx="200" cy="116" r="10" fill="#eef6ff" stroke="#102944" stroke-width="3"/><circle class="ns-signal" cx="200" cy="116" r="14" fill="none" stroke="#eef6ff"/></g><g id="nsHunter" class="ns-marker" opacity=".15"><circle cx="105" cy="83" r="8" fill="#62b5ff" stroke="#fff" stroke-width="2"/><text x="118" y="86" fill="#b7ddff" font-size="11">H</text></g><g id="nsRunner" class="ns-marker" opacity=".15"><circle cx="283" cy="154" r="8" fill="#ffab61" stroke="#fff" stroke-width="2"/><text x="296" y="157" fill="#ffd4aa" font-size="11">R</text></g><g class="ns-bonus"><path d="M255 69l8 11-8 11-8-11z" fill="#c6a7ff" stroke="#fff" stroke-width="1.5"/></g></svg><span class="ns-map-label">SIMULATION · KEIN LIVE-GPS</span></div>
+<div class="ns-tabs" id="nsTabs"><button class="btn selected" data-tab="lobby">Lobby</button><button class="btn" data-tab="game">Spielablauf</button><button class="btn" data-tab="map">Karte &amp; GPS</button><button class="btn" data-tab="comms">Funk &amp; Netzwerk</button><button class="btn" data-tab="rules">Regeln &amp; Ende</button></div>
+<div id="nsControls" class="lab-grid"></div><div id="nsOptions"></div><div id="nsRoster" class="ns-roster"></div><div class="two mt"><button class="btn primary" id="nsReset">Simulation zurücksetzen</button><button class="btn" id="nsClear">Protokoll leeren</button></div><div class="panel-title mt">Ereignisprotokoll</div><div class="ns-log" id="nsLog" role="log" aria-live="polite"></div></div>
+<div class="panel mt"><div class="ns-kicker">02 / EINZELTESTS</div><div class="panel-title">Effekte schnell finden</div><input class="field ns-search" type="search" id="nsSearch" placeholder="z. B. Radar, Fang, Countdown" aria-label="Einzeltests durchsuchen"><div class="sub" id="nsCount">Alle Einzeltests sichtbar.</div></div>
+<div class="panel mt"><div class="panel-title">Hunter-Näherungsalarm</div><div class="lab-status"><div id="labMeters" class="lab-distance">AUS</div><strong id="labBpm">0 BPM</strong></div>
       <label class="label" for="labRange">Simulierte Entfernung</label><input class="range" type="range" id="labRange" min="0" max="700" step="1" value="600">
       <div class="lab-grid mt" id="labDistances">
         <button class="btn" data-lab-distance="600">600 m · aus</button><button class="btn" data-lab-distance="500">500 m</button><button class="btn" data-lab-distance="400">400 m</button><button class="btn" data-lab-distance="300">300 m</button><button class="btn" data-lab-distance="200">200 m</button><button class="btn" data-lab-distance="100">100 m</button><button class="btn" data-lab-distance="0">0 m</button>
@@ -735,7 +764,7 @@ body{background:var(--bg)}
   const fmt=ms=>{const sec=Math.max(0,Math.ceil(ms/1000));const m=Math.floor(sec/60),s=sec%60;return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')};
   const relative=t=>{const sec=Math.max(0,Math.floor((now()-t)/1000));return sec<60?'gerade eben':`vor ${Math.floor(sec/60)} Min.`};
   const randCode=()=>{const a='ABCDEFGHJKMNPQRSTUVWXYZ23456789';const bits=new Uint8Array(4);crypto.getRandomValues(bits);return Array.from(bits,n=>a[n%a.length]).join('')};
-  const setScreen=id=>{document.querySelectorAll('.screen').forEach(e=>e.classList.toggle('active',e.id===id));window.scrollTo({top:0,behavior:'instant'});setTimeout(()=>S.map?.invalidateSize(),220)};
+  const setScreen=id=>{document.querySelectorAll('.screen').forEach(e=>{e.classList.toggle('active',e.id===id);if(e.id===id)e.querySelectorAll('.panel,.catch-panel').forEach((p,i)=>p.style.setProperty('--ns-delay',Math.min(i,5)*45+'ms'))});window.scrollTo({top:0,behavior:'instant'});setTimeout(()=>S.map?.invalidateSize(),220)};
   const connection=(msg,on=false)=>{$('connectionText').textContent=msg;$('connectionLight').classList.toggle('on',on)};
   const notify=(head,detail='',sound=false)=>{const el=document.createElement('div');el.className='toast';const b=document.createElement('strong');b.textContent=head;el.append(b,document.createTextNode(detail));$('notifications').prepend(el);if(sound)cueFromMessage(head,detail);if(navigator.vibrate&&sound)navigator.vibrate([55,35,55]);setTimeout(()=>{el.classList.add('off');setTimeout(()=>el.remove(),300)},4800)};
 
@@ -1245,6 +1274,7 @@ body{background:var(--bg)}
     }
   }
   function syncFxControls(){
+    document.documentElement.classList.toggle('ns-fx-off',!FX.visual);
     $('fxSoundOn').checked=S.soundEnabled;$('fxVoiceOn').checked=FX.voice;$('fxVisualOn').checked=FX.visual;
     $('fxVolume').value=String(Math.round(FX.volume*100));$('fxVolumeValue').textContent=Math.round(FX.volume*100)+' %';
     $('audioSettingsBtn').classList.toggle('audio-off',!S.soundEnabled);
@@ -2241,7 +2271,7 @@ body{background:var(--bg)}
     lab.active=true;lab.vehicleSince=0;lab.vehicleUsed=0;$('joinCode').value='';
     setScreen('labScreen');connection('LOKALER TEST',true);audioContext();
     labSetDistance(null);$('labEventStatus').textContent='Bereit zum Testen.';
-    labButtons('labEvents',['headstart','start','ping','radar','bonus','reward','stealth','warning','end','join','pending','wheel-win'],kind=>{
+    labButtons('labEvents',['headstart','start','hunter-release','ping','radar','bonus','reward','stealth','warning','end','join','pending','wheel-win','gps','mock','capture','reveal-end'],kind=>{
       $('labEventStatus').textContent=labLabels[kind];
       notify(labLabels[kind], 'Lokale Simulation',false);cue(kind,{voice:true,visual:true,force:true});
     });
@@ -2249,8 +2279,88 @@ body{background:var(--bg)}
     labButtons('labVoices',Object.keys(VOICE_FILES),kind=>voiceCue(kind,true));
     const reactions=$('labEmoji');reactions.replaceChildren();
     for(const emoji of REACTIONS){const b=document.createElement('button');b.type='button';b.textContent=emoji;b.onclick=()=>{if(lab.active){showReaction(emoji);cue('reaction',{force:true})}};reactions.append(b)}
-    labTick();
+    simReset();$('nsSearch').value='';nsSearch();labTick();
   }
+
+  const sim={};
+  const simActions={
+    lobby:[['join','Beitrittsanfrage'],['wheel','Glücksrad-Auslosung'],['assign','Teams zuweisen'],['copy','Raumcode anzeigen'],['start','Runde starten']],
+    game:[['headstart','Runner-Vorsprung'],['start','Jagdbeginn'],['release','Hunter-Freigabe'],['advance','Zeit + 5 Minuten'],['half','Halbzeit'],['bonus','Bonusziel aktivieren'],['reward','Bonus beanspruchen'],['stealth','Tarnung'],['end','Spielende']],
+    map:[['gps','GPS an / aus'],['gpsbad','GPS-Fehler'],['ping','Runner-Ping'],['radar','Hunter-Radar'],['mock','Mock-Signal'],['recenter','Karte zentrieren'],['mapstyle','Kartenstil wechseln'],['compass','Kompass'],['alias','Ping benennen'],['area','Spielgebiet wechseln'],['point','Bonuspunkt setzen']],
+    comms:[['reaction','Live-Reaktion'],['voice','Team-Funk (Vorschau)'],['voicefail','Funkfehler'],['disconnect','Verbindung trennen'],['reconnect','Erneut verbinden'],['notify','Systemmeldung (Vorschau)']],
+    rules:[['capture-prompt','Fanganfrage / Ablehnung'],['capture','Bestätigter Fang'],['reveal-end','Live-Reveal beenden'],['elimination','Spieler ausschließen'],['vehicle','Fahrzeugzeit Start / Stopp'],['vehicle-limit','Fahrzeuglimit'],['vehicle-reset','Fahrzeugzeit zurücksetzen'],['warning','Regelwarnung'],['end','Runde beenden']]
+  };
+  function simLog(title,detail=''){
+    const row=document.createElement('div'),time=document.createElement('time'),span=document.createElement('span');time.textContent=new Date().toLocaleTimeString('de-DE');span.textContent=title+(detail?' · '+detail:'');row.append(time,span);const box=$('nsLog');box.prepend(row);while(box.children.length>40)box.lastElementChild.remove();
+  }
+  function simRender(){
+    if(!lab.active)return;
+    $('nsPhase').textContent=sim.phase;$('nsTime').textContent=fmt(sim.remaining*1000);$('nsGps').textContent=sim.gps?'AN':'AUS';
+    $('nsConnection').textContent=sim.connected?'LOKAL · VERBUNDEN':'LOKAL · GETRENNT';$('nsCamo').textContent='TARNUNG · '+sim.camo;$('nsPerspective').textContent={host:'Host: Lobby, Teamverteilung und Rundensteuerung.',hunter:'Hunter: Runner-Pings und Fanganfragen. Alle Einzeltests bleiben zugänglich.',runner:'Runner: Radar, Bonus, Mock-Sound und Fahrzeugzeit. Alle Einzeltests bleiben zugänglich.'}[sim.role];
+    $('nsMap').dataset.effect=sim.effect;$('nsOwn').setAttribute('opacity',sim.gps?'1':'0');const reveal=S.revealUntil>now();
+    $('nsHunter').setAttribute('opacity',reveal||sim.effect==='radar'||(sim.gps&&sim.role==='hunter')?'1':'.15');$('nsRunner').setAttribute('opacity',reveal||['ping','mock'].includes(sim.effect)||(sim.gps&&sim.role==='runner')?'1':'.15');
+    $('nsBoundary').setAttribute('r',sim.area==='radius'?'87':'68');
+    for(const [id,key] of [['nsRole','role'],['nsTabs','tab']])$(id).querySelectorAll('button').forEach(b=>{const yes=b.dataset[key]===sim[key];b.classList.toggle('selected',yes);b.setAttribute('aria-pressed',String(yes))});
+    document.documentElement.classList.toggle('ns-fx-off',!FX.visual);
+  }
+  function simRoster(){
+    const box=$('nsRoster');box.replaceChildren();if(sim.tab!=='lobby')return;
+    for(const p of sim.players){const row=document.createElement('div');row.className='ns-person';const name=document.createElement('strong');name.textContent=p.name;const sel=document.createElement('select');sel.className='field';sel.setAttribute('aria-label','Team für '+p.name);for(const role of ['none','hunter','runner']){const o=document.createElement('option');o.value=role;o.textContent={none:'Offen',hunter:'Hunter',runner:'Runner'}[role];sel.append(o)}sel.value=p.role;sel.onchange=()=>{p.role=sel.value;simLog('Team zugewiesen',p.name+' · '+sel.selectedOptions[0].textContent)};row.append(name,sel);box.append(row)}
+  }
+  function simControls(){
+    const box=$('nsControls');box.replaceChildren();for(const [key,label] of simActions[sim.tab]){const b=document.createElement('button');b.type='button';b.className='btn';b.textContent=label;b.onclick=()=>simAction(key);box.append(b)}
+    const opts=$('nsOptions');opts.replaceChildren();if(sim.tab==='lobby')for(const [key,label,min,max,step] of [['duration','Spieldauer (Minuten)',20,180,10],['lead','Vorsprung (Minuten)',0,15,1]]){const l=document.createElement('label'),input=document.createElement('input');l.className='label';l.textContent=label+': '+sim[key];input.type='range';input.className='range';input.min=min;input.max=max;input.step=step;input.value=sim[key];input.setAttribute('aria-label',label);input.oninput=()=>{sim[key]=Number(input.value);l.textContent=label+': '+sim[key];if(sim.phase==='Lobby')sim.remaining=sim.duration*60;simRender()};opts.append(l,input)}simRoster();simRender();
+  }
+  function simReset(){
+    Object.assign(sim,{role:'host',tab:'lobby',phase:'Lobby',duration:60,lead:5,remaining:3600,gps:false,connected:true,area:'radius',players:[{name:'Alex',role:'hunter'},{name:'Sam',role:'runner'},{name:'Mika',role:'none'}],effect:'',until:0,timer:Date.now(),camo:0});$('nsLog').replaceChildren();$('nsMap').style.filter='';$('nsRunner').querySelector('text').textContent='R';labStopPlayback();lab.vehicleSince=0;lab.vehicleUsed=0;simControls();simLog('Simulation bereit','Alle Daten sind fiktiv');
+  }
+  function simCue(kind,title,detail=''){simLog(title,detail);cue(kind,{voice:true,visual:true,force:true});notify(title,detail||'Lokale Simulation',false)}
+  function simEffect(kind,ms){sim.effect=kind;sim.until=Date.now()+ms}
+  function simAction(key){
+    if(!lab.active)return;audioContext();
+    switch(key){
+      case 'join':ask('Beitrittsanfrage','Testspieler Robin möchte teilnehmen.',[{label:'Annehmen',kind:'primary',fn:()=>{if(!sim.players.some(p=>p.name==='Robin'))sim.players.push({name:'Robin',role:'none'});simRoster();simCue('join','Spieler verbunden','Robin')}},{label:'Ablehnen',fn:()=>simLog('Anfrage abgelehnt','Robin')}]);break;
+      case 'wheel':{const p=sim.players[Math.floor(Math.random()*sim.players.length)];simCue('wheel-win','Glücksrad-Auslosung',p.name);ask('Ausgelost: '+p.name,'Ordne den fiktiven Spieler einem Team zu.',[{label:'Hunter',kind:'blue',fn:()=>{p.role='hunter';simRoster();simLog('Team zugewiesen',p.name+' · Hunter')}},{label:'Runner',kind:'orange',fn:()=>{p.role='runner';simRoster();simLog('Team zugewiesen',p.name+' · Runner')}},{label:'Offen'}]);break}
+      case 'assign':sim.players.forEach((p,i)=>p.role=i%2?'runner':'hunter');simRoster();simLog('Teams automatisch zugewiesen');break;
+      case 'copy':notify('Simulierter Raumcode','TEST · nicht beitretbar',false);simLog('Raumcode angezeigt');break;
+      case 'headstart':sim.phase='Vorsprung';sim.remaining=sim.lead*60;simCue('headstart','Runner-Vorsprung');break;
+      case 'start':if(sim.phase==='Lobby'&&sim.lead>0){sim.phase='Vorsprung';sim.remaining=sim.lead*60;simCue('headstart','Runner-Vorsprung')}else{sim.phase='Jagd';sim.remaining=sim.duration*60;simCue('start','Jagdbeginn')}break;
+      case 'release':sim.phase='Jagd';sim.remaining=sim.duration*60;simCue('hunter-release','Hunter-Freigabe');break;
+      case 'advance':if(['Vorsprung','Jagd'].includes(sim.phase)){sim.remaining=Math.max(0,sim.remaining-300);simLog('Zeit vorgespult','5 Minuten');if(!sim.remaining)simAction(sim.phase==='Vorsprung'?'release':'end')}else simLog('Zeit vorspulen','Zuerst eine Runde starten');break;
+      case 'half':sim.phase='Jagd';sim.remaining=sim.duration*30;simLog('Halbzeit');voiceCue('half',true);notify('Halbzeit','Lokale Simulation',false);break;
+      case 'bonus':simEffect('bonus',60000);simCue('bonus','Bonusziel aktiviert');break;
+      case 'reward':sim.camo=2;simCue('reward','Bonus gesichert','2 simulierte Tarnungsrunden');break;
+      case 'stealth':if(sim.camo>0)sim.camo--;simCue('stealth','Tarnung getestet',sim.camo+' Runden übrig');break;
+      case 'end':sim.phase='Ende';sim.remaining=0;sim.gps=false;sim.effect='';endReveal();simCue('end','Spielende');break;
+      case 'gps':sim.gps=!sim.gps;simCue('gps','Test-GPS '+(sim.gps?'aktiv':'aus'));break;
+      case 'gpsbad':sim.gps=false;simCue('warning','GPS nicht verfügbar','Simulierte ungenaue Messung');break;
+      case 'ping':simEffect('ping',5000);simCue('ping','Runner-Ping','Fiktiver Kartenmarker');break;
+      case 'radar':simEffect('radar',6000);simCue('radar','Hunter-Radar','Vorschau auf der Testkarte');break;
+      case 'mock':simEffect('mock',3000);playMockSound('beacon');simCue('mock','Mock-Signal','3 Sekunden Vorschau');break;
+      case 'recenter':$('nsMap').scrollIntoView({block:'nearest',behavior:'auto'});simLog('Testkarte zentriert');break;
+      case 'mapstyle':$('nsMap').style.filter=$('nsMap').style.filter?'':'invert(.85) hue-rotate(180deg)';simLog('Kartenstil gewechselt');break;
+      case 'compass':simLog('Kompass','Simulierter Nordkurs · keine Sensorfreigabe');notify('Kompass-Test','Nord · 0°',false);break;
+      case 'alias':ask('Ping benennen','Fiktiver Ping: Test-Runner.',[{label:'Übernehmen',kind:'primary',fn:()=>{$('nsRunner').querySelector('text').textContent='Test-R';simLog('Ping umbenannt','Test-Runner')}},{label:'Abbrechen'}]);break;
+      case 'area':sim.area=sim.area==='radius'?'area':'radius';simLog('Spielgebiet',sim.area==='radius'?'Umkreis':'Stadtgebiet (schematisch)');break;
+      case 'point':simEffect('bonus',60000);simLog('Fiktiver Bonuspunkt gesetzt');break;
+      case 'reaction':showReaction(REACTIONS[Math.floor(Math.random()*REACTIONS.length)]);cue('reaction',{force:true});simLog('Live-Reaktion');break;
+      case 'voice':voiceCue('join',true);simLog('Team-Funk','Lokale Audiovorschau · keine Aufnahme');break;
+      case 'voicefail':simCue('warning','Team-Funk nicht verfügbar','Simulierter Mikrofonfehler');break;
+      case 'disconnect':sim.connected=false;simCue('warning','Verbindung unterbrochen','Nur simuliert');break;
+      case 'reconnect':sim.connected=true;simCue('join','Verbindung wiederhergestellt');break;
+      case 'notify':notify('Test-Systemmeldung','Lokale Vorschau, keine Systemberechtigung nötig',false);simLog('Benachrichtigungsvorschau');break;
+      case 'capture-prompt':case 'capture':case 'reveal-end':case 'elimination':case 'vehicle':case 'vehicle-limit':case 'vehicle-reset':labAction(key);simLog(simActions.rules.find(a=>a[0]===key)?.[1]||key);break;
+      case 'warning':simCue('warning','Regelwarnung');break;
+    }simRender();
+  }
+  function simTick(){if(!lab.active)return;const t=Date.now();if(sim.until&&t>=sim.until){sim.effect='';sim.until=0}if(['Vorsprung','Jagd'].includes(sim.phase)&&t-sim.timer>=1000){const delta=Math.floor((t-sim.timer)/1000);sim.remaining=Math.max(0,sim.remaining-delta);sim.timer+=delta*1000;if(!sim.remaining){if(sim.phase==='Vorsprung')simAction('release');else simAction('end')}}else if(!['Vorsprung','Jagd'].includes(sim.phase))sim.timer=t;simRender()}
+  $('nsRole').onclick=e=>{const b=e.target.closest('[data-role]');if(lab.active&&b){sim.role=b.dataset.role;simLog('Rollenperspektive',b.textContent);simRender()}};
+  $('nsTabs').onclick=e=>{const b=e.target.closest('[data-tab]');if(lab.active&&b){sim.tab=b.dataset.tab;simControls()}};
+  $('nsReset').onclick=()=>{if(lab.active)simReset()};$('nsClear').onclick=()=>$('nsLog').replaceChildren();
+  function nsSearch(){const q=$('nsSearch').value.trim().toLocaleLowerCase('de');let total=0,shown=0;for(const id of ['labDistances','labEvents','labActions','labMocks','labSounds','labVoices'])for(const b of $(id).querySelectorAll('button')){total++;const match=!q||b.textContent.toLocaleLowerCase('de').includes(q);b.style.display=match?'':'none';if(match)shown++}$('nsCount').textContent=shown+' von '+total+' Einzeltests sichtbar.'}
+  $('nsSearch').oninput=nsSearch;
+  document.addEventListener('pointerdown',e=>{if(!FX.visual||window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;const b=e.target.closest?.('.btn');if(!b||b.disabled)return;const rect=b.getBoundingClientRect(),dot=document.createElement('i');dot.className='ns-ripple';dot.setAttribute('aria-hidden','true');dot.style.left=(e.clientX-rect.left)+'px';dot.style.top=(e.clientY-rect.top)+'px';b.append(dot);setTimeout(()=>dot.remove(),650)},{passive:true});
+
   function labStopApproach(){if(lab.approach!==null){clearInterval(lab.approach);lab.approach=null}}
   function labSetDistance(meters){
     if(!lab.active)return;
@@ -2262,7 +2372,7 @@ body{background:var(--bg)}
     proximityRender();
   }
   function labTick(){
-    proximityRender();
+    simTick();proximityRender();
     if(S.revealUntil>now())updateRevealHud();else if(S.revealUntil)endReveal();
     const used=lab.vehicleUsed+(lab.vehicleSince?Date.now()-lab.vehicleSince:0);
     $('labVehicle').textContent=fmt(Math.max(0,VEHICLE_LIMIT_MS-used));
