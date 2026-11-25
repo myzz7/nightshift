@@ -513,6 +513,12 @@ html[data-theme=dark] .panel,html[data-theme=dark] .catch-panel{box-shadow:0 12p
 @media(max-width:420px){.hero{padding:25px 20px;border-radius:25px}.hero h1{font-size:39px}.ns-metrics .stat{padding:10px 6px}.ns-metrics small{font-size:9px}}
 @media(prefers-reduced-motion:reduce){.hero:after,.ns-sweep,.ns-signal,.live-dot.on,.screen.active,.screen.active .panel,.screen.active .catch-panel,.btn .ns-ripple{animation:none!important;translate:none!important}.btn,.panel,.ns-marker{transition:none!important}}
 html.ns-fx-off .toast,html.ns-fx-off .modal-sheet,html.ns-fx-off .fx-settings-sheet,html.ns-fx-off .hero:after,html.ns-fx-off .ns-sweep,html.ns-fx-off .ns-signal,html.ns-fx-off .live-dot.on,html.ns-fx-off .ns-ripple,html.ns-fx-off .screen.active,html.ns-fx-off .screen.active .panel,html.ns-fx-off .screen.active .catch-panel{animation:none!important;translate:none!important}
+</style><style>
+.ns-duel{position:relative;overflow:hidden;border:1px solid var(--ns-edge);background:linear-gradient(145deg,var(--surface),var(--soft))}
+.ns-duel-head{display:flex;align-items:center;justify-content:space-between;gap:8px}.ns-duel-head .panel-title{font-size:24px;margin-top:5px}
+.ns-duel-score{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;margin:16px 0}.ns-duel-score>div{border:1px solid var(--ns-edge);border-radius:16px;padding:11px 14px;text-align:center;background:var(--surface)}.ns-duel-score>div:first-child{border-color:#439aff60;color:var(--blue)}.ns-duel-score>div:last-child{border-color:#ed883d70;color:var(--orange)}.ns-duel-score small{font-size:10px;letter-spacing:.12em;font-weight:850;display:block}.ns-duel-score b{font-size:32px;line-height:1.2;font-variant-numeric:tabular-nums}.ns-duel-score>span{font-size:10px;letter-spacing:.12em;color:var(--muted)}
+.ns-duel-question{font-size:19px;font-weight:800;line-height:1.35;margin:16px 0 10px;overflow-wrap:anywhere}.ns-duel-options{display:grid;grid-template-columns:1fr 1fr;gap:8px}.ns-duel-options .btn{min-height:52px;text-align:center}.ns-duel-options .btn.selected{border:2px solid var(--ns-accent)}.ns-duel[data-active=true]{border-color:#8b75e4a0;box-shadow:0 12px 36px #6557b719}.ns-duel[data-active=true] .ns-duel-head .ns-kicker{animation:duelPulse 2.6s ease-in-out infinite}.ns-duel-options .btn{animation:duelEnter .3s ease-out both}.ns-duel-options .btn:nth-child(2){animation-delay:40ms}.ns-duel-options .btn:nth-child(3){animation-delay:80ms}.ns-duel-options .btn:nth-child(4){animation-delay:120ms}
+@keyframes duelPulse{50%{opacity:.55}}@keyframes duelEnter{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}@media(prefers-reduced-motion:reduce){.ns-duel *{animation:none!important}}html.ns-fx-off .ns-duel *{animation:none!important}
 </style></head>
 <body>
 <div class="ambient"></div><div class="grain"></div>
@@ -560,7 +566,7 @@ html.ns-fx-off .toast,html.ns-fx-off .modal-sheet,html.ns-fx-off .fx-settings-sh
       <div id="waitApproval" class="event-box hidden"><span class="event-spark">ANFRAGE GESENDET</span><h3>Warte auf den Host</h3><p>Der Host muss dich erst freischalten. Solange wird kein Standort übertragen.</p></div>
     </div>
     <div class="panel mt" id="hostSetup">
-      <div class="panel-title">Spielregeln</div><div class="sub">Nur der Host kann diese Einstellungen vor dem Start ändern.</div>
+      <div class="panel-title">Spielregeln</div><div class="sub">Nur der Host kann diese Einstellungen vor dem Start ändern.</div><label class="consent"><input type="checkbox" id="duelEnabled" checked><span><strong>Mind Clash aktivieren</strong> · freiwillige Rätselduelle zwischen den Teams mit eigener Punktetafel.</span></label>
       <div class="area-selector" id="areaSelector">
         <label class="label" style="margin-top:0">Spielgebiet auswählen</label>
         <div class="area-tabs"><button type="button" class="btn selected" id="areaModeRadius">Umkreis</button><button type="button" class="btn" id="areaModeAdmin">Stadt / Stadtteil</button></div>
@@ -603,7 +609,7 @@ html.ns-fx-off .toast,html.ns-fx-off .modal-sheet,html.ns-fx-off .fx-settings-sh
       <button class="btn orange block" type="button" id="captureBtn">Fangbestätigung anfragen</button>
       <div id="captureHint" class="micro mt"></div>
     </div>
-    <div id="gameMapDock"></div>
+    <div id="gameMapDock"></div><div class="panel mt ns-duel" id="duelPanel"><div class="ns-duel-head"><div><div class="ns-kicker">NIGHTSHIFT / SIDE QUEST</div><div class="panel-title">Mind Clash</div></div><span class="pill" id="duelClock">BEREIT</span></div><div class="ns-duel-score"><div><small>HUNTER</small><b id="duelHunter">0</b></div><span>VS</span><div><small>RUNNER</small><b id="duelRunner">0</b></div></div><p class="sub">Freiwilliges Rätselduell. Nur im sicheren Stand spielen, niemals beim Laufen oder Fahren. Keine Standort- oder Spielvorteile.</p><div class="ns-duel-question" id="duelQuestion"></div><div class="ns-duel-options" id="duelOptions"></div><p class="sub" id="duelStatus" role="status"></p></div>
     <div id="outStatus" class="event-box hidden" role="status"><span class="event-spark">RUNDE BEENDET</span><h3>Du bist ausgeschieden</h3><p id="outReason">Du kannst die Runde weiter verfolgen, aber nicht mehr mitspielen.</p></div>
     <div class="catch-panel hidden" id="vehiclePanel">
       <div class="panel-title">Fahrzeugregel · 10 Minuten gesamt</div>
@@ -634,7 +640,7 @@ html.ns-fx-off .toast,html.ns-fx-off .modal-sheet,html.ns-fx-off .fx-settings-sh
 <div class="row-between"><span class="pill" id="nsConnection">LOKAL · VERBUNDEN</span><span class="pill" id="nsCamo">TARNUNG · 0</span></div><div class="ns-map" id="nsMap" data-effect="" role="img" aria-label="Schematische Testkarte ohne echte Standorte"><svg viewBox="0 0 400 232" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><pattern id="nsGrid" width="28" height="28" patternUnits="userSpaceOnUse"><path d="M28 0H0V28" fill="none" stroke="#395370" stroke-width=".65"/></pattern></defs><rect width="400" height="232" fill="url(#nsGrid)"/><g fill="none" stroke="#3f5873" stroke-width="7" opacity=".8"><path d="M-10 55L110 95L230 30L410 80M-10 192L95 154L230 180L410 125M90 -10L125 232M305 -10L275 232"/></g><circle id="nsBoundary" cx="200" cy="116" r="87" fill="#347bc41a" stroke="#76abf0" stroke-dasharray="5 4"/><g class="ns-sweep"><path d="M200 116L200 24A92 92 0 0 1 265 51Z" fill="#8ecbff55"/></g><g id="nsOwn" opacity="0"><circle cx="200" cy="116" r="10" fill="#eef6ff" stroke="#102944" stroke-width="3"/><circle class="ns-signal" cx="200" cy="116" r="14" fill="none" stroke="#eef6ff"/></g><g id="nsHunter" class="ns-marker" opacity=".15"><circle cx="105" cy="83" r="8" fill="#62b5ff" stroke="#fff" stroke-width="2"/><text x="118" y="86" fill="#b7ddff" font-size="11">H</text></g><g id="nsRunner" class="ns-marker" opacity=".15"><circle cx="283" cy="154" r="8" fill="#ffab61" stroke="#fff" stroke-width="2"/><text x="296" y="157" fill="#ffd4aa" font-size="11">R</text></g><g class="ns-bonus"><path d="M255 69l8 11-8 11-8-11z" fill="#c6a7ff" stroke="#fff" stroke-width="1.5"/></g></svg><span class="ns-map-label">SIMULATION · KEIN LIVE-GPS</span></div>
 <div class="ns-tabs" id="nsTabs"><button class="btn selected" data-tab="lobby">Lobby</button><button class="btn" data-tab="game">Spielablauf</button><button class="btn" data-tab="map">Karte &amp; GPS</button><button class="btn" data-tab="comms">Funk &amp; Netzwerk</button><button class="btn" data-tab="rules">Regeln &amp; Ende</button></div>
 <div id="nsControls" class="lab-grid"></div><div id="nsOptions"></div><div id="nsRoster" class="ns-roster"></div><div class="two mt"><button class="btn primary" id="nsReset">Simulation zurücksetzen</button><button class="btn" id="nsClear">Protokoll leeren</button></div><div class="panel-title mt">Ereignisprotokoll</div><div class="ns-log" id="nsLog" role="log" aria-live="polite"></div></div>
-<div class="panel mt"><div class="ns-kicker">02 / EINZELTESTS</div><div class="panel-title">Effekte schnell finden</div><input class="field ns-search" type="search" id="nsSearch" placeholder="z. B. Radar, Fang, Countdown" aria-label="Einzeltests durchsuchen"><div class="sub" id="nsCount">Alle Einzeltests sichtbar.</div></div>
+<div class="panel mt ns-duel" id="duelLabPanel"><div class="ns-duel-head"><div><div class="ns-kicker">NIGHTSHIFT / SIDE QUEST</div><div class="panel-title">Mind Clash</div></div><span class="pill" id="duelLabClock">BEREIT</span></div><div class="ns-duel-score"><div><small>HUNTER</small><b id="duelLabHunter">0</b></div><span>VS</span><div><small>RUNNER</small><b id="duelLabRunner">0</b></div></div><p class="sub">Freiwilliges Rätselduell. Nur im sicheren Stand spielen, niemals beim Laufen oder Fahren. Keine Standort- oder Spielvorteile.</p><div class="ns-duel-question" id="duelLabQuestion"></div><div class="ns-duel-options" id="duelLabOptions"></div><p class="sub" id="duelLabStatus" role="status"></p><div class="lab-grid mt"><button class="btn primary" id="duelLabStart">Neues Duell</button><button class="btn" id="duelLabOther">Gegenteam antwortet</button><button class="btn" id="duelLabEnd">Duell auswerten</button><button class="btn" id="duelLabReset">Punkte zurücksetzen</button></div></div><div class="panel mt"><div class="ns-kicker">02 / EINZELTESTS</div><div class="panel-title">Effekte schnell finden</div><input class="field ns-search" type="search" id="nsSearch" placeholder="z. B. Radar, Fang, Countdown" aria-label="Einzeltests durchsuchen"><div class="sub" id="nsCount">Alle Einzeltests sichtbar.</div></div>
 <div class="panel mt"><div class="panel-title">Hunter-Näherungsalarm</div><div class="lab-status"><div id="labMeters" class="lab-distance">AUS</div><strong id="labBpm">0 BPM</strong></div>
       <label class="label" for="labRange">Simulierte Entfernung</label><input class="range" type="range" id="labRange" min="0" max="700" step="1" value="600">
       <div class="lab-grid mt" id="labDistances">
@@ -1314,8 +1320,79 @@ html.ns-fx-off .toast,html.ns-fx-off .modal-sheet,html.ns-fx-off .fx-settings-sh
   function reconnectTick(){if(!S.reconnectAt||S.reconnectAt>Date.now()||S.reconnectBusy||S.host||S.leaving)return;if(S.conn){S.reconnectAt=0;return}S.reconnectAt=0;S.reconnectBusy=true;(async()=>{try{if(!S.peer||S.peer.destroyed)await initPeer();if(S.peer.disconnected){S.peer.reconnect();scheduleReconnect();return}connectHost(true)}catch{scheduleReconnect()}finally{S.reconnectBusy=false}})()}
   async function resumeRoom(){const x=readResume();if(!x||S.joining||S.peer||lab.active)return;S.joining=true;S.host=false;S.leaving=false;S.roomCode=x.code;S.myName=x.name;S.preferredRole=x.preference;S.token=x.token;S.gpsWanted=!!x.gps;S.gpsVerified=!!x.gps;$('privacyConsent').checked=!!x.gps;S.approved=true;S.pendingPing=readPending();$('myName').value=x.name;$('joinCode').value=x.code;try{S.myId=await initPeer();connectHost(true);showRoom()}catch{scheduleReconnect();showRoom()}finally{S.joining=false}}
   const getSettingsPublic=()=>({...S.settings,center:S.settings.center?{...S.settings.center}:null,area:S.settings.area?{...S.settings.area}:null});
+
+  const DUEL_FIRST=6*60000,DUEL_INTERVAL=8*60000,DUEL_WINDOW=120000;
+  function newDuelState(){return {enabled:true,next:0,seq:0,score:{hunter:0,runner:0},round:null,last:null}}
+  let duelHost=newDuelState(),duelView=null,duelLab=newDuelState(),duelPending=null;
+  const duelRendered=new Map();
+  function duelQuestion(seq){
+    const rand=n=>Math.floor(Math.random()*n);
+    const type=seq%4;let prompt,answer,wrong;
+    if(type===1){const a=2+rand(8),d=2+rand(5);prompt='Welche Zahl folgt? '+[a,a+d,a+2*d,a+3*d].join(' · ')+' · ?';answer=a+4*d;wrong=[answer-1,answer+1,answer+d]}
+    else if(type===2){const a=3+rand(7),b=2+rand(6),c=1+rand(9);prompt='Wie viel ist '+a+' × '+b+' + '+c+'?';answer=a*b+c;wrong=[answer-2,answer+2,answer+b+2]}
+    else if(type===3){const a=2+rand(4),b=2+rand(5);prompt='Welche Zahl fehlt? '+[a,a*b,a*b*b].join(' · ')+' · ?';answer=a*b*b*b;wrong=[answer-b,answer+b,answer+a*b+1]}
+    else{const a=10+rand(20),b=2+rand(8),c=2+rand(8);prompt='Wie viel ist '+a+' − '+b+' + '+c+'?';answer=a-b+c;wrong=[answer-1,answer+2,answer+4]}
+    const choices=[answer,...wrong].map(String);for(let i=choices.length-1;i>0;i--){const j=rand(i+1);[choices[i],choices[j]]=[choices[j],choices[i]]}
+    return {prompt,choices,answer:choices.indexOf(String(answer))};
+  }
+  function duelOpen(state,t,eligible){
+    state.seq++;const q=duelQuestion(state.seq);
+    state.round={id:state.seq,prompt:q.prompt,choices:q.choices,answer:q.answer,until:t+DUEL_WINDOW,eligible:new Map(eligible.map(p=>[p.id,p.role])),votes:new Map()};
+    state.last=null;
+  }
+  function duelVote(state,id,roundId,choice,t){
+    const r=state.round;if(!r||r.id!==roundId||t>=r.until||!r.eligible.has(id)||r.votes.has(id)||!Number.isInteger(choice)||choice<0||choice>=r.choices.length)return false;
+    r.votes.set(id,choice);return true;
+  }
+  function duelFinish(state){
+    const r=state.round;if(!r)return null;
+    const stats={hunter:{correct:0,total:0},runner:{correct:0,total:0}};
+    for(const [id,choice] of r.votes){const role=r.eligible.get(id);if(!stats[role])continue;stats[role].total++;if(choice===r.answer)stats[role].correct++}
+    const h=stats.hunter,n=stats.runner;let winner='none';
+    if(h.total&&n.total){const diff=h.correct*n.total-n.correct*h.total;winner=diff>0?'hunter':diff<0?'runner':'tie';if(winner==='tie'){state.score.hunter++;state.score.runner++}else state.score[winner]+=2}
+    state.last={winner,stats,solution:r.choices[r.answer],id:r.id};state.round=null;return state.last;
+  }
+  function duelPublic(state,id){
+    const r=state.round;return {enabled:state.enabled,next:state.next,score:{...state.score},last:state.last,round:r?{id:r.id,prompt:r.prompt,choices:r.choices.slice(),until:r.until,eligible:r.eligible.has(id),vote:r.votes.has(id)?r.votes.get(id):null}:null};
+  }
+  function duelRender(prefix,view,t,onAnswer,canPlay=true,playing=true){
+    const el=$(prefix+'Panel');if(!el)return;
+    el.classList.toggle('hidden',!view?.enabled);if(!view?.enabled)return;
+    const r=view.round,remaining=r?Math.max(0,r.until-t):0,active=!!r&&remaining>0;
+    el.dataset.active=String(active);$(prefix+'Hunter').textContent=view.score.hunter;$(prefix+'Runner').textContent=view.score.runner;
+    $(prefix+'Clock').textContent=active?fmt(remaining):playing&&view.next>t?'NÄCHSTES '+fmt(view.next-t):'BEREIT';
+    let question='',status='';
+    if(r){question=r.prompt;status=!active?'Auswertung läuft …':r.vote!==null?'Antwort gespeichert. Die Auswertung folgt für beide Teams.':!canPlay||!r.eligible?'Du schaust dieses Duell an.':'Eine Antwort pro Spieler · Genauigkeit zählt, nicht Geschwindigkeit.'}
+    else if(view.last){const x=view.last,h=x.stats.hunter,n=x.stats.runner;question=x.winner==='hunter'?'Hunter gewinnen!':x.winner==='runner'?'Runner gewinnen!':x.winner==='tie'?'Unentschieden!':'Keine Wertung';status='Lösung: '+x.solution+' · Hunter '+h.correct+'/'+h.total+' · Runner '+n.correct+'/'+n.total+' richtig. '+(x.winner==='none'?'Beide Teams müssen teilnehmen.':'')}
+    else{question=playing?'Das nächste Duell kommt automatisch.':'Mind Clash · separate Teamwertung';status='Zwei Punkte für das bessere Team, je ein Punkt bei Gleichstand. Keine Pflichtteilnahme.'}
+    $(prefix+'Question').textContent=question;$(prefix+'Status').textContent=status;
+    const pending=prefix==='duel'&&duelPending===r?.id;
+    const key=JSON.stringify([r?.id,r?.prompt,r?.choices,r?.vote,active,canPlay,r?.eligible,pending]);if(duelRendered.get(prefix)===key)return;duelRendered.set(prefix,key);
+    const options=$(prefix+'Options');options.replaceChildren();if(!r)return;
+    r.choices.forEach((label,i)=>{const b=document.createElement('button');b.type='button';b.className='btn'+(r.vote===i?' selected':'');b.textContent=label;b.disabled=!active||!canPlay||!r.eligible||r.vote!==null||pending;b.setAttribute('aria-pressed',String(r.vote===i));b.onclick=()=>onAnswer(r.id,i);options.append(b)});
+  }
+  function duelShow(){
+    if(!S.approved)return;
+    const view=S.host?duelPublic(duelHost,S.myId):duelView;
+    duelRender('duel',view,now(),(id,choice)=>{if(!S.host){duelPending=id;if(!hostSend({t:'duel-answer',id,choice}))duelPending=null;duelShow();setTimeout(()=>{if(duelPending===id){duelPending=null;duelShow()}},4000)}else hostSend({t:'duel-answer',id,choice})},S.phase==='playing'&&!me()?.disqualified,S.phase==='playing');
+  }
+  function duelHostTick(t){
+    if(!duelHost.enabled||S.phase!=='playing')return;
+    if(duelHost.round&&t>=duelHost.round.until){duelFinish(duelHost);sync();return}
+    if(!duelHost.round&&t>=duelHost.next&&t+DUEL_WINDOW<=S.endAt){
+      duelHost.next=t+DUEL_INTERVAL;const eligible=S.players.filter(p=>!p.disqualified&&!S.offlineSince.has(p.id)&&['hunter','runner'].includes(p.role));
+      if(!eligible.some(p=>p.role==='hunter')||!eligible.some(p=>p.role==='runner')){sync();return}
+      duelOpen(duelHost,t,eligible);sync();sendAll({t:'event',heading:'Mind Clash verfügbar',message:'Freiwilliges Rätselduell. Nur im sicheren Stand teilnehmen.'});
+    }
+  }
+  function duelLabShow(){if(!lab.active)return;const id=sim.role==='runner'?'lab-runner':'lab-hunter';duelRender('duelLab',duelPublic(duelLab,id),Date.now(),(round,choice)=>{duelVote(duelLab,id,round,choice,Date.now());duelLabShow()},true,false)}
+  $('duelLabStart').onclick=()=>{if(!lab.active)return;duelOpen(duelLab,Date.now(),[{id:'lab-hunter',role:'hunter'},{id:'lab-runner',role:'runner'}]);duelLabShow()};
+  $('duelLabOther').onclick=()=>{if(!lab.active||!duelLab.round)return;const r=duelLab.round,id=sim.role==='runner'?'lab-hunter':'lab-runner';duelVote(duelLab,id,r.id,Math.floor(Math.random()*r.choices.length),Date.now());duelLabShow()};
+  $('duelLabEnd').onclick=()=>{if(lab.active){duelFinish(duelLab);duelLabShow()}};
+  $('duelLabReset').onclick=()=>{if(lab.active){duelLab=newDuelState();duelRendered.delete('duelLab');duelLabShow()}};
+
   const snapshotFor=id=>({t:'snapshot',clock:Date.now(),code:S.roomCode,roomName:S.roomName,players:S.players.map(p=>({...p,offline:S.offlineSince.has(p.id),gpsReady:!!S.gpsStatus.get(p.id)?.on&&Date.now()-S.gpsStatus.get(p.id).at<GPS_STALE_MS})),phase:S.phase,
-    settings:getSettingsPublic(),startAt:S.startAt,chaseAt:S.chaseAt,endAt:S.endAt,
+    settings:getSettingsPublic(),startAt:S.startAt,chaseAt:S.chaseAt,endAt:S.endAt,duel:duelPublic(duelHost,id),
     challengeOpen:S.challengeOpen,challengeUntil:S.challengeUntil,challengeWinner:S.challengeWinner,
     challengePoint:(id===S.myId||(S.challengeOpen&&roleOf(id)==='runner'))?S.challengePoint:null,
     myId:id,hostId:S.players[0]?.id||S.myId});
@@ -1396,6 +1473,7 @@ html.ns-fx-off .toast,html.ns-fx-off .modal-sheet,html.ns-fx-off .fx-settings-sh
     if(data.t==='snapshot'){
       S.approved=true;S.myId=data.myId||S.myId;S.clockOffset=Number(data.clock)-Date.now();S.roomCode=data.code;S.roomName=data.roomName;S.players=Array.isArray(data.players)?data.players:[];
       const oldPhase=S.phase,oldRound=S.chaseAt;S.phase=data.phase;S.settings={...data.settings,mode:data.settings?.mode==='area'?'area':'radius',area:data.settings?.area||null};ensureAreaBoundary();S.startAt=data.startAt;S.chaseAt=data.chaseAt;S.endAt=data.endAt;
+      const oldDuelId=duelView?.round?.id;duelView=data.duel||null;if(duelView?.round?.id!==oldDuelId||duelView?.round?.vote!=null)duelPending=null;
       if(S.pingAckRound!==S.chaseAt){S.pingAckRound=S.chaseAt;S.pingAck=-1}if(S.pendingPing&&S.pendingPing.round!==S.chaseAt){S.pendingPing=null;storePending()}if(me()?.disqualified||S.phase==='ended'){stopGPS();if(S.phase==='ended')forgetResume()}else{saveResume();if(!S.host&&S.conn?.open&&S.lastGPSHeartbeat===0){hostSend({t:'gps-status',on:S.gpsWanted&&S.gpsVerified});S.lastGPSHeartbeat=Date.now()}}S.challengeOpen=!!data.challengeOpen;S.challengeUntil=data.challengeUntil||0;S.challengeWinner=data.challengeWinner||null;S.challengePoint=toLatLng(data.challengePoint);
       $('waitApproval').classList.add('hidden');if(oldPhase!==S.phase&&S.phase==='headstart')notify('Vorsprung läuft','Hunter warten, Runner bewegen sich zum Start.',true);
       if(oldPhase!==S.phase&&S.phase==='playing')notify('Jagd gestartet','Achte auf die GPS-Pings.',true);
@@ -1648,6 +1726,7 @@ html.ns-fx-off .toast,html.ns-fx-off .modal-sheet,html.ns-fx-off .fx-settings-sh
   }
   function onHostData(conn,data){if(!S.host||!data||typeof data!=='object')return;const id=conn.peer;if(!S.players.some(p=>p.id===id))return;const role=roleOf(id),player=S.players.find(p=>p.id===id);
 
+    if(data.t==='duel-answer'){if(S.phase==='playing'&&!player.disqualified&&duelVote(duelHost,id,data.id,data.choice,Date.now()))sync();return}
     if(data.t==='link-ping'){sendTo(id,{t:'link-pong'});if(data.resume===true&&role==='runner'&&!player.disqualified&&S.phase==='playing'&&S.lastPingSlot>0&&Date.now()-(S.chaseAt+S.lastPingSlot*PING_MS)<PING_MS){if(S.lastRunnerById.get(id)===S.lastPingSlot)sendTo(id,{t:'ping-ack',slot:S.lastPingSlot,round:S.chaseAt});else sendTo(id,{t:'pulse-runner',slot:S.lastPingSlot})}return}
     if(data.t==='voice-part'){hostVoicePart(id,player,data);return}
     if(data.t==='proximity-location'){return} // No continuous location exchange.
@@ -1755,13 +1834,13 @@ html.ns-fx-off .toast,html.ns-fx-off .modal-sheet,html.ns-fx-off .fx-settings-sh
     }
   }
   function broadcastScan(){if(S.phase!=='playing')return;const samples=[...S.scanSamples.values()];sendAll({t:'hunter-scan',samples,until:S.scanVisibleUntil},'runner')}
-  function start(){if(!S.host||S.phase!=='lobby')return;proximityClear(true);endReveal();checkStart();if($('startGame').disabled)return;const t=Date.now();S.startAt=t;S.chaseAt=t+S.settings.headstartMin*60000;S.endAt=S.chaseAt+S.settings.durationMin*60000;S.phase=S.settings.headstartMin>0?'headstart':'playing';S.challengeWinner=null;S.challengeOpen=false;S.challengeUntil=0;S.challengeTriggered=false;S.lastPingSlot=0;S.lastScanSlot=0;S.pingWarnings.clear();S.publicPings.clear();S.pendingPing=null;S.pingAck=-1;S.pingAckRound=S.chaseAt;storePending();S.camo.clear();S.scanSamples.clear();S.mockRate.clear();S.reactionRate.clear();S.localMockNext=0;S.mockPending=false;S.lastMockAttempt=0;S.anonTokens.clear();S.hunterTokens.clear();S.lastRunnerById.clear();S.lastHunterById.clear();S.claimedEvent=false;S.captureRequests.clear();S.captureRate.clear();S.activityEvents=[];S.captureSelectKey='';$('catchFeed').innerHTML='<p>Noch keine Meldungen.</p>';
+  function start(){if(!S.host||S.phase!=='lobby')return;proximityClear(true);endReveal();checkStart();if($('startGame').disabled)return;const t=Date.now();S.startAt=t;S.chaseAt=t+S.settings.headstartMin*60000;S.endAt=S.chaseAt+S.settings.durationMin*60000;S.phase=S.settings.headstartMin>0?'headstart':'playing';duelHost=newDuelState();duelHost.enabled=$('duelEnabled').checked;duelHost.next=S.chaseAt+DUEL_FIRST;duelPending=null;duelView=null;duelRendered.delete('duel');S.challengeWinner=null;S.challengeOpen=false;S.challengeUntil=0;S.challengeTriggered=false;S.lastPingSlot=0;S.lastScanSlot=0;S.pingWarnings.clear();S.publicPings.clear();S.pendingPing=null;S.pingAck=-1;S.pingAckRound=S.chaseAt;storePending();S.camo.clear();S.scanSamples.clear();S.mockRate.clear();S.reactionRate.clear();S.localMockNext=0;S.mockPending=false;S.lastMockAttempt=0;S.anonTokens.clear();S.hunterTokens.clear();S.lastRunnerById.clear();S.lastHunterById.clear();S.claimedEvent=false;S.captureRequests.clear();S.captureRate.clear();S.activityEvents=[];S.captureSelectKey='';$('catchFeed').innerHTML='<p>Noch keine Meldungen.</p>';
     for(const p of S.players){p.vehicleSince=0;p.vehicleUsedMs=0;p.eliminationReason='';p.caughtBy=null;p.disqualified=false;const used=p.role==='runner'?S.anonTokens:S.hunterTokens;const prefix=p.role==='runner'?'R-':'H-';let token;do{token=prefix+Math.floor(100+Math.random()*899)}while([...used.values()].includes(token));used.set(p.id,token)}
     sync();showGame();notify('Spiel gestartet',S.phase==='headstart'?'Runner haben jetzt Vorsprung!':'Die Jagd läuft!',true);tick()}
   function hostTick(){if(!S.host)return;const t=Date.now();for(const [id,conn] of S.clients){const seen=S.lastClientSeen.get(id)??t;if(t-seen>45000){S.clients.delete(id);S.offlineSince.set(id,seen);try{conn.close()}catch{}S.voiceIncoming.delete('host:'+id);sync()}}for(const [id,since] of S.offlineSince){if(t-since<RECONNECT_MS)continue;if(S.phase==='lobby'){S.offlineSince.delete(id);S.lastClientSeen.delete(id);S.pingWarnings.delete(id);S.rejoinKeys.delete(id);S.gpsStatus.delete(id);S.players=S.players.filter(p=>p.id!==id);sync()}else if(['headstart','playing'].includes(S.phase)){eliminatePlayer(id,'Verbindung länger als fünf Minuten getrennt.');S.offlineSince.delete(id);sync()}}if(['headstart','playing'].includes(S.phase)){let changed=false;for(const p of S.players.filter(p=>p.role==='runner'&&!p.disqualified)){const gps=S.gpsStatus.get(p.id);if(!S.offlineSince.has(p.id)&&(!gps||!gps.on||(t-gps.at>=RECONNECT_MS))){eliminatePlayer(p.id,'GPS-Verbindung länger unterbrochen.');changed=true;continue}if(p.role==='runner'&&p.vehicleSince&&(p.vehicleUsedMs||0)+t-p.vehicleSince>=VEHICLE_LIMIT_MS){p.vehicleUsedMs=VEHICLE_LIMIT_MS;p.vehicleSince=0;eliminatePlayer(p.id,'10 Minuten Fahrzeugzeit erreicht.');changed=true}}}
     for(const [key,req] of S.captureRequests){if(t>req.expiresAt){S.captureRequests.delete(key);sendTo(req.hunter,{t:'capture-result',message:'Die Fanganfrage ist ohne Bestätigung abgelaufen.'})}}
     if(S.phase==='headstart'&&t>=S.chaseAt){S.phase='playing';sync();sendAll({t:'event',heading:'Die Jagd beginnt!',message:'Hunter dürfen los. Die Runner-Pings beginnen jetzt.'});notify('Vorsprung vorbei','Hunter starten jetzt.',true)}
-    if(S.phase!=='playing')return;if(t>=S.endAt){finish();return}
+    if(S.phase!=='playing')return;if(t>=S.endAt){finish();return}duelHostTick(t);
     const pingSlot=Math.floor((t-S.chaseAt)/PING_MS);if(pingSlot>S.lastPingSlot){const previous=S.lastPingSlot;if(previous>0){for(const p of S.players.filter(x=>x.role==='runner'&&!x.disqualified)){if(S.lastRunnerById.get(p.id)!==previous&&!S.offlineSince.has(p.id))eliminatePlayer(p.id,'Pflicht-Ping bis zur nächsten Runde nicht nachgereicht.')}}S.lastPingSlot=pingSlot;for(const p of S.players.filter(x=>x.role==='runner')){
        if(p.disqualified)continue;const cam=S.camo.get(p.id)||0;if(cam>0){S.camo.set(p.id,cam-1);S.lastRunnerById.set(p.id,pingSlot);S.pingWarnings.delete(p.id);sendTo(p.id,{t:'ping-ack',slot:pingSlot,round:S.chaseAt});sendTo(p.id,{t:'camo',credits:cam-1});continue}
        sendTo(p.id,{t:'pulse-runner',slot:pingSlot})}
@@ -1782,7 +1861,7 @@ html.ns-fx-off .toast,html.ns-fx-off .modal-sheet,html.ns-fx-off .fx-settings-sh
     }
     if(S.challengeOpen&&t>=S.challengeUntil){S.challengeOpen=false;sendAll({t:'event',heading:'Bonusziel geschlossen',message:'Niemand hat das Ziel rechtzeitig erreicht.'});sync()}
   }
-  function finish(){if(!S.host||S.phase==='ended')return;proximityClear(true);endReveal();S.phase='ended';forgetResume();clearVoice();S.publicPings.clear();$('pingFloat').classList.add('hidden');S.captureRequests.clear();S.challengeOpen=false;S.scanVisibleUntil=0;S.scanSamples.clear();clearMockSignals();sync();sendAll({t:'stop'});clearRemoteMarkers();stopGPS();notify('Zeit abgelaufen','Die Runde ist beendet.',true)}
+  function finish(){if(!S.host||S.phase==='ended')return;duelFinish(duelHost);duelHost.next=0;proximityClear(true);endReveal();S.phase='ended';forgetResume();clearVoice();S.publicPings.clear();$('pingFloat').classList.add('hidden');S.captureRequests.clear();S.challengeOpen=false;S.scanVisibleUntil=0;S.scanSamples.clear();clearMockSignals();sync();sendAll({t:'stop'});clearRemoteMarkers();stopGPS();notify('Zeit abgelaufen','Die Runde ist beendet.',true)}
   function clearRemoteMarkers(){S.runnerMarkers.forEach(v=>S.map?.removeLayer(v.marker));S.runnerMarkers.clear();clearHunterScan();clearMockSignals()}
   function clearHunterScan(){S.hunterMarkers.forEach(v=>S.map?.removeLayer(v.marker));S.hunterMarkers.clear();S.scanVisibleUntil=0}
   const markerIcon=cls=>L.divIcon({html:`<div class="dotmarker ${cls} pulse-circle"></div>`,className:'',iconSize:[22,22],iconAnchor:[11,11]});
@@ -2244,7 +2323,7 @@ html.ns-fx-off .toast,html.ns-fx-off .modal-sheet,html.ns-fx-off .fx-settings-sh
     }else{$('nextPing').textContent='–';$('nextScan').textContent='–'}
     $('pingFloat').classList.toggle('hidden',S.phase==='ended');
     $('pingFloatTime').textContent=$('nextPing').textContent;
-    renderCatchAndVehicle();
+    duelShow();renderCatchAndVehicle();
     $('roleHelp').textContent=r==='hunter'?'Dein GPS ist optional. Runner-Punkte erscheinen alle 5 Minuten auch ohne dein GPS. Antippen zoomt zum letzten Ping.':r==='runner'?'GPS-Pings alle 5 Minuten im Akkusparmodus. Keine Live-Nähe-Warnung. Hunter-Radar bleibt freiwillig.':'Du erhältst keine fremden GPS-Signale.';
     if(me()?.disqualified)$('roleHelp').textContent='Ausgeschieden: '+(me().eliminationReason||'Diese Runde ist beendet.');
     const state=S.phase==='ended'?'Spiel beendet. Keine weiteren Standort-Pings.':S.phase==='headstart'?'Vorsprung läuft. Bis Jagdbeginn werden keine Runner-Pings verteilt.':r==='runner'?`Hunter-Radar alle 12 Minuten. ${S.scanVisibleUntil>t?'Aktive Radarzeit: '+fmt(S.scanVisibleUntil-t):'Nächstes Signal im Countdown oben.'}`:'Nur zeitversetzte Runner-Punkte. Keine Namen oder Live-Verfolgung.';
@@ -2258,7 +2337,7 @@ html.ns-fx-off .toast,html.ns-fx-off .modal-sheet,html.ns-fx-off .fx-settings-sh
   function offlinePingTick(){if(S.host||S.conn?.open||!S.approved||S.phase!=='playing'||myRole()!=='runner'||!S.gpsWanted||me()?.disqualified)return;const slot=Math.floor((now()-S.chaseAt)/PING_MS),key=S.chaseAt+':'+slot;if(slot<1||now()-(S.chaseAt+slot*PING_MS)>=PING_MS||S.offlineSampleKey===key)return;S.offlineSampleKey=key;void sendMyRunnerPosition(slot)}
   function linkTick(){const t=Date.now(),sleep=t-S.lastLinkTick>15000;S.lastLinkTick=t;if(S.peer?.disconnected&&!S.peer.destroyed&&t-S.lastPeerRetry>5000){S.lastPeerRetry=t;try{S.peer.reconnect()}catch{}}if(S.host||!S.approved||!S.conn?.open)return;if(sleep)S.lastLinkPong=t;if(t-S.lastLinkPong>25000){const old=S.conn;S.conn=null;try{old.close()}catch{}scheduleReconnect();return}if(t-S.lastLinkPing>8000){S.lastLinkPing=t;hostSend({t:'link-ping',resume:sleep})}}
   function tick(){if(lab.active){labTick();return}countdownFx();if(S.host)hostTick();proximityRender();if(['headstart','playing','ended'].includes(S.phase))renderGame();if(S.revealUntil>now())updateRevealHud();else if(S.revealUntil)endReveal()}
-  function reset(){S.leaving=true;S.reconnectAt=0;forgetResume();clearVoice();S.rejoinKeys.clear();S.offlineSince.clear();S.lastClientSeen.clear();S.pingWarnings.clear();S.publicPings.clear();S.token='';S.pingAck=-1;S.pingAckRound=0;S.pendingPing=null;S.offlineSampleKey='';S.lastLinkPong=0;S.lastLinkPing=0;if(lab.active)closeLab();proximityClear(true);stopVoices();endReveal();closeWheel();stopGPS();clearRemoteMarkers();try{S.conn?.close()}catch{}for(const c of S.clients.values())try{c.close()}catch{}for(const x of S.pending.values())try{x.conn.close()}catch{}try{S.peer?.destroy()}catch{}
+  function reset(){duelHost=newDuelState();duelView=null;duelPending=null;duelRendered.clear();$('duelEnabled').checked=true;S.leaving=true;S.reconnectAt=0;forgetResume();clearVoice();S.rejoinKeys.clear();S.offlineSince.clear();S.lastClientSeen.clear();S.pingWarnings.clear();S.publicPings.clear();S.token='';S.pingAck=-1;S.pingAckRound=0;S.pendingPing=null;S.offlineSampleKey='';S.lastLinkPong=0;S.lastLinkPing=0;if(lab.active)closeLab();proximityClear(true);stopVoices();endReveal();closeWheel();stopGPS();clearRemoteMarkers();try{S.conn?.close()}catch{}for(const c of S.clients.values())try{c.close()}catch{}for(const x of S.pending.values())try{x.conn.close()}catch{}try{S.peer?.destroy()}catch{}
     S.peer=null;S.conn=null;S.leaving=false;S.clients.clear();S.pending.clear();S.host=false;S.approved=false;S.myId='';S.players=[];S.phase='lobby';S.clockOffset=0;S.roomName='';S.gpsStatus.clear();S.reactionRate.clear();S.mockRate.clear();S.lastGPSHeartbeat=0;S.mockPending=false;S.lastMockAttempt=0;S.localMockNext=0;S.captureRequests.clear();S.captureRate.clear();S.captureSelectKey='';S.activityEvents=[];closeAnnouncement();$('pingFloat').classList.add('hidden');S.roomCode='';S.challengePoint=null;S.challengeOpen=false;S.challengeWinner=null;S.challengeTriggered=false;S.scanVisibleUntil=0;S.pickMode='';S.settings={radiusKm:10,durationMin:60,headstartMin:5,center:null,mode:'radius',area:null};S.areaTab='radius';clearAreaBoundary();S.startAt=0;S.chaseAt=0;S.endAt=0;S.anonTokens.clear();S.hunterTokens.clear();S.lastRunnerById.clear();S.lastHunterById.clear();S.camo.clear();S.runnerMarkers.clear();S.aliases={};connection('OFFLINE');updateMapDecor();setScreen('homeScreen')}
   const labLabels={'headstart':'Runner-Vorsprung','start':'Jagdbeginn','hunter-release':'Hunter-Freigabe','ping':'GPS-Ping','radar':'Hunter-Radar','bonus':'Bonusziel nach einem Drittel','reward':'Bonus gesichert','stealth':'Tarnung','capture':'Fang bestätigt','end':'Spielende','warning':'Regelwarnung','preview':'Intro','countdown':'Countdown','join':'Spieler verbunden','wheel-win':'Glücksrad-Gewinner','tap':'Tastenton','pending':'Beitrittsanfrage','wheel-tick':'Glücksrad-Tick','reaction':'Reaktion','gps':'GPS-Signal','mock':'Mock-Signal','reveal-end':'Live-Reveal endet'};
   function labButtons(id,kinds,action){
@@ -2312,6 +2391,7 @@ html.ns-fx-off .toast,html.ns-fx-off .modal-sheet,html.ns-fx-off .fx-settings-sh
     const opts=$('nsOptions');opts.replaceChildren();if(sim.tab==='lobby')for(const [key,label,min,max,step] of [['duration','Spieldauer (Minuten)',20,180,10],['lead','Vorsprung (Minuten)',0,15,1]]){const l=document.createElement('label'),input=document.createElement('input');l.className='label';l.textContent=label+': '+sim[key];input.type='range';input.className='range';input.min=min;input.max=max;input.step=step;input.value=sim[key];input.setAttribute('aria-label',label);input.oninput=()=>{sim[key]=Number(input.value);l.textContent=label+': '+sim[key];if(sim.phase==='Lobby')sim.remaining=sim.duration*60;simRender()};opts.append(l,input)}simRoster();simRender();
   }
   function simReset(){
+    duelLab=newDuelState();duelRendered.delete('duelLab');
     Object.assign(sim,{role:'host',tab:'lobby',phase:'Lobby',duration:60,lead:5,remaining:3600,gps:false,connected:true,area:'radius',players:[{name:'Alex',role:'hunter'},{name:'Sam',role:'runner'},{name:'Mika',role:'none'}],effect:'',until:0,timer:Date.now(),camo:0});$('nsLog').replaceChildren();$('nsMap').style.filter='';$('nsRunner').querySelector('text').textContent='R';labStopPlayback();lab.vehicleSince=0;lab.vehicleUsed=0;simControls();simLog('Simulation bereit','Alle Daten sind fiktiv');
   }
   function simCue(kind,title,detail=''){simLog(title,detail);cue(kind,{voice:true,visual:true,force:true});notify(title,detail||'Lokale Simulation',false)}
@@ -2354,7 +2434,7 @@ html.ns-fx-off .toast,html.ns-fx-off .modal-sheet,html.ns-fx-off .fx-settings-sh
     }simRender();
   }
   function simTick(){if(!lab.active)return;const t=Date.now();if(sim.until&&t>=sim.until){sim.effect='';sim.until=0}if(['Vorsprung','Jagd'].includes(sim.phase)&&t-sim.timer>=1000){const delta=Math.floor((t-sim.timer)/1000);sim.remaining=Math.max(0,sim.remaining-delta);sim.timer+=delta*1000;if(!sim.remaining){if(sim.phase==='Vorsprung')simAction('release');else simAction('end')}}else if(!['Vorsprung','Jagd'].includes(sim.phase))sim.timer=t;simRender()}
-  $('nsRole').onclick=e=>{const b=e.target.closest('[data-role]');if(lab.active&&b){sim.role=b.dataset.role;simLog('Rollenperspektive',b.textContent);simRender()}};
+  $('nsRole').onclick=e=>{const b=e.target.closest('[data-role]');if(lab.active&&b){sim.role=b.dataset.role;simLog('Rollenperspektive',b.textContent);simRender();duelLabShow()}};
   $('nsTabs').onclick=e=>{const b=e.target.closest('[data-tab]');if(lab.active&&b){sim.tab=b.dataset.tab;simControls()}};
   $('nsReset').onclick=()=>{if(lab.active)simReset()};$('nsClear').onclick=()=>$('nsLog').replaceChildren();
   function nsSearch(){const q=$('nsSearch').value.trim().toLocaleLowerCase('de');let total=0,shown=0;for(const id of ['labDistances','labEvents','labActions','labMocks','labSounds','labVoices'])for(const b of $(id).querySelectorAll('button')){total++;const match=!q||b.textContent.toLocaleLowerCase('de').includes(q);b.style.display=match?'':'none';if(match)shown++}$('nsCount').textContent=shown+' von '+total+' Einzeltests sichtbar.'}
@@ -2372,7 +2452,7 @@ html.ns-fx-off .toast,html.ns-fx-off .modal-sheet,html.ns-fx-off .fx-settings-sh
     proximityRender();
   }
   function labTick(){
-    simTick();proximityRender();
+    simTick();if(duelLab.round&&Date.now()>=duelLab.round.until)duelFinish(duelLab);duelLabShow();proximityRender();
     if(S.revealUntil>now())updateRevealHud();else if(S.revealUntil)endReveal();
     const used=lab.vehicleUsed+(lab.vehicleSince?Date.now()-lab.vehicleSince:0);
     $('labVehicle').textContent=fmt(Math.max(0,VEHICLE_LIMIT_MS-used));
