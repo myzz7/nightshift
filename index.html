@@ -615,7 +615,7 @@ html.ns-fx-off .arc-wheel,html.ns-fx-off .arc-card{transition:none!important}htm
       <div id="waitApproval" class="event-box hidden"><span class="event-spark">ANFRAGE GESENDET</span><h3>Warte auf den Host</h3><p>Der Host muss dich erst freischalten. Solange wird kein Standort übertragen.</p></div>
     </div>
     <div class="panel mt" id="hostSetup">
-      <div class="panel-title">Spielregeln</div><div class="sub">Nur der Host kann diese Einstellungen vor dem Start ändern.</div><div class="ns-event-config"><div class="row-between"><div><div class="panel-title">Zwischenevents</div><div class="sub">10 Minispiele · zufällige Vorteile für die Teamwertung</div></div><span class="pill" id="eventCount">10 / 10</span></div><label class="consent"><input type="checkbox" id="duelEnabled" checked><span><strong>Zwischenevents aktivieren</strong> · alle Spiele freiwillig, ohne Einsatz oder Echtgeld.</span></label><div id="eventChoices" class="ns-event-choices"><label class="ns-event-choice"><input type="checkbox" data-event-choice="mind" checked><span><strong>Mind Clash</strong><small>Kopfrechnen und Zahlenfolgen</small></span></label><label class="ns-event-choice"><input type="checkbox" data-event-choice="roulette" checked><span><strong>Night Roulette</strong><small>Europäisches Roulette-Rad mit 37 Zahlen</small></span></label><label class="ns-event-choice"><input type="checkbox" data-event-choice="dice" checked><span><strong>Dice Clash</strong><small>Würfelseite wählen und animiert würfeln</small></span></label><label class="ns-event-choice"><input type="checkbox" data-event-choice="slots" checked><span><strong>Lucky Reels</strong><small>Drei unabhängig rollende Symbolwalzen</small></span></label><label class="ns-event-choice"><input type="checkbox" data-event-choice="cards" checked><span><strong>Card Flip</strong><small>Kartenzeichen vorhersagen · animiertes Aufdecken</small></span></label><label class="ns-event-choice"><input type="checkbox" data-event-choice="code" checked><span><strong>Code Breaker</strong><small>Zahlencode entschlüsseln</small></span></label><label class="ns-event-choice"><input type="checkbox" data-event-choice="symbols" checked><span><strong>Symbol Rush</strong><small>Muster vervollständigen</small></span></label><label class="ns-event-choice"><input type="checkbox" data-event-choice="words" checked><span><strong>Word Scramble</strong><small>Wörter rückwärts erkennen</small></span></label><label class="ns-event-choice"><input type="checkbox" data-event-choice="odd" checked><span><strong>Odd One Out</strong><small>Unpassenden Begriff finden</small></span></label><label class="ns-event-choice"><input type="checkbox" data-event-choice="memory" checked><span><strong>Memory Vault</strong><small>Symbolfolge merken und wiedererkennen</small></span></label></div><div class="two mt"><button type="button" class="btn tiny" id="eventsAll">Alle auswählen</button><button type="button" class="btn tiny" id="eventsNone">Alle abwählen</button></div><label class="label" for="eventInterval">Abstand zwischen Events</label><select class="field" id="eventInterval"><option value="3">3 Minuten</option><option value="5" selected>5 Minuten</option><option value="8">8 Minuten</option><option value="10">10 Minuten</option></select><p class="micro">Erstes Event nach 3 Minuten, danach im gewählten Abstand. Alle aktivierten Spiele kommen in zufälliger Reihenfolge, bevor sich ein Typ wiederholt.</p></div>
+      <div class="panel-title">Spielregeln</div><div class="sub">Nur der Host kann diese Einstellungen vor dem Start ändern.</div><div class="ns-event-config"><div class="row-between"><div><div class="panel-title">Zwischenevents</div><div class="sub">10 Minispiele · persönliche Vorteile für die Hauptrunde</div></div><span class="pill" id="eventCount">10 / 10</span></div><label class="consent"><input type="checkbox" id="duelEnabled" checked><span><strong>Zwischenevents aktivieren</strong> · alle Spiele freiwillig, ohne Einsatz oder Echtgeld.</span></label><div id="eventChoices" class="ns-event-choices"><label class="ns-event-choice"><input type="checkbox" data-event-choice="mind" checked><span><strong>Mind Clash</strong><small>Kopfrechnen und Zahlenfolgen</small></span></label><label class="ns-event-choice"><input type="checkbox" data-event-choice="roulette" checked><span><strong>Night Roulette</strong><small>Europäisches Roulette-Rad mit 37 Zahlen</small></span></label><label class="ns-event-choice"><input type="checkbox" data-event-choice="dice" checked><span><strong>Dice Clash</strong><small>Würfelseite wählen und animiert würfeln</small></span></label><label class="ns-event-choice"><input type="checkbox" data-event-choice="slots" checked><span><strong>Lucky Reels</strong><small>Drei unabhängig rollende Symbolwalzen</small></span></label><label class="ns-event-choice"><input type="checkbox" data-event-choice="cards" checked><span><strong>Card Flip</strong><small>Kartenzeichen vorhersagen · animiertes Aufdecken</small></span></label><label class="ns-event-choice"><input type="checkbox" data-event-choice="code" checked><span><strong>Code Breaker</strong><small>Zahlencode entschlüsseln</small></span></label><label class="ns-event-choice"><input type="checkbox" data-event-choice="symbols" checked><span><strong>Symbol Rush</strong><small>Muster vervollständigen</small></span></label><label class="ns-event-choice"><input type="checkbox" data-event-choice="words" checked><span><strong>Word Scramble</strong><small>Wörter rückwärts erkennen</small></span></label><label class="ns-event-choice"><input type="checkbox" data-event-choice="odd" checked><span><strong>Odd One Out</strong><small>Unpassenden Begriff finden</small></span></label><label class="ns-event-choice"><input type="checkbox" data-event-choice="memory" checked><span><strong>Memory Vault</strong><small>Symbolfolge merken und wiedererkennen</small></span></label></div><div class="two mt"><button type="button" class="btn tiny" id="eventsAll">Alle auswählen</button><button type="button" class="btn tiny" id="eventsNone">Alle abwählen</button></div><label class="label" for="eventInterval">Abstand zwischen Events</label><select class="field" id="eventInterval"><option value="3">3 Minuten</option><option value="5" selected>5 Minuten</option><option value="8">8 Minuten</option><option value="10">10 Minuten</option></select><p class="micro">Erstes Event nach 3 Minuten, danach im gewählten Abstand. Alle aktivierten Spiele kommen in zufälliger Reihenfolge, bevor sich ein Typ wiederholt.</p></div>
       <div class="area-selector" id="areaSelector">
         <label class="label" style="margin-top:0">Spielgebiet auswählen</label>
         <div class="area-tabs"><button type="button" class="btn selected" id="areaModeRadius">Umkreis</button><button type="button" class="btn" id="areaModeAdmin">Stadt / Stadtteil</button></div>
@@ -658,7 +658,7 @@ html.ns-fx-off .arc-wheel,html.ns-fx-off .arc-card{transition:none!important}htm
       <button class="btn orange block" type="button" id="captureBtn">Fangbestätigung anfragen</button>
       <div id="captureHint" class="micro mt"></div>
     </div>
-    <div id="gameMapDock"></div><div class="panel mt ns-duel" id="duelPanel"><div class="ns-duel-head"><div><div class="ns-kicker">NIGHTSHIFT / SIDE QUEST</div><div class="panel-title" id="duelTitle">Night Arcade</div></div><span class="pill" id="duelClock">BEREIT</span></div><div class="ns-duel-score"><div><small>HUNTER</small><b id="duelHunter">0</b></div><span>VS</span><div><small>RUNNER</small><b id="duelRunner">0</b></div></div><p class="sub">Freiwilliges Minispiel. Nur im sicheren Stand spielen, niemals beim Laufen oder Fahren. Keine Einsätze, kein Echtgeld. Gewinne zufällige Vorteile für die Night-Arcade-Teamwertung.</p><div class="ns-event-stage" id="duelStage" aria-label="Spielanzeige"></div><div class="ns-duel-question" id="duelQuestion"></div><div class="ns-duel-options" id="duelOptions"></div><p class="sub" id="duelStatus" role="status"></p><div id="duelBonus" class="arc-bonus-line" hidden></div></div>
+    <div id="gameMapDock"></div><div class="panel mt" id="missionPerkPanel"><div class="row-between"><div><div class="ns-kicker">NIGHTSHIFT / HAUPTRUNDE</div><div class="panel-title">Deine Vorteile</div></div><div class="stat"><b id="missionPoints">0</b><small>MISSIONSPUNKTE</small></div></div><p class="sub" id="missionPerkStatus"></p><button type="button" class="btn block mt" id="missionPauseBtn" disabled>Auszeit-Joker einsetzen</button><p class="sub mt" id="missionPauseList" role="status"></p><p class="micro">Missionspunkte zählen getrennt von Arcade: 3 für erfülltes Hauptziel (Hunter: mindestens ein bestätigter Fang, Runner: regulär im Spiel geblieben), 2 für regulären Rundenabschluss, plus persönliche Boni. Sicherheitsregeln gelten immer.</p></div><div class="panel mt ns-duel" id="duelPanel"><div class="ns-duel-head"><div><div class="ns-kicker">NIGHTSHIFT / SIDE QUEST</div><div class="panel-title" id="duelTitle">Night Arcade</div></div><span class="pill" id="duelClock">BEREIT</span></div><div class="ns-duel-score"><div><small>HUNTER</small><b id="duelHunter">0</b></div><span>VS</span><div><small>RUNNER</small><b id="duelRunner">0</b></div></div><p class="sub">Freiwilliges Minispiel. Nur im sicheren Stand spielen, niemals beim Laufen oder Fahren. Keine Einsätze, kein Echtgeld. Gewinne persönliche Zufallsvorteile für die Hauptrunde.</p><div class="ns-event-stage" id="duelStage" aria-label="Spielanzeige"></div><div class="ns-duel-question" id="duelQuestion"></div><div class="ns-duel-options" id="duelOptions"></div><p class="sub" id="duelStatus" role="status"></p><div id="duelBonus" class="arc-bonus-line" hidden></div></div>
     <div id="outStatus" class="event-box hidden" role="status"><span class="event-spark">RUNDE BEENDET</span><h3>Du bist ausgeschieden</h3><p id="outReason">Du kannst die Runde weiter verfolgen, aber nicht mehr mitspielen.</p></div>
     <div class="catch-panel hidden" id="vehiclePanel">
       <div class="panel-title">Fahrzeugregel · 10 Minuten gesamt</div>
@@ -689,7 +689,7 @@ html.ns-fx-off .arc-wheel,html.ns-fx-off .arc-card{transition:none!important}htm
 <div class="row-between"><span class="pill" id="nsConnection">LOKAL · VERBUNDEN</span><span class="pill" id="nsCamo">TARNUNG · 0</span></div><div class="ns-map" id="nsMap" data-effect="" role="img" aria-label="Schematische Testkarte ohne echte Standorte"><svg viewBox="0 0 400 232" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><pattern id="nsGrid" width="28" height="28" patternUnits="userSpaceOnUse"><path d="M28 0H0V28" fill="none" stroke="#395370" stroke-width=".65"/></pattern></defs><rect width="400" height="232" fill="url(#nsGrid)"/><g fill="none" stroke="#3f5873" stroke-width="7" opacity=".8"><path d="M-10 55L110 95L230 30L410 80M-10 192L95 154L230 180L410 125M90 -10L125 232M305 -10L275 232"/></g><circle id="nsBoundary" cx="200" cy="116" r="87" fill="#347bc41a" stroke="#76abf0" stroke-dasharray="5 4"/><g class="ns-sweep"><path d="M200 116L200 24A92 92 0 0 1 265 51Z" fill="#8ecbff55"/></g><g id="nsOwn" opacity="0"><circle cx="200" cy="116" r="10" fill="#eef6ff" stroke="#102944" stroke-width="3"/><circle class="ns-signal" cx="200" cy="116" r="14" fill="none" stroke="#eef6ff"/></g><g id="nsHunter" class="ns-marker" opacity=".15"><circle cx="105" cy="83" r="8" fill="#62b5ff" stroke="#fff" stroke-width="2"/><text x="118" y="86" fill="#b7ddff" font-size="11">H</text></g><g id="nsRunner" class="ns-marker" opacity=".15"><circle cx="283" cy="154" r="8" fill="#ffab61" stroke="#fff" stroke-width="2"/><text x="296" y="157" fill="#ffd4aa" font-size="11">R</text></g><g class="ns-bonus"><path d="M255 69l8 11-8 11-8-11z" fill="#c6a7ff" stroke="#fff" stroke-width="1.5"/></g></svg><span class="ns-map-label">SIMULATION · KEIN LIVE-GPS</span></div>
 <div class="ns-tabs" id="nsTabs"><button class="btn selected" data-tab="lobby">Lobby</button><button class="btn" data-tab="game">Spielablauf</button><button class="btn" data-tab="map">Karte &amp; GPS</button><button class="btn" data-tab="comms">Funk &amp; Netzwerk</button><button class="btn" data-tab="rules">Regeln &amp; Ende</button></div>
 <div id="nsControls" class="lab-grid"></div><div id="nsOptions"></div><div id="nsRoster" class="ns-roster"></div><div class="two mt"><button class="btn primary" id="nsReset">Simulation zurücksetzen</button><button class="btn" id="nsClear">Protokoll leeren</button></div><div class="panel-title mt">Ereignisprotokoll</div><div class="ns-log" id="nsLog" role="log" aria-live="polite"></div></div>
-<div class="panel mt ns-duel" id="duelLabPanel"><div class="ns-duel-head"><div><div class="ns-kicker">NIGHTSHIFT / SIDE QUEST</div><div class="panel-title" id="duelLabTitle">Night Arcade</div></div><span class="pill" id="duelLabClock">BEREIT</span></div><div class="ns-duel-score"><div><small>HUNTER</small><b id="duelLabHunter">0</b></div><span>VS</span><div><small>RUNNER</small><b id="duelLabRunner">0</b></div></div><p class="sub">Freiwilliges Minispiel. Nur im sicheren Stand spielen, niemals beim Laufen oder Fahren. Keine Einsätze, kein Echtgeld. Gewinne zufällige Vorteile für die Night-Arcade-Teamwertung.</p><div class="ns-event-stage" id="duelLabStage" aria-label="Spielanzeige"></div><div class="ns-duel-question" id="duelLabQuestion"></div><div class="ns-duel-options" id="duelLabOptions"></div><p class="sub" id="duelLabStatus" role="status"></p><div id="duelLabBonus" class="arc-bonus-line" hidden></div><div class="lab-grid mt"><label class="label" for="duelLabType">Event auswählen</label><select class="field" id="duelLabType"><option value="mind">Mind Clash</option><option value="roulette">Night Roulette</option><option value="dice">Dice Clash</option><option value="slots">Lucky Reels</option><option value="cards">Card Flip</option><option value="code">Code Breaker</option><option value="symbols">Symbol Rush</option><option value="words">Word Scramble</option><option value="odd">Odd One Out</option><option value="memory">Memory Vault</option></select><button class="btn primary" id="duelLabStart">Event starten</button><button class="btn" id="duelLabOther">Gegenteam antwortet</button><button class="btn" id="duelLabEnd">Duell auswerten</button><button class="btn" id="duelLabReset">Punkte zurücksetzen</button><button type="button" class="btn" id="duelLabReward">Zufallsvorteil testen</button><button type="button" class="btn" id="duelLabPopup">Zwischenevent-Anzeige testen</button></div></div><div class="panel mt"><div class="ns-kicker">02 / EINZELTESTS</div><div class="panel-title">Effekte schnell finden</div><input class="field ns-search" type="search" id="nsSearch" placeholder="z. B. Radar, Fang, Countdown" aria-label="Einzeltests durchsuchen"><div class="sub" id="nsCount">Alle Einzeltests sichtbar.</div></div>
+<div class="panel mt ns-duel" id="duelLabPanel"><div class="ns-duel-head"><div><div class="ns-kicker">NIGHTSHIFT / SIDE QUEST</div><div class="panel-title" id="duelLabTitle">Night Arcade</div></div><span class="pill" id="duelLabClock">BEREIT</span></div><div class="ns-duel-score"><div><small>HUNTER</small><b id="duelLabHunter">0</b></div><span>VS</span><div><small>RUNNER</small><b id="duelLabRunner">0</b></div></div><p class="sub">Freiwilliges Minispiel. Nur im sicheren Stand spielen, niemals beim Laufen oder Fahren. Keine Einsätze, kein Echtgeld. Gewinne persönliche Zufallsvorteile für die Hauptrunde.</p><div class="ns-event-stage" id="duelLabStage" aria-label="Spielanzeige"></div><div class="ns-duel-question" id="duelLabQuestion"></div><div class="ns-duel-options" id="duelLabOptions"></div><p class="sub" id="duelLabStatus" role="status"></p><div id="duelLabBonus" class="arc-bonus-line" hidden></div><div class="lab-grid mt"><label class="label" for="duelLabType">Event auswählen</label><select class="field" id="duelLabType"><option value="mind">Mind Clash</option><option value="roulette">Night Roulette</option><option value="dice">Dice Clash</option><option value="slots">Lucky Reels</option><option value="cards">Card Flip</option><option value="code">Code Breaker</option><option value="symbols">Symbol Rush</option><option value="words">Word Scramble</option><option value="odd">Odd One Out</option><option value="memory">Memory Vault</option></select><button class="btn primary" id="duelLabStart">Event starten</button><button class="btn" id="duelLabOther">Gegenteam antwortet</button><button class="btn" id="duelLabEnd">Duell auswerten</button><button class="btn" id="duelLabReset">Punkte zurücksetzen</button><button type="button" class="btn" id="duelLabReward">Zufallsvorteil testen</button><button type="button" class="btn" id="duelLabPopup">Zwischenevent-Anzeige testen</button><button type="button" class="btn" id="duelLabUsePause">Auszeit-Joker testen</button><button type="button" class="btn" id="duelLabUseShield">Fangschutz testen</button></div></div><div class="panel mt"><div class="ns-kicker">02 / EINZELTESTS</div><div class="panel-title">Effekte schnell finden</div><input class="field ns-search" type="search" id="nsSearch" placeholder="z. B. Radar, Fang, Countdown" aria-label="Einzeltests durchsuchen"><div class="sub" id="nsCount">Alle Einzeltests sichtbar.</div></div>
 <div class="panel mt"><div class="panel-title">Hunter-Näherungsalarm</div><div class="lab-status"><div id="labMeters" class="lab-distance">AUS</div><strong id="labBpm">0 BPM</strong></div>
       <label class="label" for="labRange">Simulierte Entfernung</label><input class="range" type="range" id="labRange" min="0" max="700" step="1" value="600">
       <div class="lab-grid mt" id="labDistances">
@@ -894,14 +894,14 @@ html.ns-fx-off .arc-wheel,html.ns-fx-off .arc-card{transition:none!important}htm
     const live=S.phase==='playing'||S.phase==='headstart',playing=S.phase==='playing';
     const active=live&&!me()?.disqualified&&['hunter','runner'].includes(myRole());
     $('capturePanel').classList.toggle('hidden',!active||myRole()!=='hunter');
-    const runners=S.players.filter(p=>p.role==='runner'&&!p.disqualified);
+    const runners=S.players.filter(p=>p.role==='runner'&&!p.disqualified&&!missionPauseActive(p));
     const listKey=runners.map(p=>p.id+'|'+p.name).join(';');
     if(listKey!==S.captureSelectKey){
       const select=$('captureTarget'),before=select.value;select.replaceChildren();
       for(const p of runners){const o=document.createElement('option');o.value=p.id;o.textContent=p.name;select.append(o)}
       if(runners.some(p=>p.id===before))select.value=before;S.captureSelectKey=listKey;
     }
-    $('captureBtn').disabled=!playing||!runners.length;
+    $('captureBtn').disabled=!playing||!runners.length||missionPauseActive(me());
     $('captureHint').textContent=!playing?'Fangbestätigung ist ab Beginn der Jagd verfügbar.':runners.length?'Ein Fang zählt erst nach Bestätigung auf dem Handy des Runners.':'Keine aktiven Runner übrig.';
     $('vehiclePanel').classList.toggle('hidden',!active||myRole()!=='runner');
     const p=me(),used=(Number(p?.vehicleUsedMs)||0)+(p?.vehicleSince?Math.max(0,now()-p.vehicleSince):0),remain=Math.max(0,VEHICLE_LIMIT_MS-used);
@@ -1380,21 +1380,31 @@ html.ns-fx-off .arc-wheel,html.ns-fx-off .arc-card{transition:none!important}htm
   const ROULETTE_RED=new Set([1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36]);
   const rouletteColor=n=>n===0?'Grün':ROULETTE_RED.has(n)?'Rot':'Schwarz';
   function eventShuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
-  const ARCADE_REWARDS=Object.freeze([
-    {id:'spark',title:'Bonuspunkt',points:1,description:'+1 zusätzlicher Teampunkt'},
-    {id:'boost',title:'Power Boost',points:2,description:'+2 zusätzliche Teampunkte'},
-    {id:'jackpot',title:'Superbonus',points:3,description:'+3 zusätzliche Teampunkte'},
-    {id:'double',title:'Sieg-Bonus',win:2,description:'+2 Punkte beim nächsten gewonnenen, gewerteten Event'},
-    {id:'wild',title:'Teilnahme-Joker',entry:1,description:'+1 Punkt bei Teilnahme am nächsten gewerteten Event'}
+  const PERSONAL_REWARDS=Object.freeze([
+    {id:'shield',title:'Fangschutz',description:'Ein bestätigter Spielfang wird einmalig aufgehoben. Danach gilt eine 60-Sekunden-Auszeit ohne Verfolgung.',role:'runner'},
+    {id:'break',title:'Auszeit-Joker',description:'Eine persönliche Spielpause von 60 Sekunden, in der keine Fanganfrage für oder von dir möglich ist.'},
+    {id:'finish',title:'Finalbonus',description:'+2 persönliche Missionspunkte bei regulärem Abschluss der Hauptrunde.'},
+    {id:'objective',title:'Missionsbonus',description:'+3 persönliche Missionspunkte bei erfülltem Hauptziel deiner Rolle.'},
+    {id:'boost',title:'Missions-Boost',description:'+2 persönliche Missionspunkte für die Hauptrundenwertung.'}
   ]);
-  function newDuelState(){return {enabled:true,types:EVENT_KEYS.slice(),bag:[],interval:DUEL_INTERVAL,next:0,seq:0,score:{hunter:0,runner:0},perks:{hunter:{win:0,entry:0},runner:{win:0,entry:0}},round:null,last:null}}
-  function grantArcReward(state,role,random=Math.random){
-    const pool=ARCADE_REWARDS.filter(x=>(!x.win||state.perks[role].win===0)&&(!x.entry||state.perks[role].entry===0));
+  function newDuelState(){return {enabled:true,types:EVENT_KEYS.slice(),bag:[],interval:DUEL_INTERVAL,next:0,seq:0,score:{hunter:0,runner:0},personal:new Map(),round:null,last:null}}
+  function personalPerks(state,id){
+    if(!state.personal.has(id))state.personal.set(id,{shield:0,break:0,finish:0,objective:0,points:0,pauseUntil:0});
+    return state.personal.get(id);
+  }
+  function grantArcReward(state,id,role,random=Math.random){
+    const p=personalPerks(state,id),pool=PERSONAL_REWARDS.filter(x=>(!x.role||x.role===role)&&(!(x.id==='shield'||x.id==='break')||!p[x.id]));
     const reward=pool[Math.floor(random()*pool.length)];
-    if(reward.points)state.score[role]+=reward.points;
-    if(reward.win)state.perks[role].win=reward.win;
-    if(reward.entry)state.perks[role].entry=reward.entry;
-    return {role,id:reward.id,title:reward.title,description:reward.description};
+    if(reward.id==='shield'||reward.id==='break')p[reward.id]=1;
+    if(reward.id==='finish')p.finish+=2;
+    if(reward.id==='objective')p.objective+=3;
+    if(reward.id==='boost')p.points+=2;
+    return {playerId:id,role,id:reward.id,title:reward.title,description:reward.description};
+  }
+  function usePersonalPause(state,id,t,shield=false){
+    const p=personalPerks(state,id),key=shield?'shield':'break';
+    if(!p[key]||p.pauseUntil>t)return false;
+    p[key]=0;p.pauseUntil=t+60000;return true;
   }
   let duelHost=newDuelState(),duelView=null,duelLab=newDuelState(),duelPending=null;
   const duelRendered=new Map(),eventStageRendered=new Map();
@@ -1459,18 +1469,14 @@ html.ns-fx-off .arc-wheel,html.ns-fx-off .arc-card{transition:none!important}htm
     const h=stats.hunter,n=stats.runner;let winner='none';
     if(h.total&&n.total&&(h.correct||n.correct)){const diff=h.correct*n.total-n.correct*h.total;winner=diff>0?'hunter':diff<0?'runner':'tie';if(winner==='tie'){state.score.hunter++;state.score.runner++}else state.score[winner]+=2}
     const rewards=[],used=[];
-    if(winner!=='none'){
-      for(const role of ['hunter','runner']){
-        const perk=state.perks[role];
-        if(stats[role].total&&perk.entry){state.score[role]+=perk.entry;used.push({role,description:'Teilnahme-Joker: +'+perk.entry+' Punkt'});perk.entry=0}
-        if(winner===role&&perk.win){state.score[role]+=perk.win;used.push({role,description:'Sieg-Bonus: +'+perk.win+' Punkte'});perk.win=0}
-      }
-      for(const role of winner==='tie'?['hunter','runner']:[winner])rewards.push(grantArcReward(state,role));
-    }else if(h.total&&n.total){for(const role of ['hunter','runner'])rewards.push(grantArcReward(state,role))}
+    const participants=[...r.votes.keys()].filter(id=>r.eligible.has(id));
+    const correct=participants.filter(id=>r.votes.get(id)===r.answer);
+    const candidates=correct.length?correct:participants;
+    if(candidates.length){const id=candidates[Math.floor(Math.random()*candidates.length)];rewards.push(grantArcReward(state,id,r.eligible.get(id)))}
     state.last={winner,stats,solution:r.choices[r.answer],id:r.id,type:r.type,reveal,rewards,used};state.round=null;return state.last;
   }
   function duelPublic(state,id,t=Date.now()){
-    const r=state.round;return {enabled:state.enabled,next:state.next,score:{...state.score},perks:{hunter:{...state.perks.hunter},runner:{...state.perks.runner}},last:state.last,round:r?{id:r.id,type:r.type,prompt:r.prompt,choices:t<r.readyAt||ARCADE_INPUTS.has(r.type)?[]:r.choices.slice(),stage:t<r.readyAt?r.preview:r.stage,readyAt:r.readyAt,until:r.until,eligible:r.eligible.has(id),vote:r.votes.has(id)?r.votes.get(id):null}:null};
+    const r=state.round;return {enabled:state.enabled,next:state.next,score:{...state.score},personal:{...(state.personal.get(id)||{shield:0,break:0,finish:0,objective:0,points:0,pauseUntil:0})},last:state.last?{...state.last,rewards:state.last.rewards.filter(x=>x.playerId===id),rewardAwarded:state.last.rewards.length>0}:null,round:r?{id:r.id,type:r.type,prompt:r.prompt,choices:t<r.readyAt||ARCADE_INPUTS.has(r.type)?[]:r.choices.slice(),stage:t<r.readyAt?r.preview:r.stage,readyAt:r.readyAt,until:r.until,eligible:r.eligible.has(id),vote:r.votes.has(id)?r.votes.get(id):null}:null};
   }
 
   const arcadeDrafts=new Map(),arcadeRevealTimers=new Map(),arcadeResultAt=new Map(),arcadeRole=prefix=>prefix==='duelLab'?(sim.role==='runner'?'runner':'hunter'):S.myId;
@@ -1688,21 +1694,52 @@ html.ns-fx-off .arc-wheel,html.ns-fx-off .arc-card{transition:none!important}htm
     if(!key||arcPopupSeen.get(prefix)===key)return;
     arcPopupSeen.set(prefix,key);
     if(r&&active){
-      openArcPopup(prefix,'event','ZWISCHENEVENT',EVENT_NAMES[r.type]||'Night Arcade','Ein zufälliger Vorteil wartet auf das Gewinnerteam. Bei Gleichstand erhalten beide einen Vorteil.\nNur im sicheren Stand teilnehmen.');
+      openArcPopup(prefix,'event','ZWISCHENEVENT',EVENT_NAMES[r.type]||'Night Arcade','Ein persönlicher Zufallsvorteil für die Hauptrunde wird unter den richtigen Antworten verlost.\nNur im sicheren Stand teilnehmen.');
       if(typeof FX!=='undefined')soundEffect('bonus');
     }else if(view.last?.rewards?.length){
-      const detail=view.last.rewards.map(x=>arcTeamLabel(x.role)+': '+x.description).join('\n');
-      openArcPopup(prefix,'reward','VORTEIL GEWONNEN',view.last.rewards.map(x=>x.title).join(' · '),detail);
+      const detail=view.last.rewards.map(x=>'Dein Vorteil: '+x.description).join('\n');
+      openArcPopup(prefix,'reward','DU HAST GEWONNEN',view.last.rewards.map(x=>x.title).join(' · '),detail);
       if(typeof FX!=='undefined')soundEffect('reward');
     }
   }
   function renderArcBonus(prefix,view,revealing){
-    const node=$(prefix+'Bonus');if(!node)return;node.replaceChildren();
-    const perks=view.perks||{},last=view.last,items=[];
-    if(last&&!revealing){for(const r of last.rewards||[])items.push(arcTeamLabel(r.role)+' · '+r.title+': '+r.description);for(const x of last.used||[])items.push(arcTeamLabel(x.role)+' · '+x.description)}
-    if(!revealing){for(const role of ['hunter','runner']){const p=perks[role];if(p?.win)items.push(arcTeamLabel(role)+' · aktiver Sieg-Bonus: +'+p.win+' Punkte beim nächsten Sieg');if(p?.entry)items.push(arcTeamLabel(role)+' · aktiver Teilnahme-Joker: +'+p.entry+' Punkt beim nächsten gewerteten Event')}}
-    node.hidden=!items.length;if(!items.length)return;const label=arcElement('strong','','Zufallsvorteile'),rows=arcElement('div','arc-bonus-teams');for(const item of items)rows.append(arcElement('div','',item));node.append(label,rows);
+    const node=$(prefix+'Bonus');if(!node)return;
+    const p=view.personal||{},last=view.last,items=[];
+    if(last&&!revealing){for(const r of last.rewards||[])items.push('Du hast '+r.title+' erhalten: '+r.description)}
+    if(Number(p.pauseUntil||0)>Date.now()&&prefix==='duelLab')items.push('Spielpause aktiv: '+fmt(p.pauseUntil-Date.now()));
+    if(!revealing){if(p.shield)items.push('Fangschutz bereit');if(p.break)items.push('Auszeit-Joker bereit');if(p.finish)items.push('Finalbonus: +'+p.finish+' Missionspunkte bei regulärem Abschluss');if(p.objective)items.push('Missionsbonus: +'+p.objective+' bei erfülltem Hauptziel');if(p.points)items.push('Missions-Boost: +'+p.points+' persönliche Missionspunkte');}
+    const key=JSON.stringify(items);if(node.dataset.key===key)return;node.dataset.key=key;node.replaceChildren();
+    node.hidden=!items.length;if(!items.length)return;const label=arcElement('strong','','Deine persönlichen Vorteile'),rows=arcElement('div','arc-bonus-teams');for(const item of items)rows.append(arcElement('div','',item));node.append(label,rows);
   }
+  function missionMainScore(p,players,personal,ended){
+    if(!p||!['hunter','runner'].includes(p.role))return 0;
+    const completed=ended&&!p.disqualified;
+    const objective=p.role==='hunter'?players.some(x=>x.caughtBy===p.id):completed;
+    return (personal?.points||0)+(objective?3+(personal?.objective||0):0)+(completed?2+(personal?.finish||0):0);
+  }
+  function missionPauseActive(p,t=now()){return Number(p?.missionPauseUntil||0)>t}
+  function hostMissionPause(id,shield=false){
+    if(!S.host||S.phase!=='playing')return false;
+    const player=S.players.find(p=>p.id===id);
+    if(!player||player.disqualified||!['hunter','runner'].includes(player.role)||shield&&player.role!=='runner'||!usePersonalPause(duelHost,id,Date.now(),shield))return false;
+    player.missionPauseUntil=personalPerks(duelHost,id).pauseUntil;
+    for(const [key,req] of S.captureRequests){if(req.target===id||req.hunter===id){S.captureRequests.delete(key);sendTo(req.hunter,{t:'capture-result',message:'Fanganfrage beendet: persönliche Spielpause.'})}}
+    sendAll({t:'event',heading:shield?'Fangschutz aktiviert':'Persönliche Auszeit',message:player.name+' hat 60 Sekunden Spielpause. Keine Verfolgung, keine Fanganfragen. GPS- und Sicherheitsregeln bleiben unverändert.'});
+    sync();return true;
+  }
+  function renderMissionPerks(view){
+    const p=me(),bonus=view?.personal||{},ended=S.phase==='ended',active=S.phase==='playing'&&!!p&&!p.disqualified&&['runner','hunter'].includes(p.role);
+    $('missionPerkPanel').classList.toggle('hidden',!view?.enabled||!p||!['runner','hunter'].includes(p.role));
+    $('missionPoints').textContent=String(missionMainScore(p,S.players,bonus,ended));
+    const left=Math.max(0,Number(bonus.pauseUntil||0)-now()),own=[];
+    if(bonus.shield)own.push('Fangschutz bereit');if(bonus.break)own.push('Auszeit-Joker bereit');if(bonus.finish)own.push('Finalbonus +'+bonus.finish);if(bonus.objective)own.push('Missionsbonus +'+bonus.objective);if(bonus.points)own.push('Missions-Boost +'+bonus.points);
+    $('missionPerkStatus').textContent=left>0?'Spielpause aktiv: '+fmt(left)+' · keine Verfolgung oder Fanganfragen.':own.length?own.join(' · '):'Gewinne ein Zwischenevent, um einen persönlichen Vorteil für die Hauptrunde zu erhalten.';
+    $('missionPauseBtn').disabled=!active||!bonus.break||left>0;
+    $('missionPauseBtn').textContent=left>0?'Auszeit aktiv · '+fmt(left):'Auszeit-Joker einsetzen';
+    const paused=S.players.filter(x=>missionPauseActive(x)&&!x.disqualified).map(x=>x.name);
+    $('missionPauseList').textContent=paused.length?'Spielpause: '+paused.join(', ')+' · bitte nicht verfolgen.':'';
+  }
+  $('missionPauseBtn').onclick=()=>{if(S.phase==='playing'&&!me()?.disqualified)hostSend({t:'mission-pause'})};
 
   function duelRender(prefix,view,t,onAnswer,canPlay=true,playing=true){
     const el=$(prefix+'Panel');if(!el)return;el.classList.toggle('hidden',!view?.enabled);if(!view?.enabled)return;
@@ -1714,8 +1751,8 @@ html.ns-fx-off .arc-wheel,html.ns-fx-off .arc-card{transition:none!important}htm
     const revealKey=view.last&&chanceEvents.has(view.last.type)?view.last.id+':'+view.last.type:null;let revealState=arcadeResultAt.get(prefix);if(revealKey&&revealState?.key!==revealKey){revealState={key:revealKey,at:Date.now()};arcadeResultAt.set(prefix,revealState)}if(!revealKey)arcadeResultAt.delete(prefix);const revealing=!!revealKey&&(view.last.type==='roulette'?rouletteResults.get(prefix)?.pending===true:arcadeActionStates.get(prefix)?.pending===true);
     let question='',status='';
     if(r){question=r.prompt;status=memorizing?'15 Sekunden Vorschau · danach kannst du die Symbole selbst eingeben.':!active?'Auswertung läuft …':r.vote!==null?'Antwort gespeichert. Auswertung folgt für beide Teams.':!canPlay||!r.eligible?'Du schaust dieses Event an.':chanceEvents.has(type)?'Kostenloser Zufallstipp · keine Einsätze, nur Teampunkte.':'Eine Antwort pro Spieler · Genauigkeit zählt, nicht Geschwindigkeit.'}
-    else if(view.last){const x=view.last,h=x.stats.hunter,n=x.stats.runner;question=x.winner==='hunter'?'Hunter gewinnen!':x.winner==='runner'?'Runner gewinnen!':x.winner==='tie'?'Unentschieden!':'Keine Wertung';status='Ergebnis: '+x.solution+' · Hunter '+h.correct+'/'+h.total+' · Runner '+n.correct+'/'+n.total+' richtig. '+(x.winner==='none'?'Ohne richtige Antwort gibt es keine regulären Siegpunkte. Wenn beide Teams teilnehmen, erhalten beide einen Zufallsvorteil.':'')}
-    else{question=playing?'Das nächste Event kommt automatisch.':'Night Arcade · separate Teamwertung';status='Zwei Punkte für das bessere Team, je ein Punkt bei Gleichstand. Keine Pflichtteilnahme. Das Gewinnerteam erhält außerdem einen zufälligen Vorteil.'}
+    else if(view.last){const x=view.last,h=x.stats.hunter,n=x.stats.runner;question=x.winner==='hunter'?'Hunter gewinnen!':x.winner==='runner'?'Runner gewinnen!':x.winner==='tie'?'Unentschieden!':'Keine Wertung';status='Ergebnis: '+x.solution+' · Hunter '+h.correct+'/'+h.total+' · Runner '+n.correct+'/'+n.total+' richtig. '+(x.winner==='none'?'Ohne richtige Antwort gibt es keine regulären Siegpunkte. Ein persönlicher Vorteil wird dann unter den Teilnehmenden verlost.':'')}
+    else{question=playing?'Das nächste Event kommt automatisch.':'Night Arcade · separate Teamwertung';status='Zwei Punkte für das bessere Team, je ein Punkt bei Gleichstand. Keine Pflichtteilnahme. Ein teilnehmender Spieler erhält zusätzlich einen persönlichen Zufallsvorteil für die Hauptrunde.'}
     if(revealing){question=view.last?.type==='roulette'?'Roulette · Ergebnis aufdecken':'Das Ergebnis wird aufgedeckt …';status=view.last?.type==='roulette'?'Zieh das Rad an. Dein Schwung beeinflusst die Animation, nicht das gemeinsame Zufallsergebnis.':'Führe die Spielaktion aus oder nutze den Button. Das Zufallsergebnis ist für beide Teams gleich.'}
     if(prefix==='duel'&&S.phase==='ended'&&!revealing){const h=view.score.hunter,n=view.score.runner;question=h===n?'Night Arcade · Gleichstand':h>n?'Night Arcade · Hunter gewinnen':'Night Arcade · Runner gewinnen';status='Endstand der separaten Eventwertung. '+status}
     $(prefix+'Question').textContent=question;$(prefix+'Status').textContent=status;renderArcBonus(prefix,view,revealing);arcEventAnnouncement(prefix,view,r,active,revealing);
@@ -1727,7 +1764,7 @@ html.ns-fx-off .arc-wheel,html.ns-fx-off .arc-card{transition:none!important}htm
   function duelShow(){
     if(!S.approved)return;
     const view=S.host?duelPublic(duelHost,S.myId):duelView;
-    duelRender('duel',view,now(),(id,choice)=>{if(!S.host){duelPending=id;if(!hostSend({t:'duel-answer',id,choice}))duelPending=null;duelShow();setTimeout(()=>{if(duelPending===id){duelPending=null;duelShow()}},4000)}else hostSend({t:'duel-answer',id,choice})},S.phase==='playing'&&!me()?.disqualified,S.phase==='playing');
+    renderMissionPerks(view);duelRender('duel',view,now(),(id,choice)=>{if(!S.host){duelPending=id;if(!hostSend({t:'duel-answer',id,choice}))duelPending=null;duelShow();setTimeout(()=>{if(duelPending===id){duelPending=null;duelShow()}},4000)}else hostSend({t:'duel-answer',id,choice})},S.phase==='playing'&&!me()?.disqualified,S.phase==='playing');
   }
   function duelHostTick(t){
     if(!duelHost.enabled||S.phase!=='playing')return;
@@ -1743,8 +1780,10 @@ html.ns-fx-off .arc-wheel,html.ns-fx-off .arc-card{transition:none!important}htm
   $('duelLabStart').onclick=()=>{if(!lab.active)return;duelOpen(duelLab,Date.now(),[{id:'lab-hunter',role:'hunter'},{id:'lab-runner',role:'runner'}],$('duelLabType').value);duelLabShow()};
   $('duelLabOther').onclick=()=>{if(!lab.active||!duelLab.round)return;const r=duelLab.round,id=sim.role==='runner'?'lab-hunter':'lab-runner';duelVote(duelLab,id,r.id,ARCADE_INPUTS.has(r.type)?r.choices[Math.floor(Math.random()*r.choices.length)]:Math.floor(Math.random()*r.choices.length),Date.now());duelLabShow()};
   $('duelLabEnd').onclick=()=>{if(lab.active){duelFinish(duelLab);duelLabShow()}};
-  $('duelLabReward').onclick=()=>{if(!lab.active)return;const role=sim.role==='runner'?'runner':'hunter',r=grantArcReward(duelLab,role);duelLabShow();openArcPopup('duelLab','reward','VORTEIL GEWONNEN',r.title,arcTeamLabel(role)+': '+r.description)};
-  $('duelLabPopup').onclick=()=>{if(lab.active)openArcPopup('duelLab','event','ZWISCHENEVENT',EVENT_NAMES[$('duelLabType').value]||'Night Arcade','Ein zufälliger Vorteil wartet auf das Gewinnerteam.\nLokale Vorschau.');};
+  $('duelLabReward').onclick=()=>{if(!lab.active)return;const role=sim.role==='runner'?'runner':'hunter',id='lab-'+role,r=grantArcReward(duelLab,id,role);duelLabShow();openArcPopup('duelLab','reward','DU HAST GEWONNEN',r.title,r.description)};
+  $('duelLabPopup').onclick=()=>{if(lab.active)openArcPopup('duelLab','event','ZWISCHENEVENT',EVENT_NAMES[$('duelLabType').value]||'Night Arcade','Ein persönlicher Vorteil für die Hauptrunde wartet.\nLokale Vorschau.');};
+  $('duelLabUsePause').onclick=()=>{if(lab.active){const id=sim.role==='runner'?'lab-runner':'lab-hunter';if(usePersonalPause(duelLab,id,Date.now()))notify('Auszeit aktiv','60 Sekunden simulierte Spielpause',false);else notify('Kein Joker verfügbar','Lose zuerst einen Auszeit-Joker aus oder warte bis zum Ende der Pause.',false);duelLabShow()}};
+  $('duelLabUseShield').onclick=()=>{if(lab.active){if(sim.role==='runner'&&usePersonalPause(duelLab,'lab-runner',Date.now(),true))notify('Fangschutz verbraucht','Simulierter Spielfang aufgehoben · 60 Sekunden Spielpause',false);else notify('Fangschutz nicht verfügbar','Wähle Runner und lose einen Fangschutz aus.',false);duelLabShow()}};
   $('duelLabReset').onclick=()=>{if(lab.active){arcPopupSeen.delete('duelLab');closeArcPopup();duelLab=newDuelState();duelRendered.delete('duelLab');eventStageRendered.delete('duelLab');arcadeDrafts.delete('duelLab');arcadeResultAt.delete('duelLab');rouletteGestures.delete('duelLab');rouletteResults.delete('duelLab');arcadeActionStates.delete('duelLab');duelLabShow()}};
 
   const snapshotFor=id=>({t:'snapshot',clock:Date.now(),code:S.roomCode,roomName:S.roomName,players:S.players.map(p=>({...p,offline:S.offlineSince.has(p.id),gpsReady:!!S.gpsStatus.get(p.id)?.on&&Date.now()-S.gpsStatus.get(p.id).at<GPS_STALE_MS})),phase:S.phase,
@@ -2082,6 +2121,7 @@ html.ns-fx-off .arc-wheel,html.ns-fx-off .arc-card{transition:none!important}htm
   }
   function onHostData(conn,data){if(!S.host||!data||typeof data!=='object')return;const id=conn.peer;if(!S.players.some(p=>p.id===id))return;const role=roleOf(id),player=S.players.find(p=>p.id===id);
 
+    if(data.t==='mission-pause'){if(!player.disqualified)hostMissionPause(id);return}
     if(data.t==='duel-answer'){if(S.phase==='playing'&&!player.disqualified&&duelVote(duelHost,id,data.id,data.choice,Date.now()))sync();return}
     if(data.t==='link-ping'){sendTo(id,{t:'link-pong'});if(data.resume===true&&role==='runner'&&!player.disqualified&&S.phase==='playing'&&S.lastPingSlot>0&&Date.now()-(S.chaseAt+S.lastPingSlot*PING_MS)<PING_MS){if(S.lastRunnerById.get(id)===S.lastPingSlot)sendTo(id,{t:'ping-ack',slot:S.lastPingSlot,round:S.chaseAt});else sendTo(id,{t:'pulse-runner',slot:S.lastPingSlot})}return}
     if(data.t==='voice-part'){hostVoicePart(id,player,data);return}
@@ -2100,6 +2140,7 @@ html.ns-fx-off .arc-wheel,html.ns-fx-off .arc-card{transition:none!important}htm
     if(data.t==='capture-request'&&role==='hunter'&&S.phase==='playing'&&!player?.disqualified){
       const target=S.players.find(p=>p.id===data.target&&p.role==='runner'&&!p.disqualified),t=Date.now();
       if(!target)return;
+      if(missionPauseActive(player,t)||missionPauseActive(target,t)){sendTo(id,{t:'capture-result',message:'Persönliche Spielpause aktiv. Nicht verfolgen und keine Fanganfrage stellen.'});return}
       if(t-(S.captureRate.get(id)||0)<12000){sendTo(id,{t:'capture-result',message:'Bitte 12 Sekunden zwischen Fanganfragen warten.'});return}
       if([...S.captureRequests.values()].some(x=>x.target===target.id&&x.expiresAt>t)){
         sendTo(id,{t:'capture-result',message:'Für diesen Runner ist bereits eine Anfrage offen.'});return;
@@ -2120,7 +2161,8 @@ html.ns-fx-off .arc-wheel,html.ns-fx-off .arc-card{transition:none!important}htm
       }
       if(data.accept===true){
         const hunter=S.players.find(p=>p.id===req.hunter);
-        if(!hunter||hunter.disqualified||hunter.role!=='hunter')return;
+        if(!hunter||hunter.disqualified||hunter.role!=='hunter'||missionPauseActive(player,t)||missionPauseActive(hunter,t))return;
+        if(hostMissionPause(id,true)){sendTo(req.hunter,{t:'capture-result',message:'Fangschutz eingesetzt. 60 Sekunden Spielpause, nicht weiter verfolgen.'});return}
         eliminatePlayer(id,'Fang von '+hunter.name+' bestätigt.','caught',req.hunter);
         sendTo(req.hunter,{t:'capture-result',message:player.name+' hat den Fang bestätigt.'});
       }else sendTo(req.hunter,{t:'capture-result',message:player.name+' hat den Fang abgelehnt.'});
@@ -2191,7 +2233,7 @@ html.ns-fx-off .arc-wheel,html.ns-fx-off .arc-card{transition:none!important}htm
   }
   function broadcastScan(){if(S.phase!=='playing')return;const samples=[...S.scanSamples.values()];sendAll({t:'hunter-scan',samples,until:S.scanVisibleUntil},'runner')}
   function start(){if(!S.host||S.phase!=='lobby')return;proximityClear(true);endReveal();checkStart();if($('startGame').disabled)return;const t=Date.now();S.startAt=t;S.chaseAt=t+S.settings.headstartMin*60000;S.endAt=S.chaseAt+S.settings.durationMin*60000;S.phase=S.settings.headstartMin>0?'headstart':'playing';duelHost=newDuelState();duelHost.types=[...document.querySelectorAll('[data-event-choice]:checked')].map(x=>x.dataset.eventChoice).filter(x=>EVENT_KEYS.includes(x));duelHost.enabled=$('duelEnabled').checked&&duelHost.types.length>0;duelHost.interval=[3,5,8,10].includes(Number($('eventInterval').value))?Number($('eventInterval').value)*60000:DUEL_INTERVAL;duelHost.next=S.chaseAt+DUEL_FIRST;duelPending=null;duelView=null;closeArcPopup();arcPopupSeen.delete('duel');duelRendered.delete('duel');eventStageRendered.delete('duel');arcadeDrafts.delete('duel');arcadeResultAt.delete('duel');rouletteGestures.delete('duel');rouletteResults.delete('duel');arcadeActionStates.delete('duel');S.challengeWinner=null;S.challengeOpen=false;S.challengeUntil=0;S.challengeTriggered=false;S.lastPingSlot=0;S.lastScanSlot=0;S.pingWarnings.clear();S.publicPings.clear();S.pendingPing=null;S.pingAck=-1;S.pingAckRound=S.chaseAt;storePending();S.camo.clear();S.scanSamples.clear();S.mockRate.clear();S.reactionRate.clear();S.localMockNext=0;S.mockPending=false;S.lastMockAttempt=0;S.anonTokens.clear();S.hunterTokens.clear();S.lastRunnerById.clear();S.lastHunterById.clear();S.claimedEvent=false;S.captureRequests.clear();S.captureRate.clear();S.activityEvents=[];S.captureSelectKey='';$('catchFeed').innerHTML='<p>Noch keine Meldungen.</p>';
-    for(const p of S.players){p.vehicleSince=0;p.vehicleUsedMs=0;p.eliminationReason='';p.caughtBy=null;p.disqualified=false;const used=p.role==='runner'?S.anonTokens:S.hunterTokens;const prefix=p.role==='runner'?'R-':'H-';let token;do{token=prefix+Math.floor(100+Math.random()*899)}while([...used.values()].includes(token));used.set(p.id,token)}
+    for(const p of S.players){p.vehicleSince=0;p.vehicleUsedMs=0;p.eliminationReason='';p.caughtBy=null;p.disqualified=false;p.missionPauseUntil=0;const used=p.role==='runner'?S.anonTokens:S.hunterTokens;const prefix=p.role==='runner'?'R-':'H-';let token;do{token=prefix+Math.floor(100+Math.random()*899)}while([...used.values()].includes(token));used.set(p.id,token)}
     sync();showGame();notify('Spiel gestartet',S.phase==='headstart'?'Runner haben jetzt Vorsprung!':'Die Jagd läuft!',true);tick()}
   function hostTick(){if(!S.host)return;const t=Date.now();for(const [id,conn] of S.clients){const seen=S.lastClientSeen.get(id)??t;if(t-seen>45000){S.clients.delete(id);S.offlineSince.set(id,seen);try{conn.close()}catch{}S.voiceIncoming.delete('host:'+id);sync()}}for(const [id,since] of S.offlineSince){if(t-since<RECONNECT_MS)continue;if(S.phase==='lobby'){S.offlineSince.delete(id);S.lastClientSeen.delete(id);S.pingWarnings.delete(id);S.rejoinKeys.delete(id);S.gpsStatus.delete(id);S.players=S.players.filter(p=>p.id!==id);sync()}else if(['headstart','playing'].includes(S.phase)){eliminatePlayer(id,'Verbindung länger als fünf Minuten getrennt.');S.offlineSince.delete(id);sync()}}if(['headstart','playing'].includes(S.phase)){let changed=false;for(const p of S.players.filter(p=>p.role==='runner'&&!p.disqualified)){const gps=S.gpsStatus.get(p.id);if(!S.offlineSince.has(p.id)&&(!gps||!gps.on||(t-gps.at>=RECONNECT_MS))){eliminatePlayer(p.id,'GPS-Verbindung länger unterbrochen.');changed=true;continue}if(p.role==='runner'&&p.vehicleSince&&(p.vehicleUsedMs||0)+t-p.vehicleSince>=VEHICLE_LIMIT_MS){p.vehicleUsedMs=VEHICLE_LIMIT_MS;p.vehicleSince=0;eliminatePlayer(p.id,'10 Minuten Fahrzeugzeit erreicht.');changed=true}}}
     for(const [key,req] of S.captureRequests){if(t>req.expiresAt){S.captureRequests.delete(key);sendTo(req.hunter,{t:'capture-result',message:'Die Fanganfrage ist ohne Bestätigung abgelaufen.'})}}
