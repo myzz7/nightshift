@@ -550,7 +550,7 @@ html.ns-fx-off .toast,html.ns-fx-off .modal-sheet,html.ns-fx-off .fx-settings-sh
       </div>
     </div>
     <div class="privacy-note"><span aria-hidden="true">🔒</span><p><strong>Privat und unkompliziert.</strong> Kein Benutzerkonto, kostenlos und Peer-to-Peer. Hunter können ohne GPS beitreten und spielen. Runner benötigen GPS; GPS wird nur für einzelne Messungen aktiviert; eine Live-Nähe-Warnung gibt es im Akkusparmodus nicht. Für GPS benötigst du HTTPS und eine Standortfreigabe. Lass dein Smartphone während des Spiels geöffnet.</p></div>
-    <button type="button" class="btn block mt" id="nsOpen">◉ Lokalen Testraum öffnen</button><div class="footerline">BUILT FOR THE NIGHT · PLAY RESPONSIBLY</div>
+    <div class="footerline">BUILT FOR THE NIGHT · PLAY RESPONSIBLY</div>
   </section>
   <section class="screen" id="roomScreen">
     <div class="sectionhead"><div><h2 id="roomTitle">Lobby</h2><div class="roomname" id="roomSubtitle">Raum wird geladen …</div></div><button id="copyCode" class="btn tiny">Code kopieren</button></div>
@@ -2354,7 +2354,6 @@ html.ns-fx-off .toast,html.ns-fx-off .modal-sheet,html.ns-fx-off .fx-settings-sh
     }simRender();
   }
   function simTick(){if(!lab.active)return;const t=Date.now();if(sim.until&&t>=sim.until){sim.effect='';sim.until=0}if(['Vorsprung','Jagd'].includes(sim.phase)&&t-sim.timer>=1000){const delta=Math.floor((t-sim.timer)/1000);sim.remaining=Math.max(0,sim.remaining-delta);sim.timer+=delta*1000;if(!sim.remaining){if(sim.phase==='Vorsprung')simAction('release');else simAction('end')}}else if(!['Vorsprung','Jagd'].includes(sim.phase))sim.timer=t;simRender()}
-  $('nsOpen').onclick=openLab;
   $('nsRole').onclick=e=>{const b=e.target.closest('[data-role]');if(lab.active&&b){sim.role=b.dataset.role;simLog('Rollenperspektive',b.textContent);simRender()}};
   $('nsTabs').onclick=e=>{const b=e.target.closest('[data-tab]');if(lab.active&&b){sim.tab=b.dataset.tab;simControls()}};
   $('nsReset').onclick=()=>{if(lab.active)simReset()};$('nsClear').onclick=()=>$('nsLog').replaceChildren();
